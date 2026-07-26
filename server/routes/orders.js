@@ -1,0 +1,169 @@
+const express = require("express");
+const router = express.Router();
+const User = require("../models/User");
+const Cart = require("../models/Cart");
+const Order = require("../models/Order");
+const Address = require("../models/Address");
+const { generateOrderId } = require("../utils/idGenerator");
+
+async function resolveUser(req, clientId) {
+  if (req.user && req.user.id)
+    return await User.findOne({ userId: String(req.user.id) });
+  if (clientId && clientId.startsWith("u_"))
+    return await User.findOne({ userId: clientId.slice(2) });
+  if (clientId) return await User.findOne({ clientToken: clientId });
+  return null;
+}
+
+router.get("/", async (req, res) => {
+  try {
+    const { userId, search = "", status, page = "1", limit = "20" } = req.query;
+    const query = {};
+    if (userId) query.userId = String(userId);
+    if (status) query.orderStatus = String(status);
+    if (search) {
+      query.$or = [
+        { orderId: { $regex: search, $options: "i" } },
+        { paymentId: { $regex: search, $options: "i" } },
+      ];
+    }
+    const pageNumber = Math.max(1, parseInt(page, 10) || 1);
+    const pageSize = Math.max(1, Math.min(100, parseInt(limit, 10) || 20));
+    // when querying across all users, return per-user order documents (admin view)
+    const [items, total] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip((pageNumber - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      Order.countDocuments(query),
+    ]);
+    res.json({ items, total, page: pageNumber, limit: pageSize });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/:orderId", async (req, res) => {
+  try {
+    const doc = await Order.findOne(
+      { "orders.orderId": String(req.params.orderId) },
+      { "orders.$": 1, userId: 1 },
+    ).lean();
+    if (!doc || !doc.orders || !doc.orders.length)
+      return res.status(404).json({ error: "Order not found" });
+    res.json({ userId: doc.userId, order: doc.orders[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/", async (req, res) => {
+  const { clientId, addressId } = req.body;
+  try {
+    const user = await resolveUser(req, clientId);
+    if (!user)
+      return res
+        .status(400)
+        .json({ error: "clientId or authentication required" });
+    const cartDoc = await Cart.findOne({ userId: user.userId }).lean();
+    const carts = cartDoc && Array.isArray(cartDoc.carts) ? cartDoc.carts : [];
+    if (!carts.length) return res.status(400).json({ error: "Cart is empty" });
+    const items = carts.map((i) => ({
+      productId: i.productId,
+      productName: i.productName,
+      quantity: i.quantity,
+      unitPrice: i.unitPrice,
+      subtotal: i.subtotal,
+    }));
+    const subtotal = items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+    const tax = 0;
+    const deliveryFee = 0;
+    const totalAmount = subtotal + tax + deliveryFee;
+    const existingDoc = await Order.findOne({ userId: user.userId }).lean();
+    const existingOrderIds =
+      existingDoc && Array.isArray(existingDoc.orders)
+        ? existingDoc.orders.map((o) => o.orderId)
+        : [];
+    const orderId = await generateOrderId(user.userId, existingOrderIds);
+    const addressDoc = await Address.findOne({ userId: user.userId }).lean();
+    const addressList =
+      addressDoc && Array.isArray(addressDoc.addresses)
+        ? addressDoc.addresses
+        : [];
+    const address = addressId
+      ? addressList.find((a) => a.addressId === String(addressId))
+      : addressList.find((a) => a.isDefault) || {};
+    const orderObj = {
+      orderId,
+      paymentId: "",
+      items,
+      addressSnapshot: address || {},
+      subtotal,
+      tax,
+      deliveryFee,
+      totalAmount,
+      orderStatus: "confirmed",
+      paymentStatus: "unpaid",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    await Order.findOneAndUpdate(
+      { userId: user.userId },
+      { $push: { orders: orderObj }, $set: { updatedAt: Date.now() } },
+      { upsert: true },
+    );
+    await Cart.deleteOne({ userId: user.userId });
+    res.json({ orderId, total: totalAmount, order: orderObj });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.put("/:orderId", async (req, res) => {
+  try {
+    const { orderStatus, paymentStatus, paymentId } = req.body;
+    const update = {};
+    if (orderStatus !== undefined) update["orders.$.orderStatus"] = orderStatus;
+    if (paymentStatus !== undefined)
+      update["orders.$.paymentStatus"] = paymentStatus;
+    if (paymentId !== undefined) update["orders.$.paymentId"] = paymentId;
+    if (Object.keys(update).length === 0) return res.json({});
+    update["orders.$.updatedAt"] = Date.now();
+    await Order.updateOne(
+      { "orders.orderId": String(req.params.orderId) },
+      { $set: update },
+    );
+    const doc = await Order.findOne(
+      { "orders.orderId": String(req.params.orderId) },
+      { "orders.$": 1, userId: 1 },
+    ).lean();
+    res.json({ userId: doc.userId, order: doc.orders[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.delete("/:orderId", async (req, res) => {
+  try {
+    const resu = await Order.updateOne(
+      { "orders.orderId": String(req.params.orderId) },
+      {
+        $pull: { orders: { orderId: String(req.params.orderId) } },
+        $set: { updatedAt: Date.now() },
+      },
+    );
+    if (!resu.matchedCount && !resu.modifiedCount)
+      return res.status(404).json({ error: "Order not found" });
+    res.json({ message: "Order deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+module.exports = router;

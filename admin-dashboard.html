@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoSmoothie Admin Console</title>
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#4ade80',
+            accent: '#f97316',
+            ink: '#0f172a',
+            muted: '#64748b',
+            panel: '#ffffff',
+            app: '#f6f8fb'
+          },
+          borderRadius: {
+            none: '0px',
+            sm: '4px',
+            DEFAULT: '8px',
+            md: '10px',
+            lg: '12px',
+            xl: '14px',
+            '2xl': '16px',
+            '3xl': '20px',
+            full: '9999px',
+            button: '8px'
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --line: #d9eee2;
+      --soft: #f0fdf4;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 46%, #fff7ed 100%); color: #111827; }
+    .console-shell { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; transition: grid-template-columns 180ms ease; }
+    body.sidebar-collapsed .console-shell { grid-template-columns: 88px minmax(0, 1fr); }
+    .sidebar { background: rgba(255,255,255,0.96); color: #111827; border-right: 1px solid rgba(217,238,226,0.95); box-shadow: 12px 0 34px rgba(22,101,52,0.07); backdrop-filter: blur(18px); transition: width 180ms ease; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.78rem 0.85rem; border-radius: 14px; color: #4b5563; font-weight: 700; font-size: 0.9rem; transition: background 150ms ease, color 150ms ease, transform 150ms ease; }
+    .nav-item:hover, .nav-item.active { background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(249,115,22,0.08)); color: #166534; transform: translateX(2px); }
+    .brand-mark { display: none; }
+    body.sidebar-collapsed .sidebar { padding-left: 14px; padding-right: 14px; }
+    body.sidebar-collapsed .brand-row { flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; }
+    body.sidebar-collapsed .brand-full { display: none !important; }
+    body.sidebar-collapsed .brand-mark { display: inline-flex; }
+    body.sidebar-collapsed #sidebarToggle { width: 44px; height: 44px; border-radius: 16px; box-shadow: 0 10px 22px rgba(22,101,52,0.12); }
+    body.sidebar-collapsed .sidebar-label,
+    body.sidebar-collapsed .sidebar-copy,
+    body.sidebar-collapsed .brand-copy,
+    body.sidebar-collapsed .session-card { display: none !important; }
+    body.sidebar-collapsed .nav-item { justify-content: center; padding: 0.82rem; }
+    body.sidebar-collapsed .nav-item i { font-size: 1.25rem; }
+    .panel { background: rgba(255,255,255,0.96); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 16px 36px rgba(22,101,52,0.08); }
+    .metric { background: rgba(255,255,255,0.96); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 14px 30px rgba(22,101,52,0.075); }
+    .status-pill { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.25rem 0.55rem; font-size: 0.72rem; font-weight: 800; line-height: 1; white-space: nowrap; }
+    .table-row { transition: background-color 120ms ease; }
+    .table-row:hover { background: #f8fafc; }
+    .field { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; background: #ffffff; padding: 0.72rem 0.85rem; font-size: 0.92rem; outline: none; transition: border-color 150ms ease, box-shadow 150ms ease; }
+    .field:focus { border-color: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,0.18); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; border-radius: 10px; padding: 0.68rem 0.95rem; font-weight: 800; font-size: 0.9rem; transition: background 150ms ease, border-color 150ms ease, color 150ms ease; }
+    .btn-primary { background: #22c55e; color: white; }
+    .btn-primary:hover { background: #16a34a; }
+    .btn-dark { background: #111827; color: white; }
+    .btn-dark:hover { background: #1f2937; }
+    .btn-light { background: white; color: #0f172a; border: 1px solid #cbd5e1; }
+    .btn-light:hover { border-color: #94a3b8; background: #f8fafc; }
+    .btn-danger { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    .btn-danger:hover { background: #ffe4e6; }
+    .image-grid-bg { background-image: linear-gradient(45deg,#eef2f7 25%,transparent 25%),linear-gradient(-45deg,#eef2f7 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eef2f7 75%),linear-gradient(-45deg,transparent 75%,#eef2f7 75%); background-size: 18px 18px; background-position: 0 0,0 9px,9px -9px,-9px 0; }
+    .section-anchor { scroll-margin-top: 90px; }
+    .db-status-panel { background: rgba(255,255,255,0.98); border: 1px solid #d7eadf; border-radius: 20px; box-shadow: 0 16px 36px rgba(22,101,52,0.085); overflow: hidden; }
+    .db-badge { display: inline-flex; align-items: center; gap: 0.35rem; border-radius: 999px; padding: 0.25rem 0.62rem; font-size: 0.78rem; font-weight: 800; }
+    .db-info-card { display: flex; align-items: center; gap: 0.85rem; min-width: 0; border: 1px solid #e4efe8; background: linear-gradient(180deg,#ffffff,#f8fffb); border-radius: 16px; padding: 1rem; }
+    .db-icon { width: 44px; height: 44px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+    .db-chip { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-width: 0; border: 1px solid #e4efe8; background: #fbfefd; border-radius: 12px; padding: 0.7rem 0.82rem; }
+    .db-health-ring { width: 58px; height: 58px; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#dcfce7,#ffffff); color: #16a34a; box-shadow: inset 0 0 0 1px #bbf7d0; }
+    .admin-view[hidden] { display: none !important; }
+    .view-layout { display: contents; }
+    .workspace-hero { background: linear-gradient(135deg, rgba(74,222,128,0.18), rgba(255,255,255,0.94) 46%, rgba(249,115,22,0.12)); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 16px 36px rgba(22,101,52,0.08); }
+    @media (max-width: 1024px) {
+      .console-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .desktop-only { display: none !important; }
+    }
+  </style>
+    <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.js"></script>
+    <script src="/assets/icons.js"></script>
+</head>
+<body>
+  <div class="console-shell">
+    <aside class="sidebar lg:sticky lg:top-0 lg:h-screen p-5 flex flex-col gap-6">
+      <div class="brand-row flex items-start justify-between gap-3">
+        <div class="brand-full min-w-0">
+          <a href="/main.html" class="text-3xl font-['Pacifico'] text-primary block truncate">GoSmoothie</a>
+          <p class="brand-copy mt-2 text-xs uppercase tracking-[0.22em] text-gray-500">Delivery Admin</p>
+        </div>
+        <a href="/main.html" class="brand-mark w-12 h-12 rounded-2xl bg-gradient-to-br from-green-100 to-orange-50 text-green-600 items-center justify-center shadow-sm border border-green-100" title="GoSmoothie">
+          <i data-lucide="leaf" class="w-6 h-6"></i>
+        </a>
+        <button id="sidebarToggle" class="w-10 h-10 rounded-xl border border-green-100 bg-white text-green-700 hover:bg-green-50 transition flex items-center justify-center" aria-label="Toggle sidebar">
+          <i id="sidebarToggleIcon" data-lucide="panel-left-close" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <nav class="space-y-1">
+        <a class="nav-item active" href="#overview" data-view-target="overview" title="Overview"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span class="sidebar-label">Overview</span></a>
+        <a class="nav-item" href="#orders" data-view-target="orders" title="Orders"><i data-lucide="route" class="w-5 h-5"></i> <span class="sidebar-label">Orders</span></a>
+        <a class="nav-item" href="#payments" data-view-target="payments" title="Payments"><i data-lucide="credit-card" class="w-5 h-5"></i> <span class="sidebar-label">Payments</span></a>
+        <a class="nav-item" href="#catalog" data-view-target="catalog" title="Catalog"><i data-lucide="utensils" class="w-5 h-5"></i> <span class="sidebar-label">Catalog</span></a>
+        <a class="nav-item" href="#editor" data-view-target="editor" title="Product Editor"><i data-lucide="square-pen" class="w-5 h-5"></i> <span class="sidebar-label">Product Editor</span></a>
+      </nav>
+
+      <div class="session-card mt-auto rounded-2xl border border-green-100 bg-green-50/70 p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white text-green-600 flex items-center justify-center shadow-sm"><i data-lucide="shield-check" class="w-5 h-5"></i></div>
+          <div>
+            <p class="text-sm font-bold text-gray-900">Secure session</p>
+            <p class="sidebar-copy text-xs text-gray-500">Admin access only</p>
+          </div>
+        </div>
+        <button id="logoutBtn" class="mt-4 w-full btn btn-light"><i data-lucide="log-out" class="w-5 h-5"></i> Logout</button>
+      </div>
+    </aside>
+
+    <div class="min-w-0">
+      <header class="sticky top-0 z-40 bg-white/88 backdrop-blur-xl border-b border-green-100">
+        <div class="px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 id="workspaceTitle" class="text-xl md:text-2xl font-black text-ink">Overview</h1>
+            <p id="workspaceSubtitle" class="text-sm text-muted">Monitor revenue, fulfillment, product quality, and database health.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/main.html" class="btn btn-light"><i data-lucide="store" class="w-5 h-5"></i><span class="desktop-only">Storefront</span></a>
+            <button id="refreshBtn" class="btn btn-dark"><i data-lucide="refresh-cw" class="w-5 h-5"></i> Refresh</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <section id="overview" class="admin-view section-anchor space-y-6">
+          <div class="workspace-hero p-5 md:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p class="text-sm font-bold uppercase tracking-[0.18em] text-green-700">Live Business Overview</p>
+              <h2 class="mt-2 text-2xl md:text-3xl font-black text-gray-900">Fresh operations, clean data, fast decisions.</h2>
+              <p class="mt-2 text-gray-600 max-w-2xl">Track revenue, payment health, kitchen readiness, best sellers, and database status in one focused workspace.</p>
+            </div>
+            <div class="hidden md:flex w-24 h-24 rounded-3xl bg-white shadow-sm items-center justify-center text-primary">
+              <i data-lucide="activity" class="w-12 h-12"></i>
+            </div>
+          </div>
+          <div id="statsGrid" class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+
+          <div class="grid xl:grid-cols-[0.92fr_1.08fr] gap-6">
+            <section class="panel p-5">
+              <div class="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h2 class="text-lg font-black">Fulfillment Pulse</h2>
+                  <p class="text-sm text-muted">Operational signals for the current queue.</p>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center"><i data-lucide="bike" class="w-5 h-5"></i></div>
+              </div>
+              <div id="opsPulse" class="grid sm:grid-cols-3 xl:grid-cols-1 gap-3"></div>
+            </section>
+
+            <section class="panel p-5">
+              <div class="mb-4">
+                <h2 class="text-lg font-black">Best Sellers</h2>
+                <p class="text-sm text-muted">Ranked by recorded order revenue.</p>
+              </div>
+              <div id="topProducts" class="grid md:grid-cols-2 gap-3"></div>
+            </section>
+          </div>
+
+          <section class="db-status-panel">
+            <div class="px-5 sm:px-6 py-5 border-b border-green-100 flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="db-health-ring"><i data-lucide="database" class="w-7 h-7"></i></div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <h2 class="text-xl font-black text-ink">Database Status</h2>
+                    <span id="dbStatusLabel" class="db-badge bg-slate-100 text-slate-700"><i data-lucide="database" class="w-5 h-5"></i> Loading</span>
+                  </div>
+                  <p class="mt-1 text-sm text-muted">MongoDB health, storage, collection volumes, and connection state.</p>
+                </div>
+              </div>
+              <div id="dbServerTime" class="text-sm text-muted"></div>
+            </div>
+            <div id="dbStatusBar" class="px-5 sm:px-6 py-5"></div>
+          </section>
+        </section>
+
+        <section class="view-layout">
+          <div id="orders" class="admin-view section-anchor panel p-5 overflow-hidden" hidden>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div>
+                <p class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2">Fulfillment Workspace</p>
+                <h2 class="text-2xl font-black">Order History</h2>
+                <p class="text-sm text-muted">Customer, order, items, payment status, value, and timing.</p>
+              </div>
+            </div>
+            <div class="overflow-auto max-h-[560px]">
+              <table class="min-w-full text-sm">
+                <thead class="sticky top-0 bg-white z-10 text-left text-slate-500 uppercase tracking-[0.14em] text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3 pr-4">Customer</th>
+                    <th class="py-3 pr-4">Order</th>
+                    <th class="py-3 pr-4">Items</th>
+                    <th class="py-3 pr-4">Total</th>
+                    <th class="py-3 pr-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTable" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="payments" class="admin-view section-anchor panel p-5 overflow-hidden" hidden>
+            <div class="mb-5">
+              <p class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2">Finance Workspace</p>
+              <h2 class="text-2xl font-black">Payment Ledger</h2>
+              <p class="text-sm text-muted">Recorded payment trail across users.</p>
+            </div>
+            <div class="overflow-auto max-h-[560px]">
+              <table class="min-w-full text-sm">
+                <thead class="sticky top-0 bg-white z-10 text-left text-slate-500 uppercase tracking-[0.14em] text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3 pr-4">Customer</th>
+                    <th class="py-3 pr-4">Payment</th>
+                    <th class="py-3 pr-4">Amount</th>
+                    <th class="py-3 pr-4">Method</th>
+                    <th class="py-3 pr-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentsTable" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="view-layout">
+          <div id="editor" class="admin-view section-anchor panel p-5" hidden>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div>
+                <p class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2">Menu Workspace</p>
+                <h2 class="text-2xl font-black">Product Editor</h2>
+                <p class="text-sm text-muted">Create, update, archive, or restore menu items.</p>
+              </div>
+              <button id="resetFormBtn" class="btn btn-light !py-2"><i data-lucide="eraser" class="w-5 h-5"></i> Clear</button>
+            </div>
+
+            <form id="productForm" class="grid gap-4">
+              <input type="hidden" name="productId">
+
+              <div class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div class="w-28 h-28 shrink-0 rounded-xl overflow-hidden image-grid-bg border border-white shadow-sm">
+                  <img id="imagePreview" src="/server/images/smoothie-bowl.jpg" alt="Product preview" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <p class="text-sm font-black text-ink">Catalog asset</p>
+                  <p class="text-xs text-muted mt-1 max-w-sm">Current product image used across menu, homepage, and checkout surfaces.</p>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold mb-2">Product name</label>
+                <input name="name" required class="field" placeholder="Green Goddess">
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-bold mb-2">Price</label>
+                  <input name="price" type="number" min="0" step="1" required class="field" placeholder="250">
+                </div>
+                <div>
+                  <label class="block text-sm font-bold mb-2">Sugar</label>
+                  <input name="sugar" type="number" min="0" step="1" class="field" placeholder="18">
+                </div>
+                <div>
+                  <label class="block text-sm font-bold mb-2">Category</label>
+                  <input name="category" class="field" placeholder="Smoothies">
+                </div>
+                <div>
+                  <label class="block text-sm font-bold mb-2">Diet type</label>
+                  <select name="type" class="field">
+                    <option value="Vegetarian">Vegetarian</option>
+                    <option value="Non-Vegetarian">Non-Vegetarian</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold mb-2">Description</label>
+                <textarea name="description" rows="3" class="field resize-none" placeholder="Fresh ingredients, flavor profile, and serving notes."></textarea>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div><label class="block text-sm font-bold mb-2">Calories</label><input name="calories" type="number" min="0" step="1" class="field"></div>
+                <div><label class="block text-sm font-bold mb-2">Protein</label><input name="protein" type="number" min="0" step="1" class="field"></div>
+                <div><label class="block text-sm font-bold mb-2">Carbs</label><input name="carbs" type="number" min="0" step="1" class="field"></div>
+                <div><label class="block text-sm font-bold mb-2">Fat</label><input name="fat" type="number" min="0" step="1" class="field"></div>
+                <div><label class="block text-sm font-bold mb-2">Fiber</label><input name="fiber" type="number" min="0" step="1" class="field"></div>
+                <div><label class="block text-sm font-bold mb-2">Ingredients</label><input name="ingredients" class="field" placeholder="Spinach, Kale, Banana"></div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold mb-2">Product image</label>
+                <input name="imageFile" type="file" accept="image/*" class="field bg-white">
+                <input name="image" type="text" placeholder="Optional: paste image URL or local image path" class="field mt-3">
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+                <label class="inline-flex items-center gap-3 text-sm font-bold text-emerald-900">
+                  <input name="isFeatured" type="checkbox" class="h-4 w-4 rounded border-emerald-300 text-primary focus:ring-primary">
+                  Show under Popular Blends
+                </label>
+                <div>
+                  <label class="block text-sm font-bold mb-2 text-emerald-900">Homepage order</label>
+                  <input name="featuredOrder" type="number" min="1" max="6" step="1" class="field bg-white" placeholder="1 to 6">
+                </div>
+                <p class="sm:col-span-2 text-xs text-emerald-800">The homepage displays the first six active products marked as Popular Blends, sorted by this order.</p>
+              </div>
+
+              <label class="inline-flex items-center gap-3 text-sm font-bold">
+                <input name="isArchived" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
+                Archive item immediately
+              </label>
+
+              <div class="flex flex-wrap gap-3 pt-1">
+                <button type="submit" class="btn btn-primary"><i data-lucide="save" class="w-5 h-5"></i> Save product</button>
+                <button type="button" id="archiveBtn" class="btn btn-danger"><i data-lucide="archive" class="w-5 h-5"></i> Archive selected</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="catalog" class="admin-view section-anchor panel p-5 overflow-hidden" hidden>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div>
+                <p class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2">Catalog Workspace</p>
+                <h2 class="text-2xl font-black">Catalog Control</h2>
+                <p class="text-sm text-muted">Active items, archived history, images, codes, and nutrition tags.</p>
+              </div>
+            </div>
+            <div class="overflow-auto max-h-[920px]">
+              <table class="min-w-full text-sm">
+                <thead class="sticky top-0 bg-white z-10 text-left text-slate-500 uppercase tracking-[0.14em] text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th class="py-3 pr-4">Product</th>
+                    <th class="py-3 pr-4">Image</th>
+                    <th class="py-3 pr-4">Nutrition</th>
+                    <th class="py-3 pr-4">Popular</th>
+                    <th class="py-3 pr-4">Price</th>
+                    <th class="py-3 pr-4">State</th>
+                    <th class="py-3 pr-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTable" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const tokenKey = 'gs_admin_token';
+    const userKey = 'gs_admin_user';
+    const state = { dashboard: null, products: [] };
+
+    function token() { return localStorage.getItem(tokenKey) || ''; }
+    function authHeaders(extra = {}) { return { ...extra, Authorization: 'Bearer ' + token() }; }
+    function money(value) { return 'Rs ' + Number(value || 0).toLocaleString('en-IN'); }
+    function formatBytes(value) {
+      const bytes = Number(value || 0);
+      if(bytes < 1024) return `${bytes} B`;
+      if(bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      if(bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+      return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`;
+    }
+    function dateTime(value) {
+      if(!value) return '-';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString();
+    }
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+    function statusClass(status, type = 'order') {
+      const value = String(status || '').toLowerCase();
+      if(['paid', 'confirmed', 'delivered', 'completed'].includes(value)) return 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100';
+      if(['pending', 'unpaid', 'preparing'].includes(value)) return type === 'payment' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-100' : 'bg-blue-50 text-blue-700 ring-1 ring-blue-100';
+      if(['cancelled', 'failed', 'refunded'].includes(value)) return 'bg-red-50 text-red-700 ring-1 ring-red-100';
+      return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200';
+    }
+    function metaFromForm(formData) {
+      const meta = {};
+      ['calories', 'protein', 'carbs', 'fat', 'fiber', 'sugar'].forEach(key => {
+        const value = formData.get(key);
+        if(value !== null && value !== '') meta[key] = Number(value);
+      });
+      const ingredients = String(formData.get('ingredients') || '').trim();
+      if(ingredients) meta.ingredients = ingredients.split(',').map(item => item.trim()).filter(Boolean);
+      return meta;
+    }
+
+    function renderStats(totals) {
+      const cards = [
+        ['Sales', money(totals.totalSales), 'trending-up', 'All order value'],
+        ['Earnings', money(totals.totalEarnings), 'wallet', 'Paid ledger value'],
+        ['Orders', totals.orders || 0, 'shopping-bag', 'Total orders'],
+        ['Customers', totals.users || 0, 'user', 'User records'],
+        ['Payments', totals.payments || 0, 'credit-card', `${totals.pendingPayments || 0} pending`],
+        ['Paid', totals.paidPayments || 0, 'circle-check', 'Cleared payments'],
+        ['Live Menu', totals.activeProducts || 0, 'utensils', 'Available products'],
+        ['Archived', totals.archivedProducts || 0, 'archive', 'Hidden products']
+      ];
+
+      document.getElementById('statsGrid').innerHTML = cards.map(([label, value, icon, hint]) => `
+        <article class="metric p-4 min-h-[128px]">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold text-muted">${label}</p>
+              <p class="mt-2 text-2xl font-black text-ink">${value}</p>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-teal-50 text-primary flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5"></i></div>
+          </div>
+          <p class="mt-4 text-xs uppercase tracking-[0.14em] font-black text-slate-400">${hint}</p>
+        </article>
+      `).join('');
+    }
+
+    function renderDb(database) {
+      const connected = database.status === 'connected';
+      const stateText = connected ? 'Connected' : 'Disconnected';
+      const host = [database.host, database.port].filter(Boolean).join(':') || 'localhost';
+      const counts = database.collectionCounts || {};
+      const serverTime = database.serverTime ? new Date(database.serverTime) : new Date();
+      document.getElementById('dbStatusLabel').className = connected
+        ? 'db-badge bg-emerald-50 text-emerald-700'
+        : 'db-badge bg-red-50 text-red-700';
+      document.getElementById('dbStatusLabel').innerHTML = `<i data-lucide="database" class="w-5 h-5"></i> ${connected ? 'CONNECTED' : 'DISCONNECTED'}`;
+      document.getElementById('dbServerTime').textContent = `Server time: ${serverTime.toLocaleString()}`;
+
+      const infoCards = [
+        ['Host', host, 'plug', 'bg-sky-50 text-sky-600', 'Cluster endpoint'],
+        ['Database', database.name || 'gosmoothie', 'database', 'bg-indigo-50 text-indigo-600', 'Active schema'],
+        ['State Code', database.stateCode ?? '-', 'radio-tower', 'bg-emerald-50 text-emerald-600', 'Mongoose readyState'],
+        ['State', stateText, 'info', connected ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600', 'Current connection']
+      ];
+
+      const chips = [
+        ['Users', counts.users ?? 0, 'users', 'text-blue-600'],
+        ['Admins', counts.admins ?? 0, 'user-cog', 'text-red-600'],
+        ['Products', counts.products ?? 0, 'utensils', 'text-orange-600'],
+        ['Orders', counts.orders ?? 0, 'clipboard-list', 'text-violet-600'],
+        ['Payments', counts.payments ?? 0, 'wallet', 'text-emerald-600'],
+        ['Carts', counts.carts ?? 0, 'shopping-cart', 'text-cyan-600'],
+        ['Addresses', counts.addresses ?? 0, 'map-pin', 'text-rose-600'],
+        ['Indexes', database.indexes ?? 0, 'history', 'text-slate-600']
+      ];
+
+      document.getElementById('dbStatusBar').innerHTML = `
+        <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+          ${infoCards.map(([label, value, icon, tone, hint]) => `
+            <div class="db-info-card">
+              <span class="db-icon ${tone}"><i data-lucide="${icon}" class="w-5 h-5"></i></span>
+              <div class="min-w-0">
+                <p class="text-sm text-muted">${label}</p>
+                <p class="font-black text-ink truncate">${escapeHtml(value)}</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">${hint}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3">
+          ${chips.map(([label, value, icon, tone]) => `
+            <div class="db-chip">
+              <span class="min-w-0 flex items-center gap-2 text-sm text-slate-700">
+                <i data-lucide="${icon}" class="w-5 h-5 ${tone}"></i>
+                <span class="truncate">${label}</span>
+              </span>
+              <span class="font-black text-ink">${escapeHtml(value)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="mt-4 grid sm:grid-cols-3 gap-3 text-sm">
+          ${[
+            ['Collections', database.collections ?? 0, 'layers', 'border-emerald-100 bg-emerald-50/70', 'bg-emerald-100 text-emerald-700'],
+            ['Documents', database.objects ?? 0, 'clipboard-list', 'border-blue-100 bg-blue-50/70', 'bg-blue-100 text-blue-700'],
+            ['Storage', formatBytes(database.storageSize), 'hard-drive', 'border-orange-100 bg-orange-50/70', 'bg-orange-100 text-orange-700']
+          ].map(([label, value, icon, cardTone, iconTone]) => `
+            <div class="rounded-xl border ${cardTone} px-4 py-3 flex items-center justify-between gap-3">
+              <span class="min-w-0 flex items-center gap-2 text-slate-700 font-semibold">
+                <span class="w-8 h-8 rounded-lg ${iconTone} flex items-center justify-center shrink-0"><i data-lucide="${icon}" class="w-5 h-5"></i></span>
+                <span class="truncate">${label}</span>
+              </span>
+              <span class="font-black text-ink">${escapeHtml(value)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderPulse(data) {
+      const totals = data.totals || {};
+      const orders = data.orders || data.recentOrders || [];
+      const activeOrders = orders.filter(order => ['pending', 'confirmed', 'preparing'].includes(String(order.orderStatus || '').toLowerCase())).length;
+      const unpaid = totals.pendingPayments || 0;
+      const cards = [
+        ['Active queue', activeOrders, 'Orders not closed', 'timer', activeOrders ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'],
+        ['Payment review', unpaid, 'Need attention', 'triangle-alert', unpaid ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'],
+        ['Menu live', totals.activeProducts || 0, 'Customer visible', 'leaf', 'bg-teal-50 text-teal-700']
+      ];
+      document.getElementById('opsPulse').innerHTML = cards.map(([label, value, hint, icon, tone]) => `
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between gap-3">
+          <div>
+            <p class="text-sm font-black text-ink">${label}</p>
+            <p class="mt-1 text-xs text-muted">${hint}</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-2xl font-black text-ink">${value}</span>
+            <span class="w-10 h-10 rounded-xl ${tone} flex items-center justify-center"><i data-lucide="${icon}" class="w-5 h-5"></i></span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderTopProducts(products) {
+      const rows = (products || []).slice(0, 6);
+      document.getElementById('topProducts').innerHTML = rows.map((item, index) => `
+        <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center font-black text-primary">${index + 1}</div>
+          <div class="min-w-0 flex-1">
+            <p class="font-black text-ink truncate">${escapeHtml(item.productName || 'Unknown item')}</p>
+            <p class="text-xs text-muted mt-0.5">${Number(item.quantity || 0)} units sold</p>
+          </div>
+          <p class="font-black text-ink">${money(item.revenue)}</p>
+        </div>
+      `).join('') || '<div class="md:col-span-2 rounded-xl border border-dashed border-slate-300 p-5 text-center text-muted">No sales data yet</div>';
+    }
+
+    function renderOrders(orders) {
+      document.getElementById('ordersTable').innerHTML = orders.map(order => {
+        const items = (order.items || []).map(item => `${item.quantity || 1}x ${escapeHtml(item.productName || item.name || 'Item')}`).join('<br>') || '&mdash;';
+        return `
+          <tr class="table-row align-top">
+            <td class="py-4 pr-4"><p class="font-black text-ink">${escapeHtml(order.customerName || 'Unknown')}</p><p class="text-xs text-muted mt-1">${escapeHtml(order.customerEmail || '')}</p></td>
+            <td class="py-4 pr-4"><p class="font-mono font-black text-ink">${escapeHtml(order.orderId || '-')}</p><p class="text-xs text-muted mt-1">${dateTime(order.createdAt)}</p></td>
+            <td class="py-4 pr-4 text-slate-700 leading-6">${items}</td>
+            <td class="py-4 pr-4 font-black text-ink">${money(order.totalAmount)}</td>
+            <td class="py-4 pr-4"><div class="flex flex-col gap-1"><span class="status-pill ${statusClass(order.orderStatus, 'order')}">${escapeHtml(order.orderStatus || 'pending')}</span><span class="status-pill ${statusClass(order.paymentStatus, 'payment')}">${escapeHtml(order.paymentStatus || 'unpaid')}</span></div></td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="5" class="py-10 text-center text-muted">No orders yet</td></tr>';
+    }
+
+    function renderPayments(payments) {
+      document.getElementById('paymentsTable').innerHTML = payments.map(payment => `
+        <tr class="table-row align-top">
+          <td class="py-4 pr-4"><p class="font-black text-ink">${escapeHtml(payment.customerName || 'Unknown')}</p><p class="text-xs text-muted mt-1">${escapeHtml(payment.customerEmail || '')}</p></td>
+          <td class="py-4 pr-4"><p class="font-mono font-black text-ink">${escapeHtml(payment.paymentId || '-')}</p><p class="text-xs text-muted mt-1">${dateTime(payment.createdAt)}</p></td>
+          <td class="py-4 pr-4 font-black text-ink">${money(payment.amountPaid)}</td>
+          <td class="py-4 pr-4 text-slate-700">${escapeHtml(payment.paymentMethod || 'Manual')}</td>
+          <td class="py-4 pr-4"><span class="status-pill ${statusClass(payment.paymentStatus, 'payment')}">${escapeHtml(payment.paymentStatus || 'pending')}</span></td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" class="py-10 text-center text-muted">No payments yet</td></tr>';
+    }
+
+    function nutrition(product) {
+      const meta = product.meta || {};
+      return [
+        ['Cal', meta.calories],
+        ['Pro', meta.protein],
+        ['Carb', meta.carbs],
+        ['Sugar', meta.sugar]
+      ].filter(([, value]) => value !== undefined && value !== null && value !== '');
+    }
+
+    function renderProducts(products) {
+      state.products = products;
+      document.getElementById('productsTable').innerHTML = products.map(product => {
+        const ingredients = product.meta && Array.isArray(product.meta.ingredients) ? product.meta.ingredients.slice(0, 3) : [];
+        return `
+          <tr class="table-row align-top">
+            <td class="py-4 pr-4 min-w-[220px]">
+              <p class="font-black text-ink">${escapeHtml(product.name)}</p>
+              <p class="text-xs text-muted mt-1 line-clamp-2">${escapeHtml(product.description || '')}</p>
+              <p class="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400 mt-2">${escapeHtml(product.category || 'Menu')} · ${escapeHtml(product.type || 'Vegetarian')}</p>
+              <div class="mt-2 flex flex-wrap gap-1">${ingredients.map(item => `<span class="px-2 py-1 rounded-full bg-teal-50 text-primary text-[11px] font-black">${escapeHtml(item)}</span>`).join('')}</div>
+            </td>
+            <td class="py-4 pr-4">
+              <img src="${product.image || ''}" alt="${escapeHtml(product.name)}" class="w-28 h-20 rounded-xl object-cover border border-slate-200 bg-slate-100 shadow-sm" onerror="this.src='/server/images/smoothie-bowl.jpg'">
+              <p class="mt-2 text-[11px] font-mono text-muted">${escapeHtml(product.productCode || product.productId || '')}</p>
+            </td>
+            <td class="py-4 pr-4">
+              <div class="grid grid-cols-2 gap-1.5 min-w-[150px]">${nutrition(product).map(([label, value]) => `<span class="rounded-lg bg-slate-50 border border-slate-200 px-2 py-1 text-xs"><b>${label}</b> ${escapeHtml(value)}</span>`).join('') || '<span class="text-xs text-muted">No data</span>'}</div>
+            </td>
+            <td class="py-4 pr-4">
+              ${product.isFeatured ? `<span class="status-pill bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">Popular #${escapeHtml(product.featuredOrder || '')}</span>` : '<span class="status-pill bg-slate-100 text-slate-600 ring-1 ring-slate-200">Not shown</span>'}
+            </td>
+            <td class="py-4 pr-4 font-black text-ink">${money(product.price)}</td>
+            <td class="py-4 pr-4"><span class="status-pill ${product.isArchived ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-100' : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'}">${product.isArchived ? 'Archived' : 'Active'}</span></td>
+            <td class="py-4 pr-4">
+              <div class="flex flex-wrap gap-2 min-w-[160px]">
+                <button data-action="edit" data-id="${product.productId}" class="btn btn-light !px-3 !py-2"><i data-lucide="square-pen" class="w-5 h-5"></i> Edit</button>
+                <button data-action="toggle" data-id="${product.productId}" class="${product.isArchived ? 'btn btn-light !px-3 !py-2' : 'btn btn-danger !px-3 !py-2'}"><i data-lucide="${product.isArchived ? 'upload' : 'archive'}" class="w-5 h-5"></i> ${product.isArchived ? 'Restore' : 'Archive'}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('') || '<tr><td colspan="7" class="py-10 text-center text-muted">No products found</td></tr>';
+    }
+
+    function updatePreview(src) {
+      const preview = document.getElementById('imagePreview');
+      if(preview) preview.src = src || '/server/images/smoothie-bowl.jpg';
+    }
+
+    const workspaceCopy = {
+      overview: ['Overview', 'Monitor revenue, fulfillment, product quality, and database health.'],
+      orders: ['Orders', 'Review customer orders, item mixes, value, and fulfillment status.'],
+      payments: ['Payments', 'Audit payment records, methods, status, and cleared revenue.'],
+      catalog: ['Catalog', 'Manage product availability, image quality, nutrition tags, and archive state.'],
+      editor: ['Product Editor', 'Create new products or refine an existing menu item.']
+    };
+
+    function showView(viewId, shouldScroll = true) {
+      const nextView = workspaceCopy[viewId] ? viewId : 'overview';
+      document.querySelectorAll('.admin-view').forEach(view => {
+        view.hidden = view.id !== nextView;
+      });
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.viewTarget === nextView);
+      });
+      const [title, subtitle] = workspaceCopy[nextView];
+      document.getElementById('workspaceTitle').textContent = title;
+      document.getElementById('workspaceSubtitle').textContent = subtitle;
+      if(location.hash !== `#${nextView}`) history.replaceState(null, '', `#${nextView}`);
+      if(shouldScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function populateForm(product) {
+      showView('editor');
+      const form = document.getElementById('productForm');
+      form.productId.value = product.productId || '';
+      form.name.value = product.name || '';
+      form.price.value = product.price ?? '';
+      form.category.value = product.category || '';
+      form.type.value = product.type || 'Vegetarian';
+      form.description.value = product.description || '';
+      form.image.value = product.image || '';
+      form.isFeatured.checked = !!product.isFeatured;
+      form.featuredOrder.value = product.featuredOrder && product.featuredOrder < 999 ? product.featuredOrder : '';
+      form.isArchived.checked = !!product.isArchived;
+      const meta = product.meta || {};
+      form.calories.value = meta.calories ?? '';
+      form.protein.value = meta.protein ?? '';
+      form.carbs.value = meta.carbs ?? '';
+      form.fat.value = meta.fat ?? '';
+      form.fiber.value = meta.fiber ?? '';
+      form.sugar.value = meta.sugar ?? '';
+      form.ingredients.value = Array.isArray(meta.ingredients) ? meta.ingredients.join(', ') : '';
+      updatePreview(product.image || '');
+    }
+
+    function clearForm() {
+      const form = document.getElementById('productForm');
+      form.reset();
+      form.productId.value = '';
+      form.type.value = 'Vegetarian';
+      updatePreview('/server/images/smoothie-bowl.jpg');
+    }
+
+    async function loadDashboard() {
+      if(!token()) {
+        window.location.href = '/admin-login.html';
+        return;
+      }
+      const response = await fetch('/api/admins/dashboard', { headers: authHeaders() });
+      const data = await response.json();
+      if(!response.ok) {
+        if(response.status === 403) {
+          localStorage.removeItem(tokenKey);
+          localStorage.removeItem(userKey);
+          window.location.href = '/admin-login.html';
+          return;
+        }
+        throw new Error(data.error || 'Unable to load dashboard');
+      }
+      state.dashboard = data;
+      renderStats(data.totals || {});
+      renderDb(data.database || {});
+      renderPulse(data);
+      renderTopProducts(data.topProducts || []);
+      renderOrders(data.orders || data.recentOrders || []);
+      renderPayments(data.payments || data.recentPayments || []);
+      renderProducts([...(data.products?.active || []), ...(data.products?.archived || [])]);
+    }
+
+    async function loadProducts() {
+      const response = await fetch('/api/products?includeArchived=true', { headers: authHeaders() });
+      const data = await response.json();
+      if(!response.ok) throw new Error(data.error || 'Unable to load products');
+      renderProducts(data);
+    }
+
+    async function refreshAll() {
+      await loadDashboard();
+      await loadProducts();
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      try { await refreshAll(); } catch (err) { alert(err.message); }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem(tokenKey);
+      localStorage.removeItem(userKey);
+      window.location.href = '/admin-login.html';
+    });
+
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarToggleIcon = document.getElementById('sidebarToggleIcon');
+    function syncSidebarToggle() {
+      const collapsed = document.body.classList.contains('sidebar-collapsed');
+      sidebarToggle.setAttribute('aria-label', collapsed ? 'Open sidebar' : 'Close sidebar');
+      sidebarToggle.title = collapsed ? 'Open sidebar' : 'Close sidebar';
+      sidebarToggleIcon.className = collapsed ? 'ri-sidebar-unfold-line text-xl' : 'ri-sidebar-fold-line text-xl';
+    }
+    if(localStorage.getItem('gs_admin_sidebar') === 'collapsed') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+    syncSidebarToggle();
+    sidebarToggle.addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('gs_admin_sidebar', document.body.classList.contains('sidebar-collapsed') ? 'collapsed' : 'expanded');
+      syncSidebarToggle();
+    });
+
+    document.getElementById('resetFormBtn').addEventListener('click', clearForm);
+
+    document.getElementById('archiveBtn').addEventListener('click', async () => {
+      const form = document.getElementById('productForm');
+      const productId = form.productId.value;
+      if(!productId) {
+        alert('Select a product from the catalog first.');
+        return;
+      }
+      const product = state.products.find(item => item.productId === productId);
+      const url = product && product.isArchived ? `/api/products/${productId}/restore` : `/api/products/${productId}`;
+      const method = product && product.isArchived ? 'PUT' : 'DELETE';
+      const response = await fetch(url, { method, headers: authHeaders() });
+      const data = await response.json();
+      if(!response.ok) {
+        alert(data.error || 'Unable to update product');
+        return;
+      }
+      await refreshAll();
+      clearForm();
+    });
+
+    document.getElementById('productForm').addEventListener('change', event => {
+      if(event.target.name !== 'imageFile') return;
+      const file = event.target.files && event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('productForm').image.value = reader.result;
+        updatePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('productForm').image.addEventListener('input', event => {
+      updatePreview(event.target.value.trim());
+    });
+
+    document.getElementById('productForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      const productId = String(formData.get('productId') || '').trim();
+      const payload = {
+        name: String(formData.get('name') || '').trim(),
+        description: String(formData.get('description') || '').trim(),
+        category: String(formData.get('category') || '').trim(),
+        type: String(formData.get('type') || 'Vegetarian').trim(),
+        price: Number(formData.get('price') || 0),
+        image: String(formData.get('image') || '').trim(),
+        meta: metaFromForm(formData),
+        isFeatured: !!formData.get('isFeatured'),
+        featuredOrder: Number(formData.get('featuredOrder') || 999),
+        isArchived: !!formData.get('isArchived')
+      };
+      const response = await fetch(productId ? `/api/products/${productId}` : '/api/products', {
+        method: productId ? 'PUT' : 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if(!response.ok) {
+        alert(data.error || 'Unable to save product');
+        return;
+      }
+      await refreshAll();
+      clearForm();
+    });
+
+    document.addEventListener('click', event => {
+      const button = event.target.closest('button[data-action]');
+      if(!button) return;
+      const productId = button.dataset.id;
+      const action = button.dataset.action;
+      const product = state.products.find(item => item.productId === productId);
+      if(!product) return;
+
+      if(action === 'edit') {
+        populateForm(product);
+        return;
+      }
+
+      if(action === 'toggle') {
+        const url = product.isArchived ? `/api/products/${productId}/restore` : `/api/products/${productId}`;
+        const method = product.isArchived ? 'PUT' : 'DELETE';
+        fetch(url, { method, headers: authHeaders() })
+          .then(response => response.json().then(data => ({ response, data })))
+          .then(async ({ response, data }) => {
+            if(!response.ok) {
+              alert(data.error || 'Unable to update product');
+              return;
+            }
+            await refreshAll();
+          });
+      }
+    });
+
+    document.querySelectorAll('.nav-item').forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        showView(link.dataset.viewTarget || 'overview');
+      });
+    });
+
+    window.addEventListener('hashchange', () => {
+      showView((location.hash || '#overview').slice(1), false);
+    });
+
+    showView((location.hash || '#overview').slice(1), false);
+
+    refreshAll().catch(err => {
+      alert(err.message);
+      window.location.href = '/admin-login.html';
+    });
+  </script>
+</body>
+</html>

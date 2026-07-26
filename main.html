@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresh Blend | Premium Smoothies & Juices</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#4ade80',secondary:'#f97316'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+<!-- Shared product artwork generator (window.GoSmoothieProductImages) -->
+<script src="/server/data/productImages.js"></script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+/* Dark Mode CSS Variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+  --card-bg: #ffffff;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --hover-bg: #f0fdf4;
+  --input-bg: #ffffff;
+  --header-bg: #ffffff;
+}
+
+html.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --border-color: #475569;
+  --card-bg: #1e293b;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --hover-bg: #0d4a2c;
+  --input-bg: #334155;
+  --header-bg: #1e293b;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html.dark body {
+  background: linear-gradient(to bottom right, #0f172a, #1e293b);
+}
+
+html:not(.dark) body {
+  background: linear-gradient(to bottom right, #f0fdf4, #ffffff);
+}
+
+.smoothie-card {
+position: relative;
+}
+.smoothie-card:hover .nutritional-info {
+opacity: 1;
+visibility: visible;
+}
+.nutritional-info {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+opacity: 0;
+visibility: hidden;
+transition: all 0.3s ease;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+.custom-checkbox {
+position: relative;
+cursor: pointer;
+}
+.custom-checkbox input {
+position: absolute;
+opacity: 0;
+cursor: pointer;
+}
+.checkmark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: var(--input-bg);
+border: 2px solid var(--border-color);
+border-radius: 4px;
+transition: all 0.2s ease;
+}
+.custom-checkbox input:checked ~ .checkmark {
+background-color: #4ade80;
+border-color: #4ade80;
+}
+.checkmark:after {
+content: "";
+position: absolute;
+display: none;
+}
+.custom-checkbox input:checked ~ .checkmark:after {
+display: block;
+}
+.custom-checkbox .checkmark:after {
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+.custom-radio {
+position: relative;
+cursor: pointer;
+}
+.custom-radio input {
+position: absolute;
+opacity: 0;
+cursor: pointer;
+}
+.radio-mark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: var(--input-bg);
+border: 2px solid var(--border-color);
+border-radius: 50%;
+transition: all 0.2s ease;
+}
+.custom-radio input:checked ~ .radio-mark {
+border-color: #4ade80;
+}
+.radio-mark:after {
+content: "";
+position: absolute;
+display: none;
+}
+.custom-radio input:checked ~ .radio-mark:after {
+display: block;
+}
+.custom-radio .radio-mark:after {
+top: 3px;
+left: 3px;
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: #4ade80;
+}
+.custom-switch {
+position: relative;
+display: inline-block;
+width: 48px;
+height: 24px;
+}
+.custom-switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: var(--border-color);
+transition: .4s;
+border-radius: 24px;
+}
+.slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 3px;
+background-color: var(--bg-primary);
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .slider {
+background-color: #4ade80;
+}
+input:checked + .slider:before {
+transform: translateX(24px);
+}
+.range-slider {
+appearance: none;
+-webkit-appearance: none;
+width: 100%;
+height: 6px;
+border-radius: 5px;
+background: var(--border-color);
+outline: none;
+}
+.range-slider::-webkit-slider-thumb {
+appearance: none;
+-webkit-appearance: none;
+appearance: none;
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background: #4ade80;
+cursor: pointer;
+border: 2px solid white;
+box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+.range-slider::-moz-range-thumb {
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background: #4ade80;
+cursor: pointer;
+border: 2px solid white;
+box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+<body>
+<!-- Header -->
+<header class="fixed top-0 left-0 right-0 bg-white dark:bg-slate-800 shadow-sm z-50 transition-colors duration-300">
+<div class="container mx-auto px-4 py-3 flex items-center justify-between">
+<div class="flex items-center">
+<a href="#" class="text-3xl font-['Pacifico'] text-primary mr-8">GoSmoothie</a>
+<nav class="hidden md:flex space-x-6">
+<a href="#home" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Home</a>
+  <a href="/menu.html" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Menu</a>
+<a href="#builder" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Build Your Own</a>
+<a href="/about-us.html" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">About Us</a>
+<a href="#order" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Order Now</a>
+</nav>
+</div>
+<div class="flex items-center space-x-4">
+    <button id="themeToggle" class="w-10 h-10 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition" title="Toggle theme">
+        <i class="ri-moon-line dark:hidden text-xl"></i>
+        <i class="ri-sun-line hidden dark:inline text-xl"></i>
+    </button>
+    <div class="relative">
+        <button id="cartBtn" class="w-10 h-10 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary transition">
+            <i class="ri-shopping-cart-2-line text-xl"></i>
+            <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+        </button>
+    </div>
+    <div id="authLinks" class="flex items-center space-x-2">
+        <a id="loginLink" href="/login.html" class="text-gray-700 dark:text-gray-300 hover:text-primary">Login</a>
+        <a id="registerLink" href="/register.html" class="text-gray-700 dark:text-gray-300 hover:text-primary">Register</a>
+    </div>
+    <div id="userMenu" class="hidden relative">
+      <button id="userMenuBtn" type="button" class="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary transition cursor-pointer">
+        <span id="userName" class="text-sm font-medium"></span>
+      </button>
+      <div id="userMenuDropdown" class="absolute right-0 top-full pt-2 w-48 opacity-0 invisible pointer-events-none translate-y-1 transition-all duration-150 z-50">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+        <a href="/profile.html" class="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-slate-700 hover:text-primary transition flex items-center gap-2">
+          <i class="ri-user-line"></i> My Profile
+        </a>
+        <button id="logoutBtn" class="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900 hover:text-red-600 transition flex items-center gap-2 border-t dark:border-slate-700">
+          <i class="ri-logout-box-r-line"></i> Logout
+        </button>
+        </div>
+      </div>
+    </div>
+    <button id="orderNowHeader" class="bg-primary text-white px-4 py-2 !rounded-button font-medium whitespace-nowrap hidden md:block">Order Now</button>
+    <button class="md:hidden w-10 h-10 flex items-center justify-center text-gray-700">
+        <i class="ri-menu-line text-xl"></i>
+    </button>
+</div>
+</div>
+</header>
+<!-- Hero Section -->
+<section class="pt-20 relative overflow-hidden">
+<div class="absolute inset-0 z-0" style="background-image: url('https://readdy.ai/api/search-image?query=A%20vibrant%2C%20fresh%20scene%20with%20colorful%20fruits%20and%20smoothies.%20Left%20side%20has%20a%20clean%20gradient%20from%20light%20green%20to%20white%2C%20providing%20space%20for%20text.%20Right%20side%20features%20an%20arrangement%20of%20fresh%20fruits%2C%20berries%2C%20and%20smoothie%20glasses%20with%20ingredients%20spilling%20artistically.%20Modern%2C%20bright%2C%20and%20appetizing%20composition%20with%20natural%20lighting%20and%20professional%20food%20styling.&width=1920&height=800&seq=1&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="relative z-10 container mx-auto px-4 py-20 md:py-28 flex flex-col items-start">
+<div class="max-w-xl">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">Refresh Your Day with Nature's Best</h1>
+<p class="text-lg md:text-xl text-gray-700 mb-8">Handcrafted smoothies and juices made with 100% fresh ingredients. Fuel your body with the perfect blend of nutrition and delicious taste.</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<a href="#order" class="bg-primary text-white px-6 py-3 !rounded-button font-medium text-center whitespace-nowrap">Order Now</a>
+<a href="#builder" class="bg-white text-gray-900 border border-gray-300 px-6 py-3 !rounded-button font-medium text-center whitespace-nowrap">Build Your Own</a>
+</div>
+</div>
+</div>
+<div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce">
+<i class="ri-arrow-down-line text-2xl text-gray-700"></i>
+</div>
+</section>
+<!-- Featured Products Grid -->
+<section id="menu" class="py-16 bg-gradient-to-r from-white to-green-50">
+<div class="container mx-auto px-4">
+<div class="text-center mb-12">
+<h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Popular Blends</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Discover our most loved creations, crafted with premium ingredients to deliver exceptional taste and nutrition.</p>
+</div>
+<div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  <!-- products will be rendered here -->
+  <div class="col-span-full text-center text-gray-500" id="productsLoading">Loading products...</div>
+</div>
+<script>
+  let productsCache = null;
+
+  // Popular Blends: the fixed set of smoothies shown on the homepage, in order.
+  // Legacy names (without the "Smoothie" suffix) are also accepted so the grid
+  // still fills in against databases seeded before the catalog migration.
+  const POPULAR_BLENDS = [
+    { name: 'Green Goddess Smoothie', aliases: ['Green Goddess'] },
+    { name: 'Berry Blast Smoothie', aliases: ['Berry Blast'] },
+    { name: 'Tropical Paradise Smoothie', aliases: ['Tropical Paradise'] },
+    { name: 'Carrot Sunrise Smoothie', aliases: ['Carrot Sunrise'] },
+    { name: 'Protein Power Smoothie', aliases: ['Protein Power'] },
+    { name: 'Green Detox Smoothie', aliases: ['Green Detox'] }
+  ];
+
+  // Falls back to the shared generator when a stored image is missing.
+  function productImage(product){
+    if(product && product.image) return product.image;
+    const images = window.GoSmoothieProductImages;
+    return images ? images.imageUrl(product) : '';
+  }
+
+  // Keep only the Popular Blends smoothies, in the order defined above.
+  function pickPopularBlends(products){
+    const list = Array.isArray(products) ? products : [];
+    return POPULAR_BLENDS.map(blend => {
+      const accepted = [blend.name, ...(blend.aliases || [])].map(n => n.toLowerCase());
+      const match = list.find(p => accepted.includes(String(p.name || '').trim().toLowerCase()));
+      if(!match) return null;
+      const product = { ...match, name: blend.name };
+      product.image = productImage(product);
+      return product;
+    }).filter(Boolean);
+  }
+
+  async function loadProducts(){
+    const container = document.getElementById('productsGrid');
+    if(productsCache){
+      renderProducts(productsCache);
+      return;
+    }
+    try{
+      const res = await fetch('/api/products', { signal: AbortSignal.timeout(5000) });
+      if(!res.ok) throw new Error('Failed to load products');
+      productsCache = pickPopularBlends(await res.json());
+      renderProducts(productsCache);
+    }catch(err){ 
+      console.error(err); 
+      container.innerHTML = '<div class="col-span-full text-red-500">Failed to load products</div>'; 
+    }
+  }
+  
+  function renderProducts(products){
+    const container = document.getElementById('productsGrid');
+    container.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'smoothie-card bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2';
+      card.dataset.productName = p.name;
+      card.dataset.productPrice = p.price;
+      card.innerHTML = `
+        <div class="relative h-64">
+          <img src="${p.image || 'https://via.placeholder.com/600x400?text=Smoothie'}" alt="${p.name}" class="w-full h-full object-cover object-top">
+          <div class="nutritional-info absolute inset-0 bg-black bg-opacity-75 p-4 flex flex-col justify-center text-white overflow-y-auto">
+            <h3 class="font-bold mb-3 text-center">Nutrition Info</h3>
+            <ul class="text-md space-y-1">
+              <li class="grid grid-cols-[1fr_auto] items-center gap-3"><span>Calories:</span><span class="font-semibold text-right">${(p.meta && p.meta.calories) || '-'} kcal</span></li>
+              <li class="grid grid-cols-[1fr_auto] items-center gap-3"><span>Protein:</span><span class="font-semibold text-right">${(p.meta && p.meta.protein) || '-'} g</span></li>
+              <li class="grid grid-cols-[1fr_auto] items-center gap-3"><span>Carbs:</span><span class="font-semibold text-right">${(p.meta && p.meta.carbs) || '-'} g</span></li>
+              <li class="grid grid-cols-[1fr_auto] items-center gap-3"><span>Fat:</span><span class="font-semibold text-right">${(p.meta && p.meta.fat) || '-'} g</span></li>
+              <li class="grid grid-cols-[1fr_auto] items-center gap-3"><span>Fiber:</span><span class="font-semibold text-right">${(p.meta && p.meta.fiber) || '-'} g</span></li>
+              <li class="grid grid-cols-[1fr_auto] items-center gap-3"><span>Sugar:</span><span class="font-semibold text-right">${(p.meta && p.meta.sugar) || '-'} g</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-xl font-bold text-gray-900">${p.name}</h3>
+            <span class="text-lg font-semibold text-primary">${p.price} Rs/-</span>
+          </div>
+          <p class="text-gray-600 mb-4 line-clamp-2">${p.description || ''}</p>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center border rounded overflow-hidden">
+              <button class="qty-dec px-3 py-2 bg-gray-100">-</button>
+              <input type="number" min="1" value="1" class="qty-input w-16 text-center px-2 py-2 border-l border-r" />
+              <button class="qty-inc px-3 py-2 bg-gray-100">+</button>
+            </div>
+            <button class="add-to-cart flex-1 bg-primary text-white py-2 !rounded-button font-medium whitespace-nowrap">Add to Cart</button>
+          </div>
+        </div>
+      `;
+      fragment.appendChild(card);
+    });
+    
+    container.appendChild(fragment);
+    attachProductHandlers();
+  }
+  
+  function attachProductHandlers(){
+    document.querySelectorAll('.smoothie-card').forEach(card => {
+      const dec = card.querySelector('.qty-dec');
+      const inc = card.querySelector('.qty-inc');
+      const input = card.querySelector('.qty-input');
+      
+      dec.addEventListener('click', ()=>{ input.value = Math.max(1, parseInt(input.value||1)-1); });
+      inc.addEventListener('click', ()=>{ input.value = Math.max(1, parseInt(input.value||1)+1); });
+      
+      const addBtn = card.querySelector('.add-to-cart');
+      addBtn.addEventListener('click', async ()=>{
+        const qty = parseInt(input.value||1);
+        const token = localStorage.getItem('gs_token');
+        const name = card.dataset.productName || 'Product';
+        const price = parseFloat(card.dataset.productPrice) || 0;
+
+        // if already in cart -> remove
+        if(addBtn.dataset.inCart === '1'){
+          let itemId = addBtn.dataset.cartId;
+          try{
+            if(!itemId){
+              const cart = await fetchCartMain();
+              const found = cart && cart.items && cart.items.find(i => i.name === name && parseFloat(i.price) === price);
+              itemId = found && found._id;
+            }
+            if(!itemId) return;
+            const url = '/api/cart/' + itemId + (token ? '' : ('?clientId=' + localStorage.getItem('gs_clientId')));
+            const res = await fetch(url, { method: 'DELETE', headers: token ? { 'Authorization': 'Bearer ' + token } : {}, signal: AbortSignal.timeout(5000) });
+            if(!res.ok){ const errText = await res.text().catch(()=>res.statusText); showToastMain('Remove failed: ' + errText, 'error'); return; }
+            showToastMain(name + ' removed from cart!');
+            window.dispatchEvent(new Event('cartUpdated'));
+          }catch(err){ console.error(err); showToastMain('Network error: ' + err.message, 'error'); }
+          return;
+        }
+
+        const body = { name, price, quantity: qty };
+        if(!token) {
+          const clientId = localStorage.getItem('gs_clientId') || ('c_'+Date.now()+Math.random().toString(36).slice(2,9));
+          body.clientId = clientId;
+          localStorage.setItem('gs_clientId', clientId);
+        }
+
+        const headers = Object.assign({'Content-Type':'application/json'}, token ? { 'Authorization': 'Bearer ' + token } : {});
+        try{
+          const r = await fetch('/api/cart', { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(5000) });
+          if(r.ok){ 
+            const cart = await r.json();
+            const item = cart.items && cart.items.find(i => i.name === name && parseFloat(i.price) === price);
+            if(item){ addBtn.dataset.inCart = '1'; addBtn.dataset.cartId = item._id; addBtn.textContent = 'Remove from Cart'; addBtn.classList.remove('bg-primary'); addBtn.classList.add('bg-red-500'); }
+            showToastMain(name + ' added to cart!');
+            window.dispatchEvent(new Event('cartUpdated'));
+          }
+          else { 
+            const err = await r.json(); 
+            showToastMain(err.error||'Failed to add to cart', 'error'); 
+          }
+        }catch(err){ 
+          console.error('Cart error:', err); 
+          showToastMain('Network error: ' + err.message, 'error'); 
+        }
+      });
+    });
+  }
+
+  async function fetchCartMain(){
+    const token = localStorage.getItem('gs_token');
+    let url = '/api/cart';
+    if(!token) url += '?clientId=' + (localStorage.getItem('gs_clientId') || '');
+    try{ const r = await fetch(url, { headers: token ? { 'Authorization': 'Bearer ' + token } : {}, signal: AbortSignal.timeout(5000) }); if(r.ok) return await r.json(); }catch(e){}
+    return null;
+  }
+
+  async function syncProductButtons(){
+    const cart = await fetchCartMain();
+    document.querySelectorAll('.smoothie-card').forEach(card =>{
+      const name = card.dataset.productName; const price = parseFloat(card.dataset.productPrice)||0;
+      const addBtn = card.querySelector('.add-to-cart');
+      if(!addBtn) return;
+      const found = cart && cart.items && cart.items.find(i => i.name === name && parseFloat(i.price) === price);
+      if(found){ addBtn.dataset.inCart='1'; addBtn.dataset.cartId=found._id; addBtn.textContent='Remove from Cart'; addBtn.classList.remove('bg-primary'); addBtn.classList.add('bg-red-500'); }
+      else { addBtn.dataset.inCart='0'; delete addBtn.dataset.cartId; addBtn.textContent='Add to Cart'; addBtn.classList.remove('bg-red-500'); addBtn.classList.add('bg-primary'); }
+    });
+  }
+  // Toast notification system
+  function showToastMain(message, type = 'success'){
+    const toast = document.createElement('div');
+    const bgClass = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    toast.className = `fixed bottom-6 right-6 ${bgClass} text-white px-6 py-3 rounded-lg shadow-lg animate-pulse z-50`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.remove(); }, 3000);
+  }
+
+  window.addEventListener('cartUpdated', syncProductButtons);
+  syncProductButtons();
+
+  // Handle seasonal specials add to cart buttons
+  function attachSeasonalSpecialsHandlers(){
+    document.querySelectorAll('[data-product-name][data-product-price]').forEach(card => {
+      if(card.classList.contains('smoothie-card')) return; // Skip if already handled by smoothie-card handler
+      const addBtn = card.querySelector('.add-to-cart');
+      if(!addBtn) return;
+      
+      addBtn.addEventListener('click', async ()=>{
+        const token = localStorage.getItem('gs_token');
+        const name = card.dataset.productName;
+        const price = parseFloat(card.dataset.productPrice);
+        const qty = 1;
+        
+        const body = { name, price, quantity: qty };
+        if(!token) {
+          const clientId = localStorage.getItem('gs_clientId') || ('c_'+Date.now()+Math.random().toString(36).slice(2,9));
+          body.clientId = clientId;
+          localStorage.setItem('gs_clientId', clientId);
+        }
+        
+        const headers = Object.assign({'Content-Type':'application/json'}, token ? { 'Authorization': 'Bearer ' + token } : {});
+        try{
+          const r = await fetch('/api/cart', { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(5000) });
+          if(r.ok){ 
+            addBtn.textContent = 'Added!'; 
+            setTimeout(()=> addBtn.textContent = 'Add to Cart', 1200); 
+            // Update cart count
+            try{ const evt = new Event('cartUpdated'); window.dispatchEvent(evt); }catch(e){}
+          }
+          else { 
+            const err = await r.json(); 
+            alert(err.error||'Failed to add to cart'); 
+          }
+        }catch(err){ 
+          console.error('Cart error:', err); 
+          alert('Network error: ' + err.message); 
+        }
+      });
+    });
+  }
+  
+  // Load products on page load or when section comes into view
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){
+      loadProducts();
+      attachSeasonalSpecialsHandlers();
+    });
+  } else {
+    loadProducts();
+    attachSeasonalSpecialsHandlers();
+  }
+</script>
+</script>
+<div class="text-center mt-12">
+<a href="/menu.html" class="inline-flex items-center text-primary font-medium hover:underline">
+View Full Menu
+<i class="ri-arrow-right-line ml-2"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Smoothie Builder Section -->
+<section id="builder" class="py-20 bg-gradient-to-b from-green-50 to-white">
+    <div class="container mx-auto px-4">
+    <div class="text-center mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Build Your Perfect Blend</h2>
+    <p class="text-gray-600 max-w-2xl mx-auto">Create your own custom smoothie with our interactive builder. Mix and match ingredients to craft your ideal blend.</p>
+    </div>
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3">
+    <!-- Builder Controls -->
+    <div class="lg:col-span-2 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-gray-200">
+    <div class="mb-8">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">1. Choose Your Base</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option">
+    <input type="radio" name="base" value="almond" class="custom-radio mr-3">
+    <span>Almond Milk</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option">
+    <input type="radio" name="base" value="coconut" class="custom-radio mr-3">
+    <span>Coconut Water</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option">
+    <input type="radio" name="base" value="yogurt" class="custom-radio mr-3">
+    <span>Greek Yogurt</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option">
+    <input type="radio" name="base" value="oat" class="custom-radio mr-3">
+    <span>Oat Milk</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option">
+    <input type="radio" name="base" value="juice" class="custom-radio mr-3">
+    <span>Apple Juice</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option">
+    <input type="radio" name="base" value="water" class="custom-radio mr-3">
+    <span>Filtered Water</span>
+    </label>
+    </div>
+    </div>
+    <div class="mb-8">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">2. Select Your Fruits (Choose up to 3)</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="strawberry" class="custom-checkbox mr-3">
+    <span>Strawberry</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="banana" class="custom-checkbox mr-3">
+    <span>Banana</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="blueberry" class="custom-checkbox mr-3">
+    <span>Blueberry</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="mango" class="custom-checkbox mr-3">
+    <span>Mango</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="pineapple" class="custom-checkbox mr-3">
+    <span>Pineapple</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="kiwi" class="custom-checkbox mr-3">
+    <span>Kiwi</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="peach" class="custom-checkbox mr-3">
+    <span>Peach</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option">
+    <input type="checkbox" name="fruits" value="raspberry" class="custom-checkbox mr-3">
+    <span>Raspberry</span>
+    </label>
+    </div>
+    </div>
+    <div class="mb-8">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">3. Add Boosters (Optional)</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option">
+    <input type="checkbox" name="boosters" value="protein" class="custom-checkbox mr-3">
+    <span>Protein Powder (+50 Rs/-)</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option">
+    <input type="checkbox" name="boosters" value="chia" class="custom-checkbox mr-3">
+    <span>Chia Seeds (+80 Rs/-)</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option">
+    <input type="checkbox" name="boosters" value="flax" class="custom-checkbox mr-3">
+    <span>Flax Seeds (+75 Rs/-)</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option">
+    <input type="checkbox" name="boosters" value="spinach" class="custom-checkbox mr-3">
+    <span>Spinach (+100 Rs/-)</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option">
+    <input type="checkbox" name="boosters" value="collagen" class="custom-checkbox mr-3">
+    <span>Collagen (+180 Rs/-)</span>
+    </label>
+    <label class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option">
+    <input type="checkbox" name="boosters" value="acai" class="custom-checkbox mr-3">
+    <span>Acai Powder (+130 Rs/-)</span>
+    </label>
+    </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] gap-2 items-start">
+    <div>
+    <h3 class="text-xl font-bold text-gray-800 mb-4">4. Choose Your Size</h3>
+    <div class="flex flex-wrap gap-4">
+    <label class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option">
+    <input type="radio" name="size" value="small" class="custom-radio mb-2">
+    <div class="w-12 h-12 flex items-center justify-center">
+    <i class="ri-cup-line ri-2x text-gray-600"></i>
+    </div>
+    <span class="mt-2 text-center">Small<br>(12 oz)</span>
+    <span class="text-primary font-semibold mt-1">80 rs/-</span>
+    </label>
+    <label class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option">
+    <input type="radio" name="size" value="medium" class="custom-radio mb-2">
+    <div class="w-12 h-12 flex items-center justify-center">
+    <i class="ri-cup-line ri-3x text-gray-600"></i>
+    </div>
+    <span class="mt-2 text-center">Medium<br>(16 oz)</span>
+    <span class="text-primary font-semibold mt-1">130 rs/-</span>
+    </label>
+    <label class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option">
+    <input type="radio" name="size" value="large" class="custom-radio mb-2">
+    <div class="w-12 h-12 flex items-center justify-center">
+    <i class="ri-cup-line ri-4x text-gray-600"></i>
+    </div>
+    <span class="mt-2 text-center">Large<br>(24 oz)</span>
+    <span class="text-primary font-semibold mt-1">180 rs/-</span>
+    </label>
+    </div>
+    </div>
+    <div class="lg:flex-1">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">5. Special requests / Instructions</h3>
+        <label for="builderInstructions" class="block text-sm font-medium text-gray-700 mb-2">Tell us how you'd like it made</label>
+        <textarea id="builderInstructions" rows="7" placeholder="Any preferences or requests (e.g., less sugar, extra ice, allergy notes)..." class="w-full p-3 border border-gray-200 rounded resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"></textarea>
+    </div>
+    </div>
+    </div>
+    <!-- Preview and Summary -->
+    <div class="p-6 md:p-8 bg-gray-50">
+    
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Your Custom Smoothie</h3>
+    <div class="mb-6 bg-white p-4 rounded shadow-sm">
+    <div class="h-48 mb-4 flex items-center justify-center">
+    <img src="https://readdy.ai/api/search-image?query=A%20custom%20smoothie%20in%20a%20clear%20glass%20with%20visible%20layers%20of%20pink%20strawberry%20and%20yellow%20banana.%20The%20smoothie%20has%20a%20creamy%20texture%20with%20a%20strawberry%20garnish%20on%20top.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=400&height=300&seq=8&orientation=portrait" alt="Custom Smoothie Preview" class="h-full object-contain">
+    </div>
+    <h4 class="font-semibold text-center text-gray-800">Your Smoothie</h4>
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-2">Nutrition Information</h4>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+    <div class="flex justify-between p-2 bg-white rounded">
+    <span>Calories:</span>
+    <span class="font-medium"><span data-nutrition="calories">0</span> kcal</span>
+    </div>
+    <div class="flex justify-between p-2 bg-white rounded">
+    <span>Protein:</span>
+    <span class="font-medium"><span data-nutrition="protein">0</span>g</span>
+    </div>
+    <div class="flex justify-between p-2 bg-white rounded">
+    <span>Carbs:</span>
+    <span class="font-medium"><span data-nutrition="carbs">0</span>g</span>
+    </div>
+    <div class="flex justify-between p-2 bg-white rounded">
+    <span>Fat:</span>
+    <span class="font-medium"><span data-nutrition="fat">0</span>g</span>
+    </div>
+    <div class="flex justify-between p-2 bg-white rounded">
+    <span>Fiber:</span>
+    <span class="font-medium"><span data-nutrition="fiber">0</span>g</span>
+    </div>
+    <div class="flex justify-between p-2 bg-white rounded">
+    <span>Sugar:</span>
+    <span class="font-medium"><span data-nutrition="sugar">0</span>g</span>
+    </div>
+    </div>
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-2">Order Summary</h4>
+    <div class="bg-white p-4 rounded shadow-sm">
+    <div class="flex justify-between mb-2 pb-2 border-b border-gray-100">
+    <span>Base:</span>
+    <span class="builder-summary" data-type="base">-</span>
+    </div>
+    <div class="flex justify-between mb-2 pb-2 border-b border-gray-100">
+    <span>Fruits:</span>
+    <span class="builder-summary" data-type="fruits">None</span>
+    </div>
+    <div class="flex justify-between mb-2 pb-2 border-b border-gray-100">
+    <span>Boosters:</span>
+    <span class="builder-summary" data-type="boosters">None</span>
+    </div>
+    <div class="flex justify-between mb-2 pb-2 border-b border-gray-100">
+    <span>Size:</span>
+    <span class="builder-summary" data-type="size">-</span>
+    </div>
+    <div class="flex justify-between font-bold text-lg mt-4">
+    <span>Total Price:</span>
+    <span class="text-primary"><span data-price>0</span> Rs/-</span>
+    </div>
+    </div>
+    </div>
+    <!-- <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Quantity</h4>
+    <div class="flex items-center gap-2">
+      <div class="flex items-center border rounded overflow-hidden w-32">
+        <button id="builderQtyDec" class="qty-dec px-3 py-2 bg-gray-100 hover:bg-gray-200">-</button>
+        <input id="builderQtyInput" type="number" min="1" value="1" class="qty-input flex-1 text-center px-2 py-2 border-l border-r focus:outline-none" />
+        <button id="builderQtyInc" class="qty-inc px-3 py-2 bg-gray-100 hover:bg-gray-200">+</button>
+      </div>
+    </div>
+    </div> -->
+    <button id="builderAddToCart" class="w-full py-3 bg-primary text-white font-semibold rounded-button shadow hover:bg-primary/90 transition whitespace-nowrap">Add to Cart</button>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Builder UI state tracking
+      const builderState = {
+        base: null,
+        fruits: [],
+        boosters: [],
+        size: null
+      };
+
+      // Update builder summary when selections change
+      function syncBuilderPreview() {
+        const baseInput = document.querySelector('input[name="base"]:checked');
+        const sizeInput = document.querySelector('input[name="size"]:checked');
+        const fruitInputs = Array.from(document.querySelectorAll('input[name="fruits"]:checked')).map(i=>i.value);
+        const boosterInputs = Array.from(document.querySelectorAll('input[name="boosters"]:checked')).map(i=>i.value);
+
+        builderState.base = baseInput?.value || null;
+        builderState.size = sizeInput?.value || null;
+        builderState.fruits = fruitInputs;
+        builderState.boosters = boosterInputs;
+
+        // Update summary display
+        const fruitsSummary = fruitInputs.length > 0 ? fruitInputs.map(f=>f.charAt(0).toUpperCase()+f.slice(1)).join(', ') : 'None';
+        const boostersSummary = boosterInputs.length > 0 ? boosterInputs.map(b=>b.charAt(0).toUpperCase()+b.slice(1)).join(', ') : 'None';
+
+        document.querySelectorAll('.builder-summary').forEach(el=>{
+          if(el.dataset.type==='base') {
+            // prefer the human-readable label text if present (e.g. "Almond Milk")
+            let baseDisplay = '-';
+            if(baseInput) {
+              const lbl = baseInput.closest('label');
+              baseDisplay = (lbl && lbl.querySelector('span') && lbl.querySelector('span').textContent.trim()) || (builderState.base ? builderState.base.charAt(0).toUpperCase()+builderState.base.slice(1) : '-');
+            } else if(builderState.base) {
+              baseDisplay = builderState.base.charAt(0).toUpperCase()+builderState.base.slice(1);
+            }
+            el.textContent = baseDisplay || '-';
+            try{ el.style.color = '#0f172a'; }catch(e){}
+          }
+          if(el.dataset.type==='fruits') { el.textContent = fruitsSummary || 'None'; try{ el.style.color = '#0f172a'; }catch(e){} }
+          if(el.dataset.type==='boosters') { el.textContent = boostersSummary || 'None'; try{ el.style.color = '#0f172a'; }catch(e){} }
+          if(el.dataset.type==='size') { el.textContent = builderState.size ? builderState.size.charAt(0).toUpperCase()+builderState.size.slice(1)+' (16-24 oz)' : '-'; try{ el.style.color = '#0f172a'; }catch(e){} }
+        });
+
+        // debug: show current state
+        try{ console.debug('syncBuilderPreview', JSON.parse(JSON.stringify(builderState))); }catch(e){}
+
+        updateNutritionDisplay();
+      }
+
+      // expose helper globally for other pages that may check for it
+      window.showModalMain = showModalMain;
+
+      // Add UI color changes on selection
+      document.querySelectorAll('.base-option input[type="radio"]').forEach(input=>{
+        input.addEventListener('change', ()=>{
+          document.querySelectorAll('.base-option').forEach(l=>{
+            l.classList.remove('border-primary', 'bg-primary/5');
+            l.classList.add('border-gray-200');
+          });
+          input.closest('.base-option').classList.remove('border-gray-200');
+          input.closest('.base-option').classList.add('border-primary', 'bg-primary/5');
+          syncBuilderPreview();
+        });
+      });
+
+      document.querySelectorAll('.size-option input[type="radio"]').forEach(input=>{
+        input.addEventListener('change', ()=>{
+          document.querySelectorAll('.size-option').forEach(l=>{
+            l.classList.remove('border-primary', 'bg-primary/5');
+            l.classList.add('border-gray-200');
+          });
+          input.closest('.size-option').classList.remove('border-gray-200');
+          input.closest('.size-option').classList.add('border-primary', 'bg-primary/5');
+          syncBuilderPreview();
+        });
+      });
+
+      document.querySelectorAll('input[name="fruits"]').forEach(input=>{
+        input.addEventListener('change', function(){
+          // Enforce maximum 3 fruits selection
+          const checkedFruits = Array.from(document.querySelectorAll('input[name="fruits"]:checked'));
+          const label = this.closest('.fruit-option');
+          if(this.checked && checkedFruits.length > 3) {
+            // revert the latest check and give a visual hint
+            this.checked = false;
+            label.classList.add('ring-2','ring-red-400');
+            setTimeout(()=> label.classList.remove('ring-2','ring-red-400'), 700);
+            console.warn('Maximum 3 fruits allowed.');
+            return syncBuilderPreview();
+          }
+
+          if(this.checked) {
+            label.classList.add('border-primary', 'bg-primary/10');
+          } else {
+            label.classList.remove('border-primary', 'bg-primary/10');
+          }
+          syncBuilderPreview();
+        });
+      });
+
+      document.querySelectorAll('input[name="boosters"]').forEach(input=>{
+        input.addEventListener('change', function(){
+          const label = this.closest('.booster-option');
+          if(this.checked) {
+            label.classList.add('border-primary', 'bg-primary/10');
+          } else {
+            label.classList.remove('border-primary', 'bg-primary/10');
+          }
+          syncBuilderPreview();
+        });
+      });
+
+      // Quantity controls removed (handled as fixed single item)
+
+      // Nutrition data for bases and fruits
+      const nutritionData = {
+        base: {
+          almond: { calories: 30, protein: 1, carbs: 1, fat: 3, fiber: 0, sugar: 0 },
+          coconut: { calories: 45, protein: 0, carbs: 9, fat: 0, fiber: 0, sugar: 7 },
+          yogurt: { calories: 60, protein: 8, carbs: 5, fat: 2, fiber: 0, sugar: 4 },
+          oat: { calories: 40, protein: 2, carbs: 7, fat: 1, fiber: 2, sugar: 0 },
+          juice: { calories: 50, protein: 1, carbs: 12, fat: 0, fiber: 1, sugar: 11 },
+          water: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 }
+        },
+        fruit: {
+          strawberry: { calories: 30, protein: 0.6, carbs: 7, fat: 0, fiber: 2, sugar: 4 },
+          banana: { calories: 88, protein: 1, carbs: 23, fat: 0, fiber: 3, sugar: 12 },
+          blueberry: { calories: 55, protein: 0.7, carbs: 14, fat: 0, fiber: 2, sugar: 10 },
+          mango: { calories: 60, protein: 0.8, carbs: 15, fat: 0, fiber: 1.5, sugar: 13 },
+          pineapple: { calories: 42, protein: 0.5, carbs: 11, fat: 0, fiber: 1.2, sugar: 9 },
+          kiwi: { calories: 61, protein: 1.2, carbs: 15, fat: 0.5, fiber: 3, sugar: 6 },
+          peach: { calories: 39, protein: 0.9, carbs: 10, fat: 0, fiber: 1.5, sugar: 8 },
+          raspberry: { calories: 52, protein: 1.2, carbs: 12, fat: 0.6, fiber: 6, sugar: 4 }
+        }
+      };
+
+      const boosterPrices = { protein: 50, chia: 80, flax: 75, spinach: 100, collagen: 180, acai: 130 };
+
+      // Calculate nutrition and price from selections
+      function calculateNutrition() {
+        const base = builderState.base;
+        const fruits = builderState.fruits || [];
+        const boosters = builderState.boosters || [];
+
+        let nutrition = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0 };
+
+        // Add base nutrition
+        if(nutritionData.base[base]) {
+          Object.keys(nutrition).forEach(k => nutrition[k] += nutritionData.base[base][k]);
+        }
+
+        // Add fruit nutrition
+        fruits.forEach(f => {
+          if(nutritionData.fruit[f]) {
+            Object.keys(nutrition).forEach(k => nutrition[k] += nutritionData.fruit[f][k]);
+          }
+        });
+
+        // Boosters add minimal calories but increase protein
+        boosters.forEach(b => {
+          if(b === 'protein') nutrition.protein += 20;
+          if(b === 'chia') { nutrition.calories += 30; nutrition.fiber += 3; }
+          if(b === 'flax') { nutrition.calories += 25; nutrition.fiber += 2; }
+          if(b === 'spinach') { nutrition.calories += 5; nutrition.protein += 0.5; nutrition.fiber += 0.5; }
+          if(b === 'collagen') nutrition.protein += 10;
+          if(b === 'acai') { nutrition.calories += 45; nutrition.carbs += 9; }
+        });
+
+        return nutrition;
+      }
+
+      function calculatePrice() {
+        const boosterCost = (builderState.boosters || []).reduce((sum, b) => sum + (boosterPrices[b] || 0), 0);
+        const sizePrice = builderState.size ? ({ small: 80, medium: 130, large: 180 }[builderState.size] || 0) : 0;
+        return sizePrice + boosterCost;
+      }
+
+      // Update nutrition info in builder summary
+      function updateNutritionDisplay() {
+        const nutrition = calculateNutrition();
+        const price = calculatePrice();
+
+        document.querySelectorAll('[data-nutrition]').forEach(el => {
+          const type = el.dataset.nutrition;
+          el.textContent = Math.round(nutrition[type] || 0);
+        });
+
+        const priceEl = document.querySelector('[data-price]');
+        if(priceEl) priceEl.textContent = price;
+      }
+
+      // Quantity inputs and delegated handlers removed
+
+      // Initial update
+      syncBuilderPreview();
+
+      // Builder add to cart
+      const builderAddBtn = document.getElementById('builderAddToCart');
+      if(builderAddBtn) builderAddBtn.addEventListener('click', async ()=>{
+        const qty = 1;
+        const token = localStorage.getItem('gs_token');
+        const size = builderState.size;
+        const price = calculatePrice();
+
+        if(!builderState.base || !size) {
+          alert('Please select a base and size before adding your custom smoothie to the cart.');
+          return;
+        }
+
+        const instructions = (document.getElementById('builderInstructions') && document.getElementById('builderInstructions').value) || '';
+        const body = {
+          name: 'Custom Smoothie (' + size.charAt(0).toUpperCase() + size.slice(1) + ')',
+          price: price,
+          quantity: qty,
+          instructions: instructions
+        };
+
+        if(!token) {
+          body.clientId = localStorage.getItem('gs_clientId') || ('c_'+Date.now()+Math.random().toString(36).slice(2,9));
+        }
+
+        const headers = Object.assign({'Content-Type':'application/json'}, token ? { 'Authorization': 'Bearer ' + token } : {});
+
+        try {
+          const r = await fetch('/api/cart', { method: 'POST', headers, body: JSON.stringify(body) });
+          if(r.ok) {
+            const btn = document.getElementById('builderAddToCart');
+            btn.textContent = 'Added!';
+            setTimeout(()=> btn.textContent = 'Add to Cart', 1200);
+          } else {
+            const err = await r.json();
+            alert(err.error || 'Add failed');
+          }
+          // Update header cart count
+          try{ const evt = new Event('cartUpdated'); window.dispatchEvent(evt); }catch(e){}
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      });
+
+      // Handle user menu and logout
+      function updateUserMenu() {
+        const token = localStorage.getItem('gs_token');
+        const user = token ? JSON.parse(localStorage.getItem('gs_user') || '{}') : null;
+        const authLinks = document.getElementById('authLinks');
+        const userMenu = document.getElementById('userMenu');
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+        const userNameEl = document.getElementById('userName');
+
+        if(token && user) {
+          authLinks.style.display = 'none';
+          userMenu.classList.remove('hidden');
+          const displayName = (user.name && user.name.trim().split(' ')[0]) || (user.email && user.email.split('@')[0]) || 'Profile';
+          if(userNameEl) userNameEl.textContent = displayName;
+
+          let closeTimer;
+          const openMenu = () => {
+            clearTimeout(closeTimer);
+            userMenuDropdown.classList.remove('opacity-0', 'invisible', 'pointer-events-none', 'translate-y-1');
+            userMenuDropdown.classList.add('opacity-100', 'visible', 'pointer-events-auto', 'translate-y-0');
+          };
+          const closeMenu = () => {
+            clearTimeout(closeTimer);
+            closeTimer = setTimeout(() => {
+              userMenuDropdown.classList.add('opacity-0', 'invisible', 'pointer-events-none', 'translate-y-1');
+              userMenuDropdown.classList.remove('opacity-100', 'visible', 'pointer-events-auto', 'translate-y-0');
+            }, 180);
+          };
+
+          userMenuBtn.onclick = () => { window.location.href = '/profile.html'; };
+          userMenu.onmouseenter = openMenu;
+          userMenu.onmouseleave = closeMenu;
+          userMenuDropdown.onmouseenter = openMenu;
+          userMenuDropdown.onmouseleave = closeMenu;
+        } else {
+          authLinks.style.display = 'flex';
+          userMenu.classList.add('hidden');
+        }
+      }
+
+          // Modal helper for main page
+          function showModalMain({ title = 'Confirm', message = '', type = 'info', okText = 'OK', cancelText = 'Cancel' } = {}){
+            return new Promise(resolve => {
+              let modal = document.getElementById('globalModal');
+              if(!modal){
+                const html = `
+                  <div id="globalModal" class="hidden fixed inset-0 z-60 flex items-center justify-center bg-black/50" aria-hidden="true">
+                    <div role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="bg-white dark:bg-gray-800 max-w-md w-full rounded-xl shadow-lg p-6 mx-4">
+                      <div class="flex items-start gap-4">
+                        <div id="modalIcon" class="text-2xl"></div>
+                        <div class="flex-1">
+                          <h3 id="modalTitle" class="text-lg font-semibold text-gray-900 dark:text-gray-100">Title</h3>
+                          <p id="modalMessage" class="text-sm text-gray-600 dark:text-gray-300 mt-2">Message</p>
+                        </div>
+                      </div>
+                      <div class="mt-6 flex justify-end gap-3">
+                        <button id="modalCancel" class="px-4 py-2 rounded-button bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-200 transition">Cancel</button>
+                        <button id="modalOk" class="px-4 py-2 rounded-button bg-primary text-white hover:bg-green-600 transition">OK</button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', html);
+                modal = document.getElementById('globalModal');
+              }
+
+              const titleEl = document.getElementById('modalTitle');
+              const msgEl = document.getElementById('modalMessage');
+              const okBtn = document.getElementById('modalOk');
+              const cancelBtn = document.getElementById('modalCancel');
+              const icon = document.getElementById('modalIcon');
+
+              titleEl.textContent = title;
+              msgEl.textContent = message;
+              okBtn.textContent = okText;
+              cancelBtn.textContent = cancelText;
+
+              icon.className = '';
+              if(type === 'warning') icon.innerHTML = '<i class="ri-alert-line text-yellow-500"></i>';
+              else if(type === 'error') icon.innerHTML = '<i class="ri-close-circle-line text-red-500"></i>';
+              else if(type === 'success') icon.innerHTML = '<i class="ri-checkbox-circle-line text-green-500"></i>';
+              else icon.innerHTML = '<i class="ri-information-line text-blue-500"></i>';
+
+              modal.classList.remove('hidden');
+              modal.setAttribute('aria-hidden', 'false');
+
+              function cleanup(choice){
+                modal.classList.add('hidden');
+                modal.setAttribute('aria-hidden', 'true');
+                okBtn.removeEventListener('click', onOk);
+                cancelBtn.removeEventListener('click', onCancel);
+                modal.removeEventListener('click', onBackdrop);
+                resolve(choice);
+              }
+
+              function onOk(e){ e.stopPropagation(); cleanup(true); }
+              function onCancel(e){ e.stopPropagation(); cleanup(false); }
+              function onBackdrop(e){ if(e.target === modal) cleanup(false); }
+
+              okBtn.addEventListener('click', onOk);
+              cancelBtn.addEventListener('click', onCancel);
+              modal.addEventListener('click', onBackdrop);
+            });
+          }
+
+          const logoutBtn = document.getElementById('logoutBtn');
+          if(logoutBtn) logoutBtn.addEventListener('click', async () => {
+            const confirmed = await showModalMain({ title: 'Logout', message: 'Do you want to logout?', type: 'warning', okText: 'Logout', cancelText: 'Cancel' });
+            if(!confirmed) return;
+            localStorage.removeItem('gs_token');
+            localStorage.removeItem('gs_user');
+            location.href = '/main.html';
+          });
+
+      // Update on page load and when cart updates
+      updateUserMenu();
+      window.addEventListener('cartUpdated', updateUserMenu);
+    });
+    </script>
+    </div>
+    </div>
+    </div>
+    </div>
+    </section>
+<!-- Health Benefits Bar -->
+<section class="py-16 bg-gradient-to-r from-white via-green-50 to-white">
+<div class="container mx-auto px-4">
+<div class="text-center mb-12">
+<h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Health Benefits</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Our smoothies and juices are packed with nutrients that support your health and wellbeing.</p>
+</div>
+<div class="flex overflow-x-auto pb-6 scrollbar-hide">
+<div class="flex space-x-6 min-w-max">
+<!-- Benefit 1 -->
+<div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
+<div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-heart-pulse-line text-2xl text-primary"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Heart Health</h3>
+<p class="text-gray-600 text-sm">Antioxidant-rich berries and leafy greens support cardiovascular health.</p>
+</div>
+<!-- Benefit 2 -->
+<div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
+<div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-mental-health-line text-2xl text-primary"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Immune Support</h3>
+<p class="text-gray-600 text-sm">Vitamin C from citrus fruits and ginger help strengthen your immune system.</p>
+</div>
+<!-- Benefit 3 -->
+<div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
+<div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-run-line text-2xl text-primary"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Energy Boost</h3>
+<p class="text-gray-600 text-sm">Natural sugars and B vitamins provide sustained energy throughout the day.</p>
+</div>
+<!-- Benefit 4 -->
+<div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
+<div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-seedling-line text-2xl text-primary"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Digestive Health</h3>
+<p class="text-gray-600 text-sm">Fiber-rich ingredients support gut health and improve digestion.</p>
+</div>
+<!-- Benefit 5 -->
+<div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
+<div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-eye-line text-2xl text-primary"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Eye Health</h3>
+<p class="text-gray-600 text-sm">Carotenoids in carrots and leafy greens support vision and eye health.</p>
+</div>
+<!-- Benefit 6 -->
+<div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
+<div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
+<i class="ri-brain-line text-2xl text-primary"></i>
+</div>
+<h3 class="text-lg font-bold text-gray-900 mb-2">Brain Function</h3>
+<p class="text-gray-600 text-sm">Omega-3 fatty acids and antioxidants support cognitive function.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Order Options Section -->
+<section id="order" class="py-20 bg-gradient-to-r from-orange-50 to-white">
+    <div class="container mx-auto px-4">
+    <div class="text-center mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Order Your Fresh Blend</h2>
+    <p class="text-gray-600 max-w-2xl mx-auto">Choose the most convenient way to enjoy our fresh smoothies and juices.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Pickup Option -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="h-64 relative">
+    <div class="absolute inset-0" style="background-image: url('https://public.readdy.ai/gen_page/map_placeholder_1280x720.png'); background-size: cover; background-position: center;"></div>
+    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+    <h3 class="text-2xl font-bold text-white bg-black/30 px-6 py-2 rounded">Pickup</h3>
+    </div>
+    </div>
+    <div class="p-6">
+    <div class="mb-6">
+    <label class="block text-md font-semibold text-gray-800 mb-2">Name</label>
+    <input type="text" placeholder="Enter your name" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    </div>
+    <div class="mb-6">
+    <label class="block text-md font-semibold text-gray-800 mb-2">Phone</label>
+    <input type="tel" placeholder="Phone number" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    </div>
+    <div class="mb-6">
+    <div class="mb-3 flex items-center justify-between gap-3">
+    <button type="button" id="pickupUseLocationBtn" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap">
+    <i class="ri-map-pin-2-line"></i> Use the Location
+    </button>
+    <h4 class="font-semibold text-gray-800">Find a Store Near You</h4>
+    </div>
+    <div class="flex border border-gray-300 rounded overflow-hidden">
+    <input type="text" id="pickupSearchHome" placeholder="Zipcode" class="w-full px-4 py-2 focus:outline-none text-sm border-none">
+    <button id="pickupFindBtnHome" class="bg-primary text-white px-4 flex items-center justify-center whitespace-nowrap !rounded-none">
+    <i class="ri-search-line mr-2"></i> Find
+    </button>
+    </div>
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Nearest Locations</h4>
+    <div class="space-y-3">
+    <div class="pickup-location-card border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition" data-zip="500032">
+    <div class="flex justify-between mb-1">
+    <span class="font-medium">Gachibowli</span>
+    <span class="text-sm text-gray-500">1.2 km</span>
+    </div>
+    <p class="text-sm text-gray-600">HITEC City Main Road, Hyderabad, Telangana 500032</p>
+    </div>
+    <div class="pickup-location-card border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition" data-zip="500075">
+    <div class="flex justify-between mb-1">
+    <span class="font-medium">Kokapet</span>
+    <span class="text-sm text-gray-500">2.6 km</span>
+    </div>
+    <p class="text-sm text-gray-600">Golden Mile Road, Kokapet, Hyderabad, Telangana 500075</p>
+    </div>
+    <div class="pickup-location-card border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition" data-zip="500084">
+    <div class="flex justify-between mb-1">
+    <span class="font-medium">Kondapur</span>
+    <span class="text-sm text-gray-500">3.1 km</span>
+    </div>
+    <p class="text-sm text-gray-600">Botanical Garden Road, Kondapur, Hyderabad, Telangana 500084</p>
+    </div>
+    </div>
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Pickup Time</h4>
+    <div class="grid grid-cols-2 gap-3">
+    <div>
+    <label class="block text-sm text-gray-600 mb-1">Date</label>
+    <input type="date" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm" min="2025-04-15">
+    </div>
+    <div>
+    <label class="block text-sm text-gray-600 mb-1">Time</label>
+    <select class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm pr-8 appearance-none bg-white" style="background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 viewBox=%220 0 24 24%22><path fill=%22%23a0aec0%22 d=%22M7 10l5 5 5-5H7z%22/></svg>'); background-position: right 0.5rem center; background-repeat: no-repeat;">
+    <option>ASAP (15-20 min)</option>
+    <option>10:00 AM</option>
+    <option>10:30 AM</option>
+    <option>11:00 AM</option>
+    <option>11:30 AM</option>
+    <option>12:00 PM</option>
+    <option>12:30 PM</option>
+    </select>
+    </div>
+    </div>
+    </div>
+    <button class="w-full py-3 bg-primary text-white font-semibold rounded-button shadow hover:bg-primary/90 transition whitespace-nowrap">Continue with Pickup</button>
+    </div>
+    </div>
+    <!-- Delivery Option -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="h-64 relative">
+    <div class="absolute inset-0" style="background-image: url('https://readdy.ai/api/search-image?query=A%20delivery%20person%20on%20a%20bicycle%20carrying%20a%20bag%20of%20fresh%20smoothies%20and%20juices.%20The%20scene%20shows%20an%20urban%20environment%20with%20trees%20and%20buildings%20in%20the%20background.%20The%20delivery%20person%20is%20wearing%20a%20green%20uniform%20that%20matches%20the%20brand%20colors.%20The%20image%20has%20a%20bright%2C%20sunny%20atmosphere%20with%20soft%20natural%20lighting.&width=800&height=500&seq=9&orientation=landscape'); background-size: cover; background-position: center;"></div>
+    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+    <h3 class="text-2xl font-bold text-white bg-black/30 px-6 py-2 rounded">Delivery</h3>
+    </div>
+    </div>
+    <div class="p-6">
+    <div class="mb-4">
+    <label class="block text-md font-semibold text-gray-800 mb-2">Name</label>
+    <input type="text" id="deliveryNameHome" placeholder="Enter your name" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    </div>
+    <div class="mb-4">
+    <label class="block text-md font-semibold text-gray-800 mb-2">Phone</label>
+    <input type="tel" id="deliveryPhoneHome" placeholder="Phone number" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Delivery Address</h4>
+    <div class="mb-3">
+    <div class="flex items-center justify-between mb-2">
+    <h5 class="text-sm font-semibold text-gray-700">Use saved address</h5>
+    <p id="deliverySavedAddressBadgeHome" class="text-sm font-medium text-primary hidden"></p>
+    </div>
+    <div id="deliverySavedAddressCardsHome" class="space-y-2"></div>
+    </div>
+    <button type="button" id="useLocationBtn" class="mb-3 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition">
+    <i class="ri-map-pin-2-line"></i> Use My Location
+    </button>
+    <div class="space-y-3">
+    <input type="text" id="deliveryStreet" placeholder="Street Address" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    <div class="grid grid-cols-2 gap-3">
+    <input type="text" id="deliveryCity" placeholder="City" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    <input type="text" id="deliveryZip" placeholder="Zip Code" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
+    </div>
+    </div>
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Delivery Options</h4>
+    <div class="space-y-3" id="deliveryOptionsGroupHome">
+    <label class="delivery-option-card flex items-center justify-between p-3 border border-primary bg-primary/5 rounded cursor-pointer" data-option="standard">
+    <div class="flex items-center">
+    <input type="radio" name="delivery-option" value="standard" class="custom-radio mr-3" checked>
+    <span>Standard Delivery</span>
+    </div>
+    <span class="text-sm text-gray-500">30-45 min</span>
+    </label>
+    <label class="delivery-option-card flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition" data-option="express">
+    <div class="flex items-center">
+    <input type="radio" name="delivery-option" value="express" class="custom-radio mr-3">
+    <span>Express Delivery</span>
+    </div>
+    <span class="text-sm text-gray-500">15-25 min (+20 Rs/-)</span>
+    </label>
+    <label class="delivery-option-card flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition" data-option="scheduled">
+    <div class="flex items-center">
+    <input type="radio" name="delivery-option" value="scheduled" class="custom-radio mr-3">
+    <span>Scheduled Delivery</span>
+    </div>
+    <span class="text-sm text-gray-500">Choose time</span>
+    </label>
+    </div>
+    <div id="deliveryScheduleWrapHome" class="hidden mt-4">
+    <label class="block text-sm text-gray-600 mb-1">Schedule Time</label>
+    <select id="deliveryScheduleTimeHome" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm pr-8 appearance-none bg-white">
+    <option value="">Select time</option>
+    <option>10:00 AM</option>
+    <option>10:30 AM</option>
+    <option>11:00 AM</option>
+    <option>11:30 AM</option>
+    <option>12:00 PM</option>
+    <option>12:30 PM</option>
+    <option>01:00 PM</option>
+    <option>01:30 PM</option>
+    </select>
+    </div>
+    </div>
+    <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Delivery Instructions (Optional)</h4>
+    <textarea placeholder="Special instructions for delivery..." class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm h-24 resize-none"></textarea>
+    </div>
+    <button class="w-full py-3 bg-primary text-white font-semibold rounded-button shadow hover:bg-primary/90 transition whitespace-nowrap">Continue with Delivery</button>
+    </div>
+    </div>
+    </div>
+    </div>
+    </section>
+    <!-- Seasonal Specials -->
+    <section class="py-16 bg-gradient-to-r from-green-50 to-orange-50">
+    <div class="container mx-auto px-4">
+    <div class="text-center mb-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-4">Seasonal Specials</h2>
+    <p class="text-gray-600 max-w-2xl mx-auto">Limited-time offerings featuring the freshest seasonal ingredients.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden group relative" data-product-name="Watermelon Mint Refresher" data-product-price="300">
+    <div class="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">LIMITED TIME</div>
+    <div class="h-48 overflow-hidden">
+    <img src="https://readdy.ai/api/search-image?query=A%20vibrant%20watermelon%20mint%20smoothie%20in%20a%20clear%20glass%20with%20visible%20watermelon%20chunks%20and%20mint%20leaves.%20The%20smoothie%20has%20a%20bright%20pink%20color%20with%20a%20watermelon%20slice%20and%20mint%20garnish.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=600&height=400&seq=10&orientation=landscape" alt="Watermelon Mint Refresher" class="w-full h-full object-cover object-top transition-transform group-hover:scale-105">
+    </div>
+    <div class="p-5">
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Watermelon Mint Refresher</h3>
+    <p class="text-gray-600 text-sm mb-3">Sweet watermelon blended with fresh mint, lime, and coconut water for the ultimate summer hydration.</p>
+    <div class="flex justify-between items-center">
+    <span class="text-primary font-semibold">300 Rs/-</span>
+    <button class="add-to-cart px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap">Add to Cart</button>
+    </div>
+    </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden group relative" data-product-name="Peach Ginger Bliss" data-product-price="340">
+    <div class="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">LIMITED TIME</div>
+    <div class="h-48 overflow-hidden">
+    <img src="https://readdy.ai/api/search-image?query=A%20golden%20peach%20and%20ginger%20smoothie%20in%20a%20clear%20glass%20with%20visible%20peach%20slices%20and%20a%20hint%20of%20ginger.%20The%20smoothie%20has%20a%20warm%20golden%20color%20with%20a%20peach%20slice%20garnish.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=600&height=400&seq=11&orientation=landscape" alt="Peach Ginger Bliss" class="w-full h-full object-cover object-top transition-transform group-hover:scale-105">
+    </div>
+    <div class="p-5">
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Peach Ginger Bliss</h3>
+    <p class="text-gray-600 text-sm mb-3">Ripe summer peaches with a hint of ginger, honey, and almond milk for a smooth, refreshing treat.</p>
+    <div class="flex justify-between items-center">
+    <span class="text-primary font-semibold">340 Rs/-</span>
+    <button class="add-to-cart px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap">Add to Cart</button>
+    </div>
+    </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md overflow-hidden group relative" data-product-name="Blackberry Lavender Dream" data-product-price="360">
+    <div class="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">LIMITED TIME</div>
+    <div class="h-48 overflow-hidden">
+    <img src="https://readdy.ai/api/search-image?query=A%20rich%20purple%20blackberry%20lavender%20smoothie%20in%20a%20clear%20glass%20with%20visible%20blackberries%20and%20a%20sprig%20of%20lavender%20as%20garnish.%20The%20smoothie%20has%20a%20deep%20purple%20color%20with%20a%20smooth%20texture.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=600&height=400&seq=12&orientation=landscape" alt="Blackberry Lavender Dream" class="w-full h-full object-cover object-top transition-transform group-hover:scale-105">
+    </div>
+    <div class="p-5">
+    <h3 class="text-lg font-bold text-gray-800 mb-2">Blackberry Lavender Dream</h3>
+    <p class="text-gray-600 text-sm mb-3">Fresh blackberries with a hint of lavender, vanilla, and oat milk for a calming, antioxidant-rich blend.</p>
+    <div class="flex justify-between items-center">
+    <span class="text-primary font-semibold">360 Rs/-</span>
+    <button class="add-to-cart px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap">Add to Cart</button>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </section>
+<!-- Reviews Section -->
+<section class="py-16 bg-gradient-to-r from-white to-green-50">
+<div class="container mx-auto px-4">
+<div class="text-center mb-12">
+<h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Don't just take our word for it. Here's what our happy customers have to say about our fresh blends.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Review 1 -->
+<div class="bg-gray-50 rounded-xl p-6">
+<div class="flex items-center mb-4">
+<div class="text-yellow-400 flex">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+</div>
+<span class="ml-2 text-gray-600 text-sm">5.0</span>
+</div>
+<p class="text-gray-700 mb-6">"I've tried many smoothie places, but this one stands out for the freshness and quality of ingredients. The Green Goddess is my go-to for a post-workout boost!"</p>
+<div class="flex items-center">
+<div class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full mr-3 font-medium">JM</div>
+<div>
+<h4 class="font-medium text-gray-900">Anu</h4>
+<p class="text-sm text-gray-500">Fitness Instructor</p>
+</div>
+</div>
+</div>
+<!-- Review 2 -->
+<div class="bg-gray-50 rounded-xl p-6">
+<div class="flex items-center mb-4">
+<div class="text-yellow-400 flex">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+</div>
+<span class="ml-2 text-gray-600 text-sm">5.0</span>
+</div>
+<p class="text-gray-700 mb-6">"The custom smoothie builder is a game-changer! I can create exactly what I want, and the nutritional information helps me stay on track with my health goals."</p>
+<div class="flex items-center">
+<div class="w-10 h-10 flex items-center justify-center bg-secondary text-white rounded-full mr-3 font-medium">DR</div>
+<div>
+<h4 class="font-medium text-gray-900">Ananya</h4>
+<p class="text-sm text-gray-500">CTO Apple</p>
+</div>
+</div>
+</div>
+<!-- Review 3 -->
+<div class="bg-gray-50 rounded-xl p-6">
+<div class="flex items-center mb-4">
+<div class="text-yellow-400 flex">
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-fill"></i>
+<i class="ri-star-half-fill"></i>
+</div>
+<span class="ml-2 text-gray-600 text-sm">4.5</span>
+</div>
+<p class="text-gray-700 mb-6">"I order delivery at least twice a week. Always on time, always fresh, and the online ordering system is so easy to use. My kids love the Tropical Paradise!"</p>
+<div class="flex items-center">
+<div class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full mr-3 font-medium">SL</div>
+<div>
+<h4 class="font-medium text-gray-900">Sneha</h4>
+<p class="text-sm text-gray-500">Senior Manager</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Newsletter Section -->
+<section class="py-16 bg-primary bg-opacity-10">
+<div class="container mx-auto px-4">
+<div class="max-w-3xl mx-auto text-center">
+<h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Join Our Healthy Community</h2>
+<p class="text-gray-600 mb-8">Subscribe to our newsletter for exclusive offers, new flavor alerts, and healthy living tips.</p>
+<div class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+<input type="email" placeholder="Enter your email address" class="flex-1 px-4 py-3 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-primary">
+<button class="bg-primary text-white px-6 py-3 !rounded-button font-medium whitespace-nowrap">Subscribe</button>
+</div>
+<p class="text-sm text-gray-500 mt-4">By subscribing, you agree to receive marketing emails from us. No worries, we hate spam too!</p>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-gray-900 text-white pt-16 pb-8">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+<div>
+<a href="#" class="text-3xl font-['Pacifico'] text-primary mb-6 inline-block">GoSmoothie</a>
+<p class="text-gray-400 mb-6">Refreshing, nutritious smoothies and juices made with the freshest ingredients for a healthier you.</p>
+<div class="flex space-x-4">
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
+<i class="ri-facebook-fill"></i>
+</a>
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
+<i class="ri-instagram-line"></i>
+</a>
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
+<i class="ri-twitter-x-line"></i>
+</a>
+<a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
+<i class="ri-tiktok-line"></i>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-lg font-bold mb-6">Quick Links</h3>
+<ul class="space-y-3">
+<li><a href="#" class="text-gray-400 hover:text-white transition">Home</a></li>
+<li><a href="#menu" class="text-gray-400 hover:text-white transition">Menu</a></li>
+<li><a href="#build" class="text-gray-400 hover:text-white transition">Build Your Own</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition">About Us</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition">Locations</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition">Careers</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-lg font-bold mb-6">Contact Us</h3>
+<ul class="space-y-3">
+<li class="flex items-start">
+<i class="ri-map-pin-line mt-1 mr-3 text-primary"></i>
+<span class="text-gray-400">sree Main Street<br>banjara Hills Road no 5,5-2-12</span>
+</li>
+<li class="flex items-center">
+<i class="ri-phone-line mr-3 text-primary"></i>
+<span class="text-gray-400">+91 9848938852</span>
+</li>
+<li class="flex items-center">
+<i class="ri-mail-line mr-3 text-primary"></i>
+<span class="text-gray-400">contact@freshblend.com</span>
+</li>
+</ul>
+</div>
+<div>
+<h3 class="text-lg font-bold mb-6">Opening Hours</h3>
+<ul class="space-y-3">
+<li class="flex justify-between">
+<span class="text-gray-400">Monday - Friday</span>
+<span class="text-gray-400">7:00 AM - 8:00 PM</span>
+</li>
+<li class="flex justify-between">
+<span class="text-gray-400">Saturday</span>
+<span class="text-gray-400">8:00 AM - 8:00 PM</span>
+</li>
+<li class="flex justify-between">
+<span class="text-gray-400">Sunday</span>
+<span class="text-gray-400">9:00 AM - 6:00 PM</span>
+</li>
+</ul>
+<div class="mt-6">
+<h4 class="text-sm font-bold uppercase text-gray-500 mb-3">We Accept</h4>
+<div class="flex space-x-3">
+<i class="ri-visa-fill text-2xl text-gray-400"></i>
+<i class="ri-mastercard-fill text-2xl text-gray-400"></i>
+<i class="ri-paypal-fill text-2xl text-gray-400"></i>
+<i class="ri-apple-fill text-2xl text-gray-400"></i>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
+<p class="mb-4">&copy; 2025 Fresh Blend. All rights reserved.</p>
+<div class="flex justify-center space-x-6">
+<a href="#" class="hover:text-white transition">Privacy Policy</a>
+<a href="#" class="hover:text-white transition">Terms of Service</a>
+<a href="#" class="hover:text-white transition">Accessibility</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sticky header
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', function() { if (window.scrollY > 50) header.classList.add('shadow-md'); else header.classList.remove('shadow-md'); });
+
+    const tokenKey = 'gs_token';
+    const userKey = 'gs_user';
+    const anonClientKey = 'gs_clientId';
+
+    function getToken(){ return localStorage.getItem(tokenKey); }
+    function getUser(){ const u = localStorage.getItem(userKey); return u ? JSON.parse(u) : null; }
+    function getClientId(){
+        let id = localStorage.getItem(anonClientKey);
+        if(!id){ id = 'c_' + Date.now() + Math.random().toString(36).slice(2,9); localStorage.setItem(anonClientKey,id); }
+        return id;
+    }
+
+    // Pickup location selection highlight
+    document.querySelectorAll('.pickup-location-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.pickup-location-card').forEach(c => c.classList.remove('border-primary', 'bg-primary/5', 'selected'));
+        card.classList.add('border-primary', 'bg-primary/5', 'selected');
+      });
+    });
+
+    // Pickup geolocation search for nearby stores
+    const pickupUseLocationBtn = document.getElementById('pickupUseLocationBtn');
+    const pickupFindBtnHome = document.getElementById('pickupFindBtnHome');
+    const pickupSearchHome = document.getElementById('pickupSearchHome');
+    function selectHomePickupStore(query){
+        const cards = Array.from(document.querySelectorAll('.pickup-location-card'));
+        if(!cards.length) return null;
+        const normalized = (query || '').trim().toLowerCase();
+      const digits = normalized.replace(/\D/g, '');
+        let matched = null;
+      if(digits){
+        matched = cards.find(card => (card.dataset.zip || '').includes(digits)) || null;
+      }
+      if(!matched && normalized){
+            matched = cards.find(card => card.textContent.toLowerCase().includes(normalized)) || null;
+        }
+        if(!matched) matched = cards[0];
+        matched.click();
+        matched.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return matched;
+    }
+
+      function updateDeliveryOptionUIHome(root = document){
+        const radios = Array.from(root.querySelectorAll('input[name="delivery-option"]'));
+        const cards = Array.from(root.querySelectorAll('.delivery-option-card'));
+        const scheduleWrap = root.querySelector('#deliveryScheduleWrapHome');
+        const selected = radios.find(r => r.checked) || radios[0];
+        const selectedValue = selected ? selected.value : 'standard';
+
+        cards.forEach(card => {
+          const isSelected = card.dataset.option === selectedValue;
+          card.classList.toggle('border-primary', isSelected);
+          card.classList.toggle('bg-primary/5', isSelected);
+          card.classList.toggle('border-gray-200', !isSelected);
+        });
+
+        if(scheduleWrap){
+          scheduleWrap.classList.toggle('hidden', selectedValue !== 'scheduled');
+          const scheduleTime = root.querySelector('#deliveryScheduleTimeHome');
+          if(scheduleTime && selectedValue !== 'scheduled') scheduleTime.value = '';
+        }
+      }
+
+      document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
+        radio.addEventListener('change', () => updateDeliveryOptionUIHome(document));
+      });
+
+      updateDeliveryOptionUIHome(document);
+    if(pickupFindBtnHome && pickupSearchHome){
+      pickupFindBtnHome.addEventListener('click', () => {
+        const zipcode = pickupSearchHome.value.trim();
+        if(!zipcode) return;
+        selectHomePickupStore(zipcode);
+      });
+    }
+    if(pickupUseLocationBtn){
+      pickupUseLocationBtn.addEventListener('click', function(){
+        if(!navigator.geolocation) {
+          alert('Geolocation is not supported by your browser. Please enter zipcode manually.');
+          return;
+        }
+        pickupUseLocationBtn.disabled = true;
+        pickupUseLocationBtn.textContent = 'Getting location...';
+        navigator.geolocation.getCurrentPosition(
+          async function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+              const data = await res.json();
+              const addressParts = data.address || {};
+              const zipcode = (addressParts.postcode || addressParts.city || addressParts.town || '').trim();
+              if(pickupSearchHome) pickupSearchHome.value = zipcode;
+              selectHomePickupStore(zipcode);
+              pickupUseLocationBtn.textContent = '✓ Location Detected';
+              setTimeout(()=>{ pickupUseLocationBtn.disabled = false; pickupUseLocationBtn.textContent = 'Use the Location'; }, 2000);
+            } catch(e) {
+              alert('Could not fetch nearby stores. Please enter zipcode manually.');
+              pickupUseLocationBtn.disabled = false;
+              pickupUseLocationBtn.textContent = 'Use the Location';
+            }
+          },
+          function(error) {
+            alert('Could not access location: ' + error.message + '. Please enter zipcode manually.');
+            pickupUseLocationBtn.disabled = false;
+            pickupUseLocationBtn.textContent = 'Use the Location';
+          }
+        );
+      });
+
+      // Keep delivery option visuals in sync on load and when clicked
+      updateDeliveryOptionUIHome(document);
+    }
+    function authHeaders(){ const t = getToken(); return t ? { 'Authorization': 'Bearer ' + t } : {}; }
+
+    // Update header auth links
+    const authLinks = document.getElementById('authLinks');
+    const profileLink = document.getElementById('profileLink');
+    const loginLink = document.getElementById('loginLink');
+    const registerLink = document.getElementById('registerLink');
+    const user = getUser();
+    if(user && getToken()){
+        if(authLinks) authLinks.classList.add('hidden');
+        if(profileLink) { profileLink.classList.remove('hidden'); profileLink.textContent = user.name; }
+    } else {
+        if(authLinks) authLinks.classList.remove('hidden');
+        if(profileLink) profileLink.classList.add('hidden');
+    }
+
+    // Load saved addresses for logged in users (home delivery)
+    let savedAddressesHome = [];
+    let selectedSavedAddressHomeId = '';
+
+    function applyAccountDefaultsHome(){
+      const user = getUser() || {};
+      const fields = [
+        ['deliveryNameHome', user.name],
+        ['deliveryPhoneHome', user.phone]
+      ];
+      fields.forEach(([id, value]) => {
+        const input = document.getElementById(id);
+        if(input && value && !input.value.trim()) input.value = value;
+      });
+    }
+
+    async function loadSavedAddressesHome(){
+      const token = getToken();
+      if(!token) return;
+      try{
+        const r = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer ' + token } });
+        if(!r.ok) return;
+        const data = await r.json();
+        savedAddressesHome = Array.isArray(data.addresses) ? data.addresses : [];
+        const container = document.getElementById('deliverySavedAddressCardsHome');
+        if(!container) return;
+        const badge = document.getElementById('deliverySavedAddressBadgeHome');
+        const defaultIndex = savedAddressesHome.findIndex(a => a.isDefault);
+        if(defaultIndex >= 0){
+          selectedSavedAddressHomeId = String(savedAddressesHome[defaultIndex]._id || defaultIndex);
+          fillDeliveryFromSavedHome(defaultIndex);
+        } else {
+          selectedSavedAddressHomeId = '';
+        }
+        renderSavedAddressCardsHome();
+      }catch(e){ console.error('loadSavedAddressesHome', e); }
+    }
+    function renderSavedAddressCardsHome(){
+      const container = document.getElementById('deliverySavedAddressCardsHome');
+      const badge = document.getElementById('deliverySavedAddressBadgeHome');
+      if(!container) return;
+      if(!savedAddressesHome.length){
+        container.innerHTML = '<div class="rounded-lg border border-dashed border-gray-300 p-3 text-sm text-gray-500">No saved addresses yet. Add one in your profile.</div>';
+        if(badge){ badge.textContent = ''; badge.classList.add('hidden'); }
+        return;
+      }
+
+      container.innerHTML = '';
+  applyAccountDefaultsHome();
+      savedAddressesHome.forEach((address, idx) => {
+        const selected = String(address._id || idx) === String(selectedSavedAddressHomeId);
+        const isDefault = !!address.isDefault;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `w-full text-left rounded-xl border p-3 transition ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-gray-200 hover:border-primary'}`;
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-semibold text-gray-900">${address.label || 'Address'}</span>
+              </div>
+              <p class="text-sm text-gray-700">${address.street || ''}</p>
+              <p class="text-sm text-gray-500">${address.city || ''} ${address.zip || ''}</p>
+            </div>
+            <span class="text-xs font-semibold px-2 py-1 rounded-full ${selected ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'}">${selected ? (isDefault ? 'Default' : 'Selected') : (isDefault ? 'Default' : 'Use')}</span>
+          </div>
+        `;
+        card.addEventListener('click', () => selectSavedAddressHome(idx));
+        container.appendChild(card);
+      });
+
+      if(badge){
+        const activeIndex = savedAddressesHome.findIndex(a => String(a._id || '') === String(selectedSavedAddressHomeId));
+        if(activeIndex >= 0){
+          badge.textContent = `Selected saved address: ${savedAddressesHome[activeIndex].label || 'Saved address'}`;
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      }
+    }
+    function selectSavedAddressHome(idx){
+      const address = savedAddressesHome[idx];
+      if(!address) return;
+      const addressId = String(address._id || idx);
+      if(String(selectedSavedAddressHomeId) === addressId){
+        clearSelectedSavedAddressHome();
+        return;
+      }
+      selectedSavedAddressHomeId = addressId;
+      fillDeliveryFromSavedHome(idx);
+      renderSavedAddressCardsHome();
+    }
+    function clearSelectedSavedAddressHome(){
+      selectedSavedAddressHomeId = '';
+      renderSavedAddressCardsHome();
+    }
+    function fillDeliveryFromSavedHome(idx){
+      const a = savedAddressesHome[idx]; if(!a) return;
+      const street = document.getElementById('deliveryStreet');
+      const city = document.getElementById('deliveryCity');
+      const zip = document.getElementById('deliveryZip');
+      const phone = document.getElementById('deliveryPhoneHome');
+      if(street) street.value = a.street || '';
+      if(city) city.value = a.city || '';
+      if(zip) zip.value = a.zip || '';
+      if(phone && a.phone) phone.value = a.phone;
+    }
+    ['deliveryStreet','deliveryCity','deliveryZip'].forEach(id => {
+      const input = document.getElementById(id);
+      if(input){ input.addEventListener('input', clearSelectedSavedAddressHome); }
+    });
+    // Try to load saved addresses on page load
+    loadSavedAddressesHome();
+
+    async function updateCartCount(){
+        try{
+            let url = '/api/cart';
+            if(!getToken()) url += '?clientId=' + getClientId();
+            const res = await fetch(url, { headers: authHeaders() });
+            if(!res.ok) return;
+            const data = await res.json();
+            const badge = document.querySelector('header .ri-shopping-cart-2-line').parentElement.querySelector('span');
+            const count = data.items ? data.items.reduce((s,i)=>s+(i.quantity||1),0) : 0;
+            if(badge) badge.textContent = count;
+        }catch(e){ console.error(e); }
+    }
+
+    // Listen for cart updates
+    window.addEventListener('cartUpdated', updateCartCount);
+
+    // Attach add-to-cart handlers
+    document.querySelectorAll('.smoothie-card').forEach(card => {
+        const btn = card.querySelector('button');
+        if(!btn) return;
+        btn.addEventListener('click', async () => {
+            const nameEl = card.querySelector('h3');
+            const priceEl = card.querySelector('span.text-primary');
+            const name = nameEl ? nameEl.textContent.trim() : 'Product';
+            let price = 0;
+            if(priceEl) { const text = priceEl.textContent.replace(/[^0-9.]/g,''); price = parseFloat(text) || 0; }
+            try{
+                const body = { name, price, quantity: 1 };
+                if(!getToken()) body.clientId = getClientId();
+                const headers = Object.assign({ 'Content-Type': 'application/json' }, authHeaders());
+                const res = await fetch('/api/cart', { method: 'POST', headers, body: JSON.stringify(body) });
+                if(res.ok){ updateCartCount(); btn.textContent = 'Added'; setTimeout(()=> btn.textContent = 'Add to Cart', 1200); }
+                else { const err = await res.json(); alert(err.error||'Failed to add to cart'); }
+            } catch(err){ console.error(err); alert('Network error'); }
+        });
+    });
+
+    // Header cart button -> cart page
+    const cartBtn = document.getElementById('cartBtn') || document.querySelector('header .ri-shopping-cart-2-line').parentElement;
+    if(cartBtn) cartBtn.addEventListener('click', ()=> window.location.href = '/cart.html');
+
+    // Header order now -> cart
+    document.querySelectorAll('button').forEach(b=>{ if(b.textContent && b.textContent.trim().toLowerCase()==='order now'){ b.addEventListener('click', ()=> window.location.href = '/cart.html'); } });
+
+    // Geolocation for delivery address
+    const useLocationBtn = document.getElementById('useLocationBtn');
+    if(useLocationBtn) {
+        useLocationBtn.addEventListener('click', function() {
+            if(!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser. Please enter address manually.');
+                return;
+            }
+        clearSelectedSavedAddressHome();
+            useLocationBtn.disabled = true;
+            useLocationBtn.textContent = 'Getting location...';
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                        const data = await res.json();
+                        const addressParts = data.address || {};
+                        document.getElementById('deliveryStreet').value = (addressParts.road || addressParts.pedestrian || addressParts.residential || addressParts.house_number || '').trim();
+                        document.getElementById('deliveryCity').value = (addressParts.city || addressParts.town || addressParts.village || '').trim();
+                        document.getElementById('deliveryZip').value = (addressParts.postcode || '').trim();
+                        useLocationBtn.textContent = '✓ Location Detected';
+                        setTimeout(()=>{ useLocationBtn.disabled = false; useLocationBtn.textContent = 'Use My Location'; }, 2000);
+                    } catch(e) {
+                        alert('Could not fetch address details. Please enter manually.');
+                        useLocationBtn.disabled = false;
+                        useLocationBtn.textContent = 'Use My Location';
+                    }
+                },
+                function(error) {
+                    alert('Could not access location: ' + error.message + '. Please enter address manually.');
+                    useLocationBtn.disabled = false;
+                    useLocationBtn.textContent = 'Use My Location';
+                }
+            );
+        });
+    }
+
+    updateCartCount();
+});
+</script>
+
+<!-- Theme Toggle Script -->
+<script>
+  function initTheme() {
+    const savedTheme = localStorage.getItem('gs_theme') || 'light';
+    const html = document.documentElement;
+    
+    if (savedTheme === 'dark') {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+    
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const isDark = html.classList.toggle('dark');
+        localStorage.setItem('gs_theme', isDark ? 'dark' : 'light');
+        applyThemeToElements();
+      });
+    }
+  }
+  
+  function applyThemeToElements() {
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    // Update card backgrounds
+    document.querySelectorAll('.smoothie-card').forEach(card => {
+      if (isDark) {
+        card.classList.add('dark:bg-slate-800', 'dark:text-gray-100');
+      } else {
+        card.classList.remove('dark:bg-slate-800', 'dark:text-gray-100');
+      }
+    });
+  }
+  
+  // Initialize theme on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
+  }
+</script>
+
+<!-- Back to top button -->
+<button id="toTopBtn" aria-label="Scroll to top" class="hidden fixed bottom-6 right-6 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:scale-105 transition-transform">
+  <i class="ri-arrow-up-line text-xl"></i>
+</button>
+
+<script>
+  (function(){
+    function toggleHomeLink(){
+      const isHome = (window.location.pathname === '/' || window.location.pathname.endsWith('main.html') || window.location.pathname.endsWith('index.html'));
+      document.querySelectorAll('header nav a').forEach(a => {
+        if(a.textContent && a.textContent.trim().toLowerCase() === 'home'){
+          a.style.display = isHome ? 'none' : '';
+        }
+      });
+    }
+
+    const toTopBtn = document.getElementById('toTopBtn');
+    function onScroll(){ if(window.scrollY > 200) toTopBtn.classList.remove('hidden'); else toTopBtn.classList.add('hidden'); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    toTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    toggleHomeLink();
+    window.addEventListener('popstate', toggleHomeLink);
+  })();
+</script>
+</body>
+</html>

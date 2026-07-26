@@ -1,21 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  (function useCanonicalLocalApp() {
+    const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    if (isLocal && (window.location.hostname !== 'localhost' || window.location.port !== '3000')) {
+      window.location.replace(`http://localhost:3000${window.location.pathname}${window.location.search}${window.location.hash}`);
+    }
+  })();
+</script>
+<script>
+  (function restoreLoginSession() {
+    const session = new URLSearchParams(window.location.hash.slice(1));
+    const readCookie = (name) => {
+      const prefix = `${name}=`;
+      const value = document.cookie.split('; ').find((item) => item.startsWith(prefix));
+      return value ? decodeURIComponent(value.slice(prefix.length)) : '';
+    };
+    const token = session.get('gs_token') || readCookie('gs_token');
+    const user = session.get('gs_user') || readCookie('gs_user');
+    if (!token) return;
+    localStorage.setItem('gs_token', token);
+    if (user) localStorage.setItem('gs_user', user);
+    history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+  })();
+</script>
+  <script src="/api-client.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fresh Blend | Premium Smoothies & Juices</title>
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-<script>tailwind.config={darkMode:'class',theme:{extend:{colors:{primary:'#4ade80',secondary:'#f97316'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#4ade80',secondary:'#f97316'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
-<!-- Shared product artwork generator (window.GoSmoothieProductImages) -->
-<script src="/server/data/productImages.js"></script>
 <style>
-:where([class^="ri-"])::before { content: "\f3c2"; }
-/* Dark Mode CSS Variables */
+/* Shared page colors */
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f9fafb;
@@ -30,32 +52,10 @@
   --header-bg: #ffffff;
 }
 
-html.dark {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --border-color: #475569;
-  --card-bg: #1e293b;
-  --card-shadow: rgba(0, 0, 0, 0.3);
-  --hover-bg: #0d4a2c;
-  --input-bg: #334155;
-  --header-bg: #1e293b;
-}
-
 body {
   font-family: 'Poppins', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-html.dark body {
-  background: linear-gradient(to bottom right, #0f172a, #1e293b);
-}
-
-html:not(.dark) body {
   background: linear-gradient(to bottom right, #f0fdf4, #ffffff);
 }
 
@@ -231,54 +231,51 @@ border: 2px solid white;
 box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
 }
 </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
 <!-- Header -->
-<header class="fixed top-0 left-0 right-0 bg-white dark:bg-slate-800 shadow-sm z-50 transition-colors duration-300">
+<header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
 <div class="container mx-auto px-4 py-3 flex items-center justify-between">
 <div class="flex items-center">
 <a href="#" class="text-3xl font-['Pacifico'] text-primary mr-8">GoSmoothie</a>
 <nav class="hidden md:flex space-x-6">
-<a href="#home" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Home</a>
-  <a href="/menu.html" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Menu</a>
-<a href="#builder" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Build Your Own</a>
-<a href="/about-us.html" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">About Us</a>
-<a href="#order" class="text-gray-900 dark:text-gray-200 font-medium hover:text-primary transition">Order Now</a>
+<a href="#home" class="text-gray-900 font-medium hover:text-primary transition">Home</a>
+  <a href="/menu.html" class="text-gray-900 font-medium hover:text-primary transition">Menu</a>
+<a href="#builder" class="text-gray-900 font-medium hover:text-primary transition">Build Your Own</a>
+<a href="/about-us.html" class="text-gray-900 font-medium hover:text-primary transition">About Us</a>
+<a href="#order" class="text-gray-900 font-medium hover:text-primary transition">Order Now</a>
 </nav>
 </div>
 <div class="flex items-center space-x-4">
-    <button id="themeToggle" class="w-10 h-10 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition" title="Toggle theme">
-        <i class="ri-moon-line dark:hidden text-xl"></i>
-        <i class="ri-sun-line hidden dark:inline text-xl"></i>
-    </button>
     <div class="relative">
-        <button id="cartBtn" class="w-10 h-10 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:text-primary transition">
-            <i class="ri-shopping-cart-2-line text-xl"></i>
+        <button id="cartBtn" class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-primary transition">
+            <i class="bi bi-cart text-xl"></i>
             <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
         </button>
     </div>
     <div id="authLinks" class="flex items-center space-x-2">
-        <a id="loginLink" href="/login.html" class="text-gray-700 dark:text-gray-300 hover:text-primary">Login</a>
-        <a id="registerLink" href="/register.html" class="text-gray-700 dark:text-gray-300 hover:text-primary">Register</a>
+        <a id="loginLink" href="/login.html" class="text-gray-700 hover:text-primary">Login</a>
+        <a id="registerLink" href="/register.html" class="text-gray-700 hover:text-primary">Register</a>
     </div>
     <div id="userMenu" class="hidden relative">
-      <button id="userMenuBtn" type="button" class="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-primary transition cursor-pointer">
+      <button id="userMenuBtn" type="button" class="flex items-center gap-2 text-gray-700 hover:text-primary transition cursor-pointer">
         <span id="userName" class="text-sm font-medium"></span>
       </button>
       <div id="userMenuDropdown" class="absolute right-0 top-full pt-2 w-48 opacity-0 invisible pointer-events-none translate-y-1 transition-all duration-150 z-50">
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
-        <a href="/profile.html" class="block px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-slate-700 hover:text-primary transition flex items-center gap-2">
-          <i class="ri-user-line"></i> My Profile
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <a href="/profile.html" class="block px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-primary transition flex items-center gap-2">
+          <i class="bi bi-person"></i> My Profile
         </a>
-        <button id="logoutBtn" class="w-full text-left px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900 hover:text-red-600 transition flex items-center gap-2 border-t dark:border-slate-700">
-          <i class="ri-logout-box-r-line"></i> Logout
+        <button id="logoutBtn" class="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition flex items-center gap-2 border-t">
+          <i class="bi bi-box-arrow-right"></i> Logout
         </button>
         </div>
       </div>
     </div>
     <button id="orderNowHeader" class="bg-primary text-white px-4 py-2 !rounded-button font-medium whitespace-nowrap hidden md:block">Order Now</button>
     <button class="md:hidden w-10 h-10 flex items-center justify-center text-gray-700">
-        <i class="ri-menu-line text-xl"></i>
+        <i class="bi bi-list text-xl"></i>
     </button>
 </div>
 </div>
@@ -297,7 +294,7 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
 </div>
 </div>
 <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce">
-<i class="ri-arrow-down-line text-2xl text-gray-700"></i>
+<i class="bi bi-arrow-down text-2xl text-gray-700"></i>
 </div>
 </section>
 <!-- Featured Products Grid -->
@@ -313,36 +310,24 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
 </div>
 <script>
   let productsCache = null;
+  const popularBlendImages = {
+    'Green Goddess Smoothie': 'https://readdy.ai/api/search-image?query=A%20professional%20product%20shot%20of%20a%20vibrant%20green%20smoothie%20in%20a%20clear%20glass.%20The%20smoothie%20has%20a%20creamy%20texture%20with%20visible%20green%20ingredients%20like%20spinach%2C%20kale%2C%20and%20avocado.%20The%20background%20is%20clean%20white%20with%20some%20fresh%20green%20ingredients%20artistically%20arranged%20nearby.%20The%20lighting%20is%20bright%20and%20natural%2C%20highlighting%20the%20freshness%20of%20the%20drink.&width=600&height=400&seq=2&orientation=landscape',
+    'Berry Blast Smoothie': 'https://readdy.ai/api/search-image?query=A%20professional%20product%20shot%20of%20a%20vibrant%20berry%20smoothie%20in%20a%20clear%20glass.%20The%20smoothie%20has%20a%20rich%20purple-red%20color%20with%20a%20creamy%20texture.%20Some%20fresh%20berries%20like%20strawberries%2C%20blueberries%2C%20and%20raspberries%20are%20visible%20on%20top%20and%20arranged%20artistically%20around%20the%20glass.%20The%20background%20is%20clean%20white%2C%20and%20the%20lighting%20is%20bright%20and%20natural%2C%20highlighting%20the%20vivid%20color%20of%20the%20drink.&width=600&height=400&seq=3&orientation=landscape',
+    'Tropical Paradise Smoothie': 'https://readdy.ai/api/search-image?query=A%20professional%20product%20shot%20of%20a%20tropical%20mango%20smoothie%20in%20a%20clear%20glass.%20The%20smoothie%20has%20a%20vibrant%20orange-yellow%20color%20with%20a%20creamy%20texture.%20Fresh%20mango%20slices%20and%20pineapple%20chunks%20are%20visible%20on%20top%20and%20arranged%20artistically%20around%20the%20glass.%20The%20background%20is%20clean%20white%2C%20and%20the%20lighting%20is%20bright%20and%20natural%2C%20highlighting%20the%20sunny%20color%20of%20the%20drink.&width=600&height=400&seq=4&orientation=landscape',
+    'Carrot Sunrise Smoothie': 'https://readdy.ai/api/search-image?query=A%20professional%20product%20shot%20of%20a%20vibrant%20orange%20carrot%20juice%20in%20a%20clear%20glass.%20The%20juice%20has%20a%20bright%20orange%20color%20with%20a%20smooth%20texture.%20Fresh%20carrots%20and%20orange%20slices%20are%20visible%20around%20the%20glass.%20The%20background%20is%20clean%20white%2C%20and%20the%20lighting%20is%20bright%20and%20natural%2C%20highlighting%20the%20vivid%20color%20of%20the%20juice.&width=600&height=400&seq=5&orientation=landscape',
+    'Protein Power Smoothie': 'https://readdy.ai/api/search-image?query=A%20professional%20product%20shot%20of%20a%20chocolate%20protein%20smoothie%20in%20a%20clear%20glass.%20The%20smoothie%20has%20a%20rich%20brown%20color%20with%20a%20thick%2C%20creamy%20texture.%20Some%20cacao%20nibs%20and%20banana%20slices%20are%20visible%20on%20top%20and%20arranged%20artistically%20around%20the%20glass.%20The%20background%20is%20clean%20white%2C%20and%20the%20lighting%20is%20bright%20and%20natural%2C%20highlighting%20the%20indulgent%20appearance%20of%20the%20drink.&width=600&height=400&seq=6&orientation=landscape',
+    'Green Detox Smoothie': 'https://readdy.ai/api/search-image?query=A%20professional%20product%20shot%20of%20a%20vibrant%20green%20detox%20juice%20in%20a%20clear%20glass.%20The%20juice%20has%20a%20bright%20green%20color%20with%20a%20smooth%20texture.%20Fresh%20celery%2C%20cucumber%2C%20apple%20slices%2C%20and%20mint%20leaves%20are%20visible%20around%20the%20glass.%20The%20background%20is%20clean%20white%2C%20and%20the%20lighting%20is%20bright%20and%20natural%2C%20highlighting%20the%20fresh%20appearance%20of%20the%20juice.&width=600&height=400&seq=7&orientation=landscape'
+  };
+  const popularBlendNames = Object.keys(popularBlendImages);
 
-  // Popular Blends: the fixed set of smoothies shown on the homepage, in order.
-  // Legacy names (without the "Smoothie" suffix) are also accepted so the grid
-  // still fills in against databases seeded before the catalog migration.
-  const POPULAR_BLENDS = [
-    { name: 'Green Goddess Smoothie', aliases: ['Green Goddess'] },
-    { name: 'Berry Blast Smoothie', aliases: ['Berry Blast'] },
-    { name: 'Tropical Paradise Smoothie', aliases: ['Tropical Paradise'] },
-    { name: 'Carrot Sunrise Smoothie', aliases: ['Carrot Sunrise'] },
-    { name: 'Protein Power Smoothie', aliases: ['Protein Power'] },
-    { name: 'Green Detox Smoothie', aliases: ['Green Detox'] }
-  ];
-
-  // Falls back to the shared generator when a stored image is missing.
-  function productImage(product){
-    if(product && product.image) return product.image;
-    const images = window.GoSmoothieProductImages;
-    return images ? images.imageUrl(product) : '';
-  }
-
-  // Keep only the Popular Blends smoothies, in the order defined above.
   function pickPopularBlends(products){
     const list = Array.isArray(products) ? products : [];
-    return POPULAR_BLENDS.map(blend => {
-      const accepted = [blend.name, ...(blend.aliases || [])].map(n => n.toLowerCase());
-      const match = list.find(p => accepted.includes(String(p.name || '').trim().toLowerCase()));
-      if(!match) return null;
-      const product = { ...match, name: blend.name };
-      product.image = productImage(product);
-      return product;
+    return popularBlendNames.map(name => {
+      const legacyName = name.replace(/ Smoothie$/, '');
+      const match = list.find(product =>
+        [name, legacyName].includes(String(product.name || '').trim())
+      );
+      return match ? { ...match, name } : null;
     }).filter(Boolean);
   }
 
@@ -373,9 +358,11 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
       card.className = 'smoothie-card bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2';
       card.dataset.productName = p.name;
       card.dataset.productPrice = p.price;
+      card.dataset.productId = p.productId || '';
+      card.dataset.productImage = popularBlendImages[p.name] || p.image || '';
       card.innerHTML = `
         <div class="relative h-64">
-          <img src="${p.image || 'https://via.placeholder.com/600x400?text=Smoothie'}" alt="${p.name}" class="w-full h-full object-cover object-top">
+          <img src="${popularBlendImages[p.name] || p.image || 'https://via.placeholder.com/600x400?text=Smoothie'}" alt="${p.name}" class="w-full h-full object-cover object-top">
           <div class="nutritional-info absolute inset-0 bg-black bg-opacity-75 p-4 flex flex-col justify-center text-white overflow-y-auto">
             <h3 class="font-bold mb-3 text-center">Nutrition Info</h3>
             <ul class="text-md space-y-1">
@@ -409,6 +396,7 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
     
     container.appendChild(fragment);
     attachProductHandlers();
+    syncProductButtons();
   }
   
   function attachProductHandlers(){
@@ -416,16 +404,40 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
       const dec = card.querySelector('.qty-dec');
       const inc = card.querySelector('.qty-inc');
       const input = card.querySelector('.qty-input');
-      
-      dec.addEventListener('click', ()=>{ input.value = Math.max(1, parseInt(input.value||1)-1); });
-      inc.addEventListener('click', ()=>{ input.value = Math.max(1, parseInt(input.value||1)+1); });
-      
       const addBtn = card.querySelector('.add-to-cart');
+
+      const changeQuantity = async nextQuantity => {
+        input.value = Math.max(1, parseInt(nextQuantity, 10) || 1);
+        if(addBtn.dataset.inCart !== '1' || !addBtn.dataset.cartId) return;
+        const token = localStorage.getItem('gs_token');
+        const clientId = localStorage.getItem('gs_clientId');
+        const url = '/api/cart/' + addBtn.dataset.cartId + (token ? '' : '?clientId=' + encodeURIComponent(clientId));
+        try{
+          const res = await fetch(url, {
+            method: 'PUT',
+            headers: Object.assign({'Content-Type':'application/json'}, token ? {'Authorization':'Bearer ' + token} : {}),
+            body: JSON.stringify({quantity: parseInt(input.value, 10)}),
+            signal: AbortSignal.timeout(5000)
+          });
+          if(!res.ok) throw new Error('Quantity update failed');
+          window.dispatchEvent(new Event('cartUpdated'));
+        }catch(err){
+          showToastMain(err.message, 'error');
+          await syncProductButtons();
+        }
+      };
+
+      dec.addEventListener('click', () => changeQuantity(parseInt(input.value || 1, 10) - 1));
+      inc.addEventListener('click', () => changeQuantity(parseInt(input.value || 1, 10) + 1));
+      input.addEventListener('change', () => changeQuantity(input.value));
+
       addBtn.addEventListener('click', async ()=>{
         const qty = parseInt(input.value||1);
         const token = localStorage.getItem('gs_token');
         const name = card.dataset.productName || 'Product';
         const price = parseFloat(card.dataset.productPrice) || 0;
+        const productId = card.dataset.productId || '';
+        const image = card.dataset.productImage || '';
 
         // if already in cart -> remove
         if(addBtn.dataset.inCart === '1'){
@@ -433,8 +445,11 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
           try{
             if(!itemId){
               const cart = await fetchCartMain();
-              const found = cart && cart.items && cart.items.find(i => i.name === name && parseFloat(i.price) === price);
-              itemId = found && found._id;
+              const found = cart && cart.items && cart.items.find(i =>
+                (productId && i.productId === productId) ||
+                (!productId && i.name === name && parseFloat(i.price) === price)
+              );
+              itemId = found && (found.cartId || found.id);
             }
             if(!itemId) return;
             const url = '/api/cart/' + itemId + (token ? '' : ('?clientId=' + localStorage.getItem('gs_clientId')));
@@ -446,7 +461,7 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
           return;
         }
 
-        const body = { name, price, quantity: qty };
+        const body = { productId, name, price, image, quantity: qty };
         if(!token) {
           const clientId = localStorage.getItem('gs_clientId') || ('c_'+Date.now()+Math.random().toString(36).slice(2,9));
           body.clientId = clientId;
@@ -458,8 +473,11 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
           const r = await fetch('/api/cart', { method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(5000) });
           if(r.ok){ 
             const cart = await r.json();
-            const item = cart.items && cart.items.find(i => i.name === name && parseFloat(i.price) === price);
-            if(item){ addBtn.dataset.inCart = '1'; addBtn.dataset.cartId = item._id; addBtn.textContent = 'Remove from Cart'; addBtn.classList.remove('bg-primary'); addBtn.classList.add('bg-red-500'); }
+            const item = cart.items && cart.items.find(i =>
+              (productId && i.productId === productId) ||
+              (!productId && i.name === name && parseFloat(i.price) === price)
+            );
+            if(item){ addBtn.dataset.inCart = '1'; addBtn.dataset.cartId = item.cartId || item.id; input.value = item.quantity || qty; addBtn.textContent = 'Remove from Cart'; addBtn.classList.remove('bg-primary'); addBtn.classList.add('bg-red-500'); }
             showToastMain(name + ' added to cart!');
             window.dispatchEvent(new Event('cartUpdated'));
           }
@@ -478,7 +496,14 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
   async function fetchCartMain(){
     const token = localStorage.getItem('gs_token');
     let url = '/api/cart';
-    if(!token) url += '?clientId=' + (localStorage.getItem('gs_clientId') || '');
+    if(!token) {
+      let clientId = localStorage.getItem('gs_clientId');
+      if(!clientId) {
+        clientId = 'c_' + Date.now() + Math.random().toString(36).slice(2,9);
+        localStorage.setItem('gs_clientId', clientId);
+      }
+      url += '?clientId=' + encodeURIComponent(clientId);
+    }
     try{ const r = await fetch(url, { headers: token ? { 'Authorization': 'Bearer ' + token } : {}, signal: AbortSignal.timeout(5000) }); if(r.ok) return await r.json(); }catch(e){}
     return null;
   }
@@ -487,11 +512,16 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
     const cart = await fetchCartMain();
     document.querySelectorAll('.smoothie-card').forEach(card =>{
       const name = card.dataset.productName; const price = parseFloat(card.dataset.productPrice)||0;
+      const productId = card.dataset.productId || '';
       const addBtn = card.querySelector('.add-to-cart');
       if(!addBtn) return;
-      const found = cart && cart.items && cart.items.find(i => i.name === name && parseFloat(i.price) === price);
-      if(found){ addBtn.dataset.inCart='1'; addBtn.dataset.cartId=found._id; addBtn.textContent='Remove from Cart'; addBtn.classList.remove('bg-primary'); addBtn.classList.add('bg-red-500'); }
-      else { addBtn.dataset.inCart='0'; delete addBtn.dataset.cartId; addBtn.textContent='Add to Cart'; addBtn.classList.remove('bg-red-500'); addBtn.classList.add('bg-primary'); }
+      const found = cart && cart.items && cart.items.find(i =>
+        (productId && i.productId === productId) ||
+        (!productId && i.name === name && parseFloat(i.price) === price)
+      );
+      const input = card.querySelector('.qty-input');
+      if(found){ addBtn.dataset.inCart='1'; addBtn.dataset.cartId=found.cartId || found.id; if(input) input.value=found.quantity || 1; addBtn.textContent='Remove from Cart'; addBtn.classList.remove('bg-primary'); addBtn.classList.add('bg-red-500'); }
+      else { addBtn.dataset.inCart='0'; delete addBtn.dataset.cartId; if(input) input.value=1; addBtn.textContent='Add to Cart'; addBtn.classList.remove('bg-red-500'); addBtn.classList.add('bg-primary'); }
     });
   }
   // Toast notification system
@@ -563,7 +593,7 @@ box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
 <div class="text-center mt-12">
 <a href="/menu.html" class="inline-flex items-center text-primary font-medium hover:underline">
 View Full Menu
-<i class="ri-arrow-right-line ml-2"></i>
+<i class="bi bi-arrow-right ml-2"></i>
 </a>
 </div>
 </div>
@@ -681,7 +711,7 @@ View Full Menu
     <label class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option">
     <input type="radio" name="size" value="small" class="custom-radio mb-2">
     <div class="w-12 h-12 flex items-center justify-center">
-    <i class="ri-cup-line ri-2x text-gray-600"></i>
+    <i class="ri-cup-line ri-2x text-gray-600" aria-hidden="true"></i>
     </div>
     <span class="mt-2 text-center">Small<br>(12 oz)</span>
     <span class="text-primary font-semibold mt-1">80 rs/-</span>
@@ -689,7 +719,7 @@ View Full Menu
     <label class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option">
     <input type="radio" name="size" value="medium" class="custom-radio mb-2">
     <div class="w-12 h-12 flex items-center justify-center">
-    <i class="ri-cup-line ri-3x text-gray-600"></i>
+    <i class="ri-cup-line ri-3x text-gray-600" aria-hidden="true"></i>
     </div>
     <span class="mt-2 text-center">Medium<br>(16 oz)</span>
     <span class="text-primary font-semibold mt-1">130 rs/-</span>
@@ -697,7 +727,7 @@ View Full Menu
     <label class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option">
     <input type="radio" name="size" value="large" class="custom-radio mb-2">
     <div class="w-12 h-12 flex items-center justify-center">
-    <i class="ri-cup-line ri-4x text-gray-600"></i>
+    <i class="ri-cup-line ri-4x text-gray-600" aria-hidden="true"></i>
     </div>
     <span class="mt-2 text-center">Large<br>(24 oz)</span>
     <span class="text-primary font-semibold mt-1">180 rs/-</span>
@@ -835,9 +865,6 @@ View Full Menu
 
         updateNutritionDisplay();
       }
-
-      // expose helper globally for other pages that may check for it
-      window.showModalMain = showModalMain;
 
       // Add UI color changes on selection
       document.querySelectorAll('.base-option input[type="radio"]').forEach(input=>{
@@ -1057,7 +1084,16 @@ View Full Menu
             }, 180);
           };
 
-          userMenuBtn.onclick = () => { window.location.href = '/profile.html'; };
+          userMenuBtn.onclick = () => {
+            const session = new URLSearchParams({
+              gs_token: token,
+              gs_user: JSON.stringify(user)
+            });
+            const appBase = ['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.port !== '3000'
+              ? `http://${window.location.hostname}:3000`
+              : '';
+            window.location.href = `${appBase}/profile.html#${session.toString()}`;
+          };
           userMenu.onmouseenter = openMenu;
           userMenu.onmouseleave = closeMenu;
           userMenuDropdown.onmouseenter = openMenu;
@@ -1068,78 +1104,36 @@ View Full Menu
         }
       }
 
-          // Modal helper for main page
-          function showModalMain({ title = 'Confirm', message = '', type = 'info', okText = 'OK', cancelText = 'Cancel' } = {}){
-            return new Promise(resolve => {
-              let modal = document.getElementById('globalModal');
-              if(!modal){
-                const html = `
-                  <div id="globalModal" class="hidden fixed inset-0 z-60 flex items-center justify-center bg-black/50" aria-hidden="true">
-                    <div role="dialog" aria-modal="true" aria-labelledby="modalTitle" class="bg-white dark:bg-gray-800 max-w-md w-full rounded-xl shadow-lg p-6 mx-4">
-                      <div class="flex items-start gap-4">
-                        <div id="modalIcon" class="text-2xl"></div>
-                        <div class="flex-1">
-                          <h3 id="modalTitle" class="text-lg font-semibold text-gray-900 dark:text-gray-100">Title</h3>
-                          <p id="modalMessage" class="text-sm text-gray-600 dark:text-gray-300 mt-2">Message</p>
-                        </div>
-                      </div>
-                      <div class="mt-6 flex justify-end gap-3">
-                        <button id="modalCancel" class="px-4 py-2 rounded-button bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-200 transition">Cancel</button>
-                        <button id="modalOk" class="px-4 py-2 rounded-button bg-primary text-white hover:bg-green-600 transition">OK</button>
-                      </div>
-                    </div>
-                  </div>
-                `;
-                document.body.insertAdjacentHTML('beforeend', html);
-                modal = document.getElementById('globalModal');
-              }
-
-              const titleEl = document.getElementById('modalTitle');
-              const msgEl = document.getElementById('modalMessage');
-              const okBtn = document.getElementById('modalOk');
-              const cancelBtn = document.getElementById('modalCancel');
-              const icon = document.getElementById('modalIcon');
-
-              titleEl.textContent = title;
-              msgEl.textContent = message;
-              okBtn.textContent = okText;
-              cancelBtn.textContent = cancelText;
-
-              icon.className = '';
-              if(type === 'warning') icon.innerHTML = '<i class="ri-alert-line text-yellow-500"></i>';
-              else if(type === 'error') icon.innerHTML = '<i class="ri-close-circle-line text-red-500"></i>';
-              else if(type === 'success') icon.innerHTML = '<i class="ri-checkbox-circle-line text-green-500"></i>';
-              else icon.innerHTML = '<i class="ri-information-line text-blue-500"></i>';
-
-              modal.classList.remove('hidden');
-              modal.setAttribute('aria-hidden', 'false');
-
-              function cleanup(choice){
-                modal.classList.add('hidden');
-                modal.setAttribute('aria-hidden', 'true');
-                okBtn.removeEventListener('click', onOk);
-                cancelBtn.removeEventListener('click', onCancel);
-                modal.removeEventListener('click', onBackdrop);
-                resolve(choice);
-              }
-
-              function onOk(e){ e.stopPropagation(); cleanup(true); }
-              function onCancel(e){ e.stopPropagation(); cleanup(false); }
-              function onBackdrop(e){ if(e.target === modal) cleanup(false); }
-
-              okBtn.addEventListener('click', onOk);
-              cancelBtn.addEventListener('click', onCancel);
-              modal.addEventListener('click', onBackdrop);
-            });
-          }
-
+          const logoutModal = document.getElementById('logoutModal');
+          const closeLogoutModal = () => {
+            logoutModal.classList.add('hidden');
+            logoutModal.classList.remove('flex');
+            logoutModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+          };
+          const openLogoutModal = () => {
+            logoutModal.classList.remove('hidden');
+            logoutModal.classList.add('flex');
+            logoutModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('logoutCancelBtn').focus();
+          };
           const logoutBtn = document.getElementById('logoutBtn');
-          if(logoutBtn) logoutBtn.addEventListener('click', async () => {
-            const confirmed = await showModalMain({ title: 'Logout', message: 'Do you want to logout?', type: 'warning', okText: 'Logout', cancelText: 'Cancel' });
-            if(!confirmed) return;
+          if(logoutBtn) logoutBtn.addEventListener('click', openLogoutModal);
+          document.getElementById('logoutCancelBtn').addEventListener('click', closeLogoutModal);
+          document.getElementById('logoutConfirmBtn').addEventListener('click', () => {
             localStorage.removeItem('gs_token');
             localStorage.removeItem('gs_user');
-            location.href = '/main.html';
+            localStorage.removeItem('gs_clientId');
+            document.cookie = 'gs_token=; Path=/; Max-Age=0; SameSite=Lax';
+            document.cookie = 'gs_user=; Path=/; Max-Age=0; SameSite=Lax';
+            window.location.href = '/main.html';
+          });
+          logoutModal.addEventListener('click', (event) => {
+            if(event.target === logoutModal) closeLogoutModal();
+          });
+          document.addEventListener('keydown', (event) => {
+            if(event.key === 'Escape' && !logoutModal.classList.contains('hidden')) closeLogoutModal();
           });
 
       // Update on page load and when cart updates
@@ -1164,7 +1158,7 @@ View Full Menu
 <!-- Benefit 1 -->
 <div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
 <div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
-<i class="ri-heart-pulse-line text-2xl text-primary"></i>
+<i class="bi bi-heart-pulse text-2xl text-primary"></i>
 </div>
 <h3 class="text-lg font-bold text-gray-900 mb-2">Heart Health</h3>
 <p class="text-gray-600 text-sm">Antioxidant-rich berries and leafy greens support cardiovascular health.</p>
@@ -1172,7 +1166,7 @@ View Full Menu
 <!-- Benefit 2 -->
 <div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
 <div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
-<i class="ri-mental-health-line text-2xl text-primary"></i>
+<i class="bi bi-lightbulb text-2xl text-primary"></i>
 </div>
 <h3 class="text-lg font-bold text-gray-900 mb-2">Immune Support</h3>
 <p class="text-gray-600 text-sm">Vitamin C from citrus fruits and ginger help strengthen your immune system.</p>
@@ -1180,7 +1174,7 @@ View Full Menu
 <!-- Benefit 3 -->
 <div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
 <div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
-<i class="ri-run-line text-2xl text-primary"></i>
+<i class="bi bi-person-standing text-2xl text-primary"></i>
 </div>
 <h3 class="text-lg font-bold text-gray-900 mb-2">Energy Boost</h3>
 <p class="text-gray-600 text-sm">Natural sugars and B vitamins provide sustained energy throughout the day.</p>
@@ -1188,7 +1182,7 @@ View Full Menu
 <!-- Benefit 4 -->
 <div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
 <div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
-<i class="ri-seedling-line text-2xl text-primary"></i>
+<i class="bi bi-flower1 text-2xl text-primary"></i>
 </div>
 <h3 class="text-lg font-bold text-gray-900 mb-2">Digestive Health</h3>
 <p class="text-gray-600 text-sm">Fiber-rich ingredients support gut health and improve digestion.</p>
@@ -1196,7 +1190,7 @@ View Full Menu
 <!-- Benefit 5 -->
 <div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
 <div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
-<i class="ri-eye-line text-2xl text-primary"></i>
+<i class="bi bi-eye text-2xl text-primary"></i>
 </div>
 <h3 class="text-lg font-bold text-gray-900 mb-2">Eye Health</h3>
 <p class="text-gray-600 text-sm">Carotenoids in carrots and leafy greens support vision and eye health.</p>
@@ -1204,7 +1198,7 @@ View Full Menu
 <!-- Benefit 6 -->
 <div class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center">
 <div class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4">
-<i class="ri-brain-line text-2xl text-primary"></i>
+<i class="bi bi-lightbulb text-2xl text-primary"></i>
 </div>
 <h3 class="text-lg font-bold text-gray-900 mb-2">Brain Function</h3>
 <p class="text-gray-600 text-sm">Omega-3 fatty acids and antioxidants support cognitive function.</p>
@@ -1235,46 +1229,37 @@ View Full Menu
     <input type="text" placeholder="Enter your name" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
     </div>
     <div class="mb-6">
-    <label class="block text-md font-semibold text-gray-800 mb-2">Phone</label>
-    <input type="tel" placeholder="Phone number" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
-    </div>
-    <div class="mb-6">
-    <div class="mb-3 flex items-center justify-between gap-3">
-    <button type="button" id="pickupUseLocationBtn" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap">
-    <i class="ri-map-pin-2-line"></i> Use the Location
-    </button>
-    <h4 class="font-semibold text-gray-800">Find a Store Near You</h4>
-    </div>
+    <h4 class="font-semibold text-gray-800 mb-3">Find a Store Near You</h4>
     <div class="flex border border-gray-300 rounded overflow-hidden">
-    <input type="text" id="pickupSearchHome" placeholder="Zipcode" class="w-full px-4 py-2 focus:outline-none text-sm border-none">
-    <button id="pickupFindBtnHome" class="bg-primary text-white px-4 flex items-center justify-center whitespace-nowrap !rounded-none">
-    <i class="ri-search-line mr-2"></i> Find
+    <input type="text" placeholder="Enter your zip code" class="w-full px-4 py-2 focus:outline-none text-sm border-none">
+    <button class="bg-primary text-white px-4 flex items-center justify-center whitespace-nowrap !rounded-none">
+    <i class="bi bi-search mr-2"></i> Find
     </button>
     </div>
     </div>
     <div class="mb-6">
     <h4 class="font-semibold text-gray-800 mb-3">Nearest Locations</h4>
     <div class="space-y-3">
-    <div class="pickup-location-card border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition" data-zip="500032">
+    <div class="border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition">
     <div class="flex justify-between mb-1">
-    <span class="font-medium">Gachibowli</span>
-    <span class="text-sm text-gray-500">1.2 km</span>
+    <span class="font-medium">Downtown</span>
+    <span class="text-sm text-gray-500">0.8 miles</span>
     </div>
-    <p class="text-sm text-gray-600">HITEC City Main Road, Hyderabad, Telangana 500032</p>
+    <p class="text-sm text-gray-600">123 Main Street, New York, NY 10001</p>
     </div>
-    <div class="pickup-location-card border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition" data-zip="500075">
+    <div class="border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition">
     <div class="flex justify-between mb-1">
-    <span class="font-medium">Kokapet</span>
-    <span class="text-sm text-gray-500">2.6 km</span>
+    <span class="font-medium">Midtown</span>
+    <span class="text-sm text-gray-500">1.4 km</span>
     </div>
-    <p class="text-sm text-gray-600">Golden Mile Road, Kokapet, Hyderabad, Telangana 500075</p>
+    <p class="text-sm text-gray-600">456 Park Avenue, New York, NY 10022</p>
     </div>
-    <div class="pickup-location-card border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition" data-zip="500084">
+    <div class="border border-gray-200 rounded p-3 hover:border-primary cursor-pointer transition">
     <div class="flex justify-between mb-1">
-    <span class="font-medium">Kondapur</span>
-    <span class="text-sm text-gray-500">3.1 km</span>
+    <span class="font-medium">Upper East Side</span>
+    <span class="text-sm text-gray-500">2.1 km</span>
     </div>
-    <p class="text-sm text-gray-600">Botanical Garden Road, Kondapur, Hyderabad, Telangana 500084</p>
+    <p class="text-sm text-gray-600">789 Madison Avenue, New York, NY 10065</p>
     </div>
     </div>
     </div>
@@ -1311,26 +1296,12 @@ View Full Menu
     </div>
     </div>
     <div class="p-6">
-    <div class="mb-4">
-    <label class="block text-md font-semibold text-gray-800 mb-2">Name</label>
-    <input type="text" id="deliveryNameHome" placeholder="Enter your name" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
-    </div>
-    <div class="mb-4">
-    <label class="block text-md font-semibold text-gray-800 mb-2">Phone</label>
-    <input type="tel" id="deliveryPhoneHome" placeholder="Phone number" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
-    </div>
     <div class="mb-6">
     <h4 class="font-semibold text-gray-800 mb-3">Delivery Address</h4>
-    <div class="mb-3">
-    <div class="flex items-center justify-between mb-2">
-    <h5 class="text-sm font-semibold text-gray-700">Use saved address</h5>
-    <p id="deliverySavedAddressBadgeHome" class="text-sm font-medium text-primary hidden"></p>
-    </div>
-    <div id="deliverySavedAddressCardsHome" class="space-y-2"></div>
-    </div>
     <button type="button" id="useLocationBtn" class="mb-3 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition">
-    <i class="ri-map-pin-2-line"></i> Use My Location
+    <i class="bi bi-geo-alt"></i> Use My Location
     </button>
+    <p id="homeGeoStatus" class="mb-3 text-sm text-gray-500"></p>
     <div class="space-y-3">
     <input type="text" id="deliveryStreet" placeholder="Street Address" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm">
     <div class="grid grid-cols-2 gap-3">
@@ -1339,44 +1310,42 @@ View Full Menu
     </div>
     </div>
     </div>
+    <div id="homeSavedAddressSection" class="hidden mb-6">
+    <button type="button" id="homeSavedAddressToggle" class="w-full flex items-center justify-between gap-3 py-2 text-left" aria-expanded="true" aria-controls="homeSavedAddressContent">
+    <span class="font-semibold text-gray-800">Saved Addresses</span>
+    <span class="flex items-center gap-2">
+    <span id="homeSavedAddressStatus" class="text-xs font-semibold text-primary"></span>
+    <i id="homeSavedAddressChevron" class="bi bi-chevron-up text-gray-500"></i>
+    </span>
+    </button>
+    <div id="homeSavedAddressContent">
+    <div id="homeSavedAddressCards" class="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch"></div>
+    </div>
+    </div>
     <div class="mb-6">
     <h4 class="font-semibold text-gray-800 mb-3">Delivery Options</h4>
-    <div class="space-y-3" id="deliveryOptionsGroupHome">
-    <label class="delivery-option-card flex items-center justify-between p-3 border border-primary bg-primary/5 rounded cursor-pointer" data-option="standard">
+    <div id="homeDeliveryOptions" class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+    <label class="home-delivery-option flex h-full flex-col items-start justify-between gap-3 p-4 border border-primary bg-primary/5 rounded-xl cursor-pointer">
     <div class="flex items-center">
     <input type="radio" name="delivery-option" value="standard" class="custom-radio mr-3" checked>
     <span>Standard Delivery</span>
     </div>
     <span class="text-sm text-gray-500">30-45 min</span>
     </label>
-    <label class="delivery-option-card flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition" data-option="express">
+    <label class="home-delivery-option flex h-full flex-col items-start justify-between gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-primary transition">
     <div class="flex items-center">
     <input type="radio" name="delivery-option" value="express" class="custom-radio mr-3">
     <span>Express Delivery</span>
     </div>
-    <span class="text-sm text-gray-500">15-25 min (+20 Rs/-)</span>
+    <span class="text-sm text-gray-500">15-25 min (+80 Rs/-)</span>
     </label>
-    <label class="delivery-option-card flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition" data-option="scheduled">
+    <label class="home-delivery-option flex h-full flex-col items-start justify-between gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-primary transition">
     <div class="flex items-center">
     <input type="radio" name="delivery-option" value="scheduled" class="custom-radio mr-3">
     <span>Scheduled Delivery</span>
     </div>
     <span class="text-sm text-gray-500">Choose time</span>
     </label>
-    </div>
-    <div id="deliveryScheduleWrapHome" class="hidden mt-4">
-    <label class="block text-sm text-gray-600 mb-1">Schedule Time</label>
-    <select id="deliveryScheduleTimeHome" class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:border-primary text-sm pr-8 appearance-none bg-white">
-    <option value="">Select time</option>
-    <option>10:00 AM</option>
-    <option>10:30 AM</option>
-    <option>11:00 AM</option>
-    <option>11:30 AM</option>
-    <option>12:00 PM</option>
-    <option>12:30 PM</option>
-    <option>01:00 PM</option>
-    <option>01:30 PM</option>
-    </select>
     </div>
     </div>
     <div class="mb-6">
@@ -1451,20 +1420,20 @@ View Full Menu
 </div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 <!-- Review 1 -->
-<div class="bg-gray-50 rounded-xl p-6">
+<div class="bg-gray-50 rounded-xl p-6 flex flex-col h-full">
 <div class="flex items-center mb-4">
 <div class="text-yellow-400 flex">
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
 </div>
 <span class="ml-2 text-gray-600 text-sm">5.0</span>
 </div>
-<p class="text-gray-700 mb-6">"I've tried many smoothie places, but this one stands out for the freshness and quality of ingredients. The Green Goddess is my go-to for a post-workout boost!"</p>
-<div class="flex items-center">
-<div class="w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full mr-3 font-medium">JM</div>
+<p class="text-gray-700 mb-6 flex-1">"I've tried many smoothie places, but this one stands out for the freshness and quality of ingredients. The Green Goddess is my go-to for a post-workout boost!"</p>
+<div class="flex items-center" data-reviewer-name="Anu">
+<div class="reviewer-initials w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full mr-3 font-medium"></div>
 <div>
 <h4 class="font-medium text-gray-900">Anu</h4>
 <p class="text-sm text-gray-500">Fitness Instructor</p>
@@ -1472,20 +1441,20 @@ View Full Menu
 </div>
 </div>
 <!-- Review 2 -->
-<div class="bg-gray-50 rounded-xl p-6">
+<div class="bg-gray-50 rounded-xl p-6 flex flex-col h-full">
 <div class="flex items-center mb-4">
 <div class="text-yellow-400 flex">
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
 </div>
 <span class="ml-2 text-gray-600 text-sm">5.0</span>
 </div>
-<p class="text-gray-700 mb-6">"The custom smoothie builder is a game-changer! I can create exactly what I want, and the nutritional information helps me stay on track with my health goals."</p>
-<div class="flex items-center">
-<div class="w-10 h-10 flex items-center justify-center bg-secondary text-white rounded-full mr-3 font-medium">DR</div>
+<p class="text-gray-700 mb-6 flex-1">"The custom smoothie builder is a game-changer! I can create exactly what I want, and the nutritional information helps me stay on track with my health goals."</p>
+<div class="flex items-center" data-reviewer-name="Ananya">
+<div class="reviewer-initials w-10 h-10 flex items-center justify-center bg-secondary text-white rounded-full mr-3 font-medium"></div>
 <div>
 <h4 class="font-medium text-gray-900">Ananya</h4>
 <p class="text-sm text-gray-500">CTO Apple</p>
@@ -1493,20 +1462,20 @@ View Full Menu
 </div>
 </div>
 <!-- Review 3 -->
-<div class="bg-gray-50 rounded-xl p-6">
+<div class="bg-gray-50 rounded-xl p-6 flex flex-col h-full">
 <div class="flex items-center mb-4">
 <div class="text-yellow-400 flex">
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-fill"></i>
-<i class="ri-star-half-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
+<i class="bi bi-star-fill"></i>
 </div>
 <span class="ml-2 text-gray-600 text-sm">4.5</span>
 </div>
-<p class="text-gray-700 mb-6">"I order delivery at least twice a week. Always on time, always fresh, and the online ordering system is so easy to use. My kids love the Tropical Paradise!"</p>
-<div class="flex items-center">
-<div class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full mr-3 font-medium">SL</div>
+<p class="text-gray-700 mb-6 flex-1">"I order delivery at least twice a week. Always on time, always fresh, and the online ordering system is so easy to use. My kids love the Tropical Paradise!"</p>
+<div class="flex items-center" data-reviewer-name="Sneha">
+<div class="reviewer-initials w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full mr-3 font-medium"></div>
 <div>
 <h4 class="font-medium text-gray-900">Sneha</h4>
 <p class="text-sm text-gray-500">Senior Manager</p>
@@ -1516,6 +1485,12 @@ View Full Menu
 </div>
 </div>
 </section>
+<script>
+document.querySelectorAll('[data-reviewer-name]').forEach(reviewer => {
+  const letters = reviewer.dataset.reviewerName.replace(/[^a-z]/gi, '');
+  reviewer.querySelector('.reviewer-initials').textContent = letters.slice(0, 2).toUpperCase();
+});
+</script>
 <!-- Newsletter Section -->
 <section class="py-16 bg-primary bg-opacity-10">
 <div class="container mx-auto px-4">
@@ -1539,16 +1514,16 @@ View Full Menu
 <p class="text-gray-400 mb-6">Refreshing, nutritious smoothies and juices made with the freshest ingredients for a healthier you.</p>
 <div class="flex space-x-4">
 <a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
-<i class="ri-facebook-fill"></i>
+<i class="bi bi-globe2"></i>
 </a>
 <a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
-<i class="ri-instagram-line"></i>
+<i class="bi bi-camera"></i>
 </a>
 <a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
-<i class="ri-twitter-x-line"></i>
+<i class="bi bi-chat-dots"></i>
 </a>
 <a href="#" class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors">
-<i class="ri-tiktok-line"></i>
+<i class="bi bi-music-note"></i>
 </a>
 </div>
 </div>
@@ -1567,15 +1542,15 @@ View Full Menu
 <h3 class="text-lg font-bold mb-6">Contact Us</h3>
 <ul class="space-y-3">
 <li class="flex items-start">
-<i class="ri-map-pin-line mt-1 mr-3 text-primary"></i>
+<i class="bi bi-geo-alt mt-1 mr-3 text-primary"></i>
 <span class="text-gray-400">sree Main Street<br>banjara Hills Road no 5,5-2-12</span>
 </li>
 <li class="flex items-center">
-<i class="ri-phone-line mr-3 text-primary"></i>
+<i class="bi bi-telephone mr-3 text-primary"></i>
 <span class="text-gray-400">+91 9848938852</span>
 </li>
 <li class="flex items-center">
-<i class="ri-mail-line mr-3 text-primary"></i>
+<i class="bi bi-envelope mr-3 text-primary"></i>
 <span class="text-gray-400">contact@freshblend.com</span>
 </li>
 </ul>
@@ -1599,10 +1574,10 @@ View Full Menu
 <div class="mt-6">
 <h4 class="text-sm font-bold uppercase text-gray-500 mb-3">We Accept</h4>
 <div class="flex space-x-3">
-<i class="ri-visa-fill text-2xl text-gray-400"></i>
-<i class="ri-mastercard-fill text-2xl text-gray-400"></i>
-<i class="ri-paypal-fill text-2xl text-gray-400"></i>
-<i class="ri-apple-fill text-2xl text-gray-400"></i>
+<i class="bi bi-credit-card text-2xl text-gray-400"></i>
+<i class="bi bi-credit-card text-2xl text-gray-400"></i>
+<i class="bi bi-credit-card text-2xl text-gray-400"></i>
+<i class="bi bi-apple text-2xl text-gray-400"></i>
 </div>
 </div>
 </div>
@@ -1634,108 +1609,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if(!id){ id = 'c_' + Date.now() + Math.random().toString(36).slice(2,9); localStorage.setItem(anonClientKey,id); }
         return id;
     }
-
-    // Pickup location selection highlight
-    document.querySelectorAll('.pickup-location-card').forEach(card => {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.pickup-location-card').forEach(c => c.classList.remove('border-primary', 'bg-primary/5', 'selected'));
-        card.classList.add('border-primary', 'bg-primary/5', 'selected');
-      });
-    });
-
-    // Pickup geolocation search for nearby stores
-    const pickupUseLocationBtn = document.getElementById('pickupUseLocationBtn');
-    const pickupFindBtnHome = document.getElementById('pickupFindBtnHome');
-    const pickupSearchHome = document.getElementById('pickupSearchHome');
-    function selectHomePickupStore(query){
-        const cards = Array.from(document.querySelectorAll('.pickup-location-card'));
-        if(!cards.length) return null;
-        const normalized = (query || '').trim().toLowerCase();
-      const digits = normalized.replace(/\D/g, '');
-        let matched = null;
-      if(digits){
-        matched = cards.find(card => (card.dataset.zip || '').includes(digits)) || null;
-      }
-      if(!matched && normalized){
-            matched = cards.find(card => card.textContent.toLowerCase().includes(normalized)) || null;
-        }
-        if(!matched) matched = cards[0];
-        matched.click();
-        matched.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        return matched;
-    }
-
-      function updateDeliveryOptionUIHome(root = document){
-        const radios = Array.from(root.querySelectorAll('input[name="delivery-option"]'));
-        const cards = Array.from(root.querySelectorAll('.delivery-option-card'));
-        const scheduleWrap = root.querySelector('#deliveryScheduleWrapHome');
-        const selected = radios.find(r => r.checked) || radios[0];
-        const selectedValue = selected ? selected.value : 'standard';
-
-        cards.forEach(card => {
-          const isSelected = card.dataset.option === selectedValue;
-          card.classList.toggle('border-primary', isSelected);
-          card.classList.toggle('bg-primary/5', isSelected);
-          card.classList.toggle('border-gray-200', !isSelected);
-        });
-
-        if(scheduleWrap){
-          scheduleWrap.classList.toggle('hidden', selectedValue !== 'scheduled');
-          const scheduleTime = root.querySelector('#deliveryScheduleTimeHome');
-          if(scheduleTime && selectedValue !== 'scheduled') scheduleTime.value = '';
-        }
-      }
-
-      document.querySelectorAll('input[name="delivery-option"]').forEach(radio => {
-        radio.addEventListener('change', () => updateDeliveryOptionUIHome(document));
-      });
-
-      updateDeliveryOptionUIHome(document);
-    if(pickupFindBtnHome && pickupSearchHome){
-      pickupFindBtnHome.addEventListener('click', () => {
-        const zipcode = pickupSearchHome.value.trim();
-        if(!zipcode) return;
-        selectHomePickupStore(zipcode);
-      });
-    }
-    if(pickupUseLocationBtn){
-      pickupUseLocationBtn.addEventListener('click', function(){
-        if(!navigator.geolocation) {
-          alert('Geolocation is not supported by your browser. Please enter zipcode manually.');
-          return;
-        }
-        pickupUseLocationBtn.disabled = true;
-        pickupUseLocationBtn.textContent = 'Getting location...';
-        navigator.geolocation.getCurrentPosition(
-          async function(position) {
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-            try {
-              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-              const data = await res.json();
-              const addressParts = data.address || {};
-              const zipcode = (addressParts.postcode || addressParts.city || addressParts.town || '').trim();
-              if(pickupSearchHome) pickupSearchHome.value = zipcode;
-              selectHomePickupStore(zipcode);
-              pickupUseLocationBtn.textContent = '✓ Location Detected';
-              setTimeout(()=>{ pickupUseLocationBtn.disabled = false; pickupUseLocationBtn.textContent = 'Use the Location'; }, 2000);
-            } catch(e) {
-              alert('Could not fetch nearby stores. Please enter zipcode manually.');
-              pickupUseLocationBtn.disabled = false;
-              pickupUseLocationBtn.textContent = 'Use the Location';
-            }
-          },
-          function(error) {
-            alert('Could not access location: ' + error.message + '. Please enter zipcode manually.');
-            pickupUseLocationBtn.disabled = false;
-            pickupUseLocationBtn.textContent = 'Use the Location';
-          }
-        );
-      });
-
-      // Keep delivery option visuals in sync on load and when clicked
-      updateDeliveryOptionUIHome(document);
-    }
     function authHeaders(){ const t = getToken(); return t ? { 'Authorization': 'Bearer ' + t } : {}; }
 
     // Update header auth links
@@ -1752,122 +1625,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if(profileLink) profileLink.classList.add('hidden');
     }
 
-    // Load saved addresses for logged in users (home delivery)
-    let savedAddressesHome = [];
-    let selectedSavedAddressHomeId = '';
-
-    function applyAccountDefaultsHome(){
-      const user = getUser() || {};
-      const fields = [
-        ['deliveryNameHome', user.name],
-        ['deliveryPhoneHome', user.phone]
-      ];
-      fields.forEach(([id, value]) => {
-        const input = document.getElementById(id);
-        if(input && value && !input.value.trim()) input.value = value;
-      });
-    }
-
-    async function loadSavedAddressesHome(){
-      const token = getToken();
-      if(!token) return;
-      try{
-        const r = await fetch('/api/users/me', { headers: { 'Authorization': 'Bearer ' + token } });
-        if(!r.ok) return;
-        const data = await r.json();
-        savedAddressesHome = Array.isArray(data.addresses) ? data.addresses : [];
-        const container = document.getElementById('deliverySavedAddressCardsHome');
-        if(!container) return;
-        const badge = document.getElementById('deliverySavedAddressBadgeHome');
-        const defaultIndex = savedAddressesHome.findIndex(a => a.isDefault);
-        if(defaultIndex >= 0){
-          selectedSavedAddressHomeId = String(savedAddressesHome[defaultIndex]._id || defaultIndex);
-          fillDeliveryFromSavedHome(defaultIndex);
-        } else {
-          selectedSavedAddressHomeId = '';
-        }
-        renderSavedAddressCardsHome();
-      }catch(e){ console.error('loadSavedAddressesHome', e); }
-    }
-    function renderSavedAddressCardsHome(){
-      const container = document.getElementById('deliverySavedAddressCardsHome');
-      const badge = document.getElementById('deliverySavedAddressBadgeHome');
-      if(!container) return;
-      if(!savedAddressesHome.length){
-        container.innerHTML = '<div class="rounded-lg border border-dashed border-gray-300 p-3 text-sm text-gray-500">No saved addresses yet. Add one in your profile.</div>';
-        if(badge){ badge.textContent = ''; badge.classList.add('hidden'); }
-        return;
-      }
-
-      container.innerHTML = '';
-  applyAccountDefaultsHome();
-      savedAddressesHome.forEach((address, idx) => {
-        const selected = String(address._id || idx) === String(selectedSavedAddressHomeId);
-        const isDefault = !!address.isDefault;
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = `w-full text-left rounded-xl border p-3 transition ${selected ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-gray-200 hover:border-primary'}`;
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="font-semibold text-gray-900">${address.label || 'Address'}</span>
-              </div>
-              <p class="text-sm text-gray-700">${address.street || ''}</p>
-              <p class="text-sm text-gray-500">${address.city || ''} ${address.zip || ''}</p>
-            </div>
-            <span class="text-xs font-semibold px-2 py-1 rounded-full ${selected ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600'}">${selected ? (isDefault ? 'Default' : 'Selected') : (isDefault ? 'Default' : 'Use')}</span>
-          </div>
-        `;
-        card.addEventListener('click', () => selectSavedAddressHome(idx));
-        container.appendChild(card);
-      });
-
-      if(badge){
-        const activeIndex = savedAddressesHome.findIndex(a => String(a._id || '') === String(selectedSavedAddressHomeId));
-        if(activeIndex >= 0){
-          badge.textContent = `Selected saved address: ${savedAddressesHome[activeIndex].label || 'Saved address'}`;
-          badge.classList.remove('hidden');
-        } else {
-          badge.textContent = '';
-          badge.classList.add('hidden');
-        }
-      }
-    }
-    function selectSavedAddressHome(idx){
-      const address = savedAddressesHome[idx];
-      if(!address) return;
-      const addressId = String(address._id || idx);
-      if(String(selectedSavedAddressHomeId) === addressId){
-        clearSelectedSavedAddressHome();
-        return;
-      }
-      selectedSavedAddressHomeId = addressId;
-      fillDeliveryFromSavedHome(idx);
-      renderSavedAddressCardsHome();
-    }
-    function clearSelectedSavedAddressHome(){
-      selectedSavedAddressHomeId = '';
-      renderSavedAddressCardsHome();
-    }
-    function fillDeliveryFromSavedHome(idx){
-      const a = savedAddressesHome[idx]; if(!a) return;
-      const street = document.getElementById('deliveryStreet');
-      const city = document.getElementById('deliveryCity');
-      const zip = document.getElementById('deliveryZip');
-      const phone = document.getElementById('deliveryPhoneHome');
-      if(street) street.value = a.street || '';
-      if(city) city.value = a.city || '';
-      if(zip) zip.value = a.zip || '';
-      if(phone && a.phone) phone.value = a.phone;
-    }
-    ['deliveryStreet','deliveryCity','deliveryZip'].forEach(id => {
-      const input = document.getElementById(id);
-      if(input){ input.addEventListener('input', clearSelectedSavedAddressHome); }
-    });
-    // Try to load saved addresses on page load
-    loadSavedAddressesHome();
-
     async function updateCartCount(){
         try{
             let url = '/api/cart';
@@ -1875,7 +1632,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const res = await fetch(url, { headers: authHeaders() });
             if(!res.ok) return;
             const data = await res.json();
-            const badge = document.querySelector('header .ri-shopping-cart-2-line').parentElement.querySelector('span');
+            const badge = document.getElementById('cartBtn').querySelector('span');
             const count = data.items ? data.items.reduce((s,i)=>s+(i.quantity||1),0) : 0;
             if(badge) badge.textContent = count;
         }catch(e){ console.error(e); }
@@ -1906,102 +1663,205 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Header cart button -> cart page
-    const cartBtn = document.getElementById('cartBtn') || document.querySelector('header .ri-shopping-cart-2-line').parentElement;
+    const cartBtn = document.getElementById('cartBtn');
     if(cartBtn) cartBtn.addEventListener('click', ()=> window.location.href = '/cart.html');
 
     // Header order now -> cart
     document.querySelectorAll('button').forEach(b=>{ if(b.textContent && b.textContent.trim().toLowerCase()==='order now'){ b.addEventListener('click', ()=> window.location.href = '/cart.html'); } });
 
+    // Three-column delivery option tiles
+    function syncHomeDeliveryOptions(){
+        document.querySelectorAll('.home-delivery-option').forEach(tile => {
+            const selected = !!tile.querySelector('input[type="radio"]:checked');
+            tile.classList.toggle('border-primary', selected);
+            tile.classList.toggle('bg-primary/5', selected);
+            tile.classList.toggle('ring-1', selected);
+            tile.classList.toggle('ring-primary/20', selected);
+            tile.classList.toggle('border-gray-200', !selected);
+        });
+    }
+    document.querySelectorAll('input[name="delivery-option"]').forEach(input => {
+        input.addEventListener('change', syncHomeDeliveryOptions);
+    });
+    syncHomeDeliveryOptions();
+
+    // Saved delivery addresses for signed-in customers
+    const homeSavedAddressToggle = document.getElementById('homeSavedAddressToggle');
+    if(homeSavedAddressToggle){
+        homeSavedAddressToggle.addEventListener('click', () => {
+            const content = document.getElementById('homeSavedAddressContent');
+            const chevron = document.getElementById('homeSavedAddressChevron');
+            const expanded = homeSavedAddressToggle.getAttribute('aria-expanded') === 'true';
+            homeSavedAddressToggle.setAttribute('aria-expanded', String(!expanded));
+            if(content) content.classList.toggle('hidden', expanded);
+            if(chevron) chevron.className = `bi ${expanded ? 'bi-chevron-down' : 'bi-chevron-up'} text-gray-500`;
+        });
+    }
+
+    async function loadHomeSavedAddresses(){
+        const section = document.getElementById('homeSavedAddressSection');
+        const container = document.getElementById('homeSavedAddressCards');
+        const status = document.getElementById('homeSavedAddressStatus');
+        if(!section || !container || !getToken()) return;
+        try{
+            const res = await fetch('/api/users/me', { headers: authHeaders(), signal: AbortSignal.timeout(5000) });
+            if(!res.ok) return;
+            const userData = await res.json();
+            const addresses = Array.isArray(userData.addresses) ? userData.addresses : [];
+            if(!addresses.length) return;
+            section.classList.remove('hidden');
+            container.innerHTML = '';
+            let selectedId = '';
+
+            const selectAddress = (address, card) => {
+                selectedId = String(address._id || '');
+                document.querySelectorAll('[data-home-address]').forEach(item => {
+                    const selected = item === card;
+                    item.classList.toggle('border-primary', selected);
+                    item.classList.toggle('bg-primary/5', selected);
+                    item.classList.toggle('ring-1', selected);
+                    item.classList.toggle('ring-primary/20', selected);
+                    item.classList.toggle('border-gray-200', !selected);
+                });
+                document.getElementById('deliveryStreet').value = address.street || '';
+                document.getElementById('deliveryCity').value = address.city || '';
+                document.getElementById('deliveryZip').value = address.zip || '';
+                status.textContent = address.isDefault ? 'Default selected' : 'Address selected';
+            };
+
+            addresses.forEach(address => {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.dataset.homeAddress = String(address._id || '');
+                card.className = 'h-full text-left rounded-xl border border-gray-200 p-4 hover:border-primary transition';
+                const header = document.createElement('div');
+                header.className = 'flex items-start justify-between gap-2 mb-2';
+                const label = document.createElement('span');
+                label.className = 'font-semibold text-gray-900';
+                label.textContent = address.label || 'Address';
+                header.appendChild(label);
+                if(address.isDefault){
+                    const badge = document.createElement('span');
+                    badge.className = 'text-[11px] font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700';
+                    badge.textContent = 'Default';
+                    header.appendChild(badge);
+                }
+                const street = document.createElement('p');
+                street.className = 'text-sm text-gray-700';
+                street.textContent = address.street || '';
+                const city = document.createElement('p');
+                city.className = 'text-sm text-gray-500 mt-1';
+                city.textContent = [address.city, address.zip].filter(Boolean).join(' ');
+                card.append(header, street, city);
+                card.addEventListener('click', () => selectAddress(address, card));
+                container.appendChild(card);
+            });
+
+            const defaultAddress = addresses.find(address => address.isDefault);
+            if(defaultAddress){
+                const defaultCard = Array.from(container.children).find(card =>
+                    card.dataset.homeAddress === String(defaultAddress._id || '')
+                );
+                if(defaultCard) selectAddress(defaultAddress, defaultCard);
+            }
+        }catch(err){
+            console.error('Saved address load failed:', err);
+        }
+    }
+
+    function parseFullDeliveryLocation(data) {
+        const address = data.address || {};
+        const detailedAddress = [
+            address.house_number,
+            address.road || address.pedestrian || address.footway || address.path || address.residential,
+            address.neighbourhood || address.quarter,
+            address.suburb,
+            address.city_district,
+            address.city || address.town || address.village || address.municipality,
+            address.county || address.state_district,
+            address.state,
+            address.postcode,
+            address.country
+        ].filter((part, index, values) => part && values.indexOf(part) === index).join(', ');
+        return {
+            fullAddress: data.display_name || detailedAddress,
+            city: address.city || address.town || address.village || address.municipality || address.county || '',
+            postcode: address.postcode || ''
+        };
+    }
+
     // Geolocation for delivery address
     const useLocationBtn = document.getElementById('useLocationBtn');
+    const homeGeoStatus = document.getElementById('homeGeoStatus');
     if(useLocationBtn) {
         useLocationBtn.addEventListener('click', function() {
             if(!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser. Please enter address manually.');
+                if(homeGeoStatus) homeGeoStatus.textContent = 'Geolocation is not supported by this browser.';
                 return;
             }
-        clearSelectedSavedAddressHome();
             useLocationBtn.disabled = true;
-            useLocationBtn.textContent = 'Getting location...';
+            useLocationBtn.innerHTML = '<i class="bi bi-geo-alt"></i> Getting location...';
+            if(homeGeoStatus) homeGeoStatus.textContent = 'Requesting a high-accuracy location...';
             navigator.geolocation.getCurrentPosition(
                 async function(position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     try {
-                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                        if(homeGeoStatus) homeGeoStatus.textContent = 'Fetching the complete address...';
+                        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=en&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`);
+                        if(!res.ok) throw new Error('Reverse geocoding failed');
                         const data = await res.json();
-                        const addressParts = data.address || {};
-                        document.getElementById('deliveryStreet').value = (addressParts.road || addressParts.pedestrian || addressParts.residential || addressParts.house_number || '').trim();
-                        document.getElementById('deliveryCity').value = (addressParts.city || addressParts.town || addressParts.village || '').trim();
-                        document.getElementById('deliveryZip').value = (addressParts.postcode || '').trim();
-                        useLocationBtn.textContent = '✓ Location Detected';
-                        setTimeout(()=>{ useLocationBtn.disabled = false; useLocationBtn.textContent = 'Use My Location'; }, 2000);
+                        const location = parseFullDeliveryLocation(data);
+                        if(!location.fullAddress) throw new Error('No address found for this location');
+                        document.getElementById('deliveryStreet').value = location.fullAddress;
+                        document.getElementById('deliveryCity').value = location.city;
+                        document.getElementById('deliveryZip').value = location.postcode;
+                        const accuracy = Math.round(position.coords.accuracy || 0);
+                        if(homeGeoStatus) homeGeoStatus.textContent = `Complete address filled${accuracy ? ` (GPS accuracy about ${accuracy} m)` : ''}.`;
+                        useLocationBtn.innerHTML = '<i class="bi bi-check-circle"></i> Location Filled';
                     } catch(e) {
-                        alert('Could not fetch address details. Please enter manually.');
+                        if(homeGeoStatus) homeGeoStatus.textContent = 'Could not fetch the complete address. Please enter it manually.';
+                    } finally {
                         useLocationBtn.disabled = false;
-                        useLocationBtn.textContent = 'Use My Location';
+                        setTimeout(()=>{ useLocationBtn.innerHTML = '<i class="bi bi-geo-alt"></i> Use My Location'; }, 1800);
                     }
                 },
                 function(error) {
-                    alert('Could not access location: ' + error.message + '. Please enter address manually.');
+                    if(homeGeoStatus) homeGeoStatus.textContent = `Could not access location: ${error.message}`;
                     useLocationBtn.disabled = false;
-                    useLocationBtn.textContent = 'Use My Location';
-                }
+                    useLocationBtn.innerHTML = '<i class="bi bi-geo-alt"></i> Use My Location';
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
         });
     }
 
+    loadHomeSavedAddresses();
     updateCartCount();
 });
 </script>
 
-<!-- Theme Toggle Script -->
-<script>
-  function initTheme() {
-    const savedTheme = localStorage.getItem('gs_theme') || 'light';
-    const html = document.documentElement;
-    
-    if (savedTheme === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-    
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const isDark = html.classList.toggle('dark');
-        localStorage.setItem('gs_theme', isDark ? 'dark' : 'light');
-        applyThemeToElements();
-      });
-    }
-  }
-  
-  function applyThemeToElements() {
-    const isDark = document.documentElement.classList.contains('dark');
-    
-    // Update card backgrounds
-    document.querySelectorAll('.smoothie-card').forEach(card => {
-      if (isDark) {
-        card.classList.add('dark:bg-slate-800', 'dark:text-gray-100');
-      } else {
-        card.classList.remove('dark:bg-slate-800', 'dark:text-gray-100');
-      }
-    });
-  }
-  
-  // Initialize theme on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTheme);
-  } else {
-    initTheme();
-  }
-</script>
-
 <!-- Back to top button -->
 <button id="toTopBtn" aria-label="Scroll to top" class="hidden fixed bottom-6 right-6 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:scale-105 transition-transform">
-  <i class="ri-arrow-up-line text-xl"></i>
+  <i class="bi bi-arrow-up text-xl"></i>
 </button>
+
+<!-- Kept at the document root so it always overlays the complete page. -->
+<div id="logoutModal" class="hidden fixed inset-0 items-center justify-center bg-slate-950/55 backdrop-blur-sm px-4" style="z-index: 9999" aria-hidden="true">
+  <section role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle" class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+    <div class="flex items-start gap-4">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"><i class="bi bi-exclamation-triangle text-2xl"></i></span>
+      <div>
+        <h2 id="logoutModalTitle" class="text-xl font-bold text-slate-900">Log out?</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600">You will need to sign in again to access your account and profile.</p>
+      </div>
+    </div>
+    <div class="mt-7 flex justify-end gap-3">
+      <button id="logoutCancelBtn" type="button" class="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-200">Cancel</button>
+      <button id="logoutConfirmBtn" type="button" class="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700">Log out</button>
+    </div>
+  </section>
+</div>
 
 <script>
   (function(){

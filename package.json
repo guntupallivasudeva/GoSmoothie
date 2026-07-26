@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "test": "node server/test.js",
     "seed": "node server/seed.js",
+    "create-local-accounts": "node server/scripts/create_local_accounts.js",
     "reset-db": "node server/scripts/reset_database_with_snapshot.js",
     "verify": "node verify-setup.js"
   },
@@ -16,7 +17,6 @@
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.1.0",
-    "bootstrap-icons": "^1.13.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",

@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
+  <script src="/api-client.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout - GoSmoothie</title>
@@ -36,16 +37,13 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
-      rel="stylesheet"
-    />
-    <style>
+<style>
       body {
         font-family: "Poppins", sans-serif;
       }
     </style>
-  </head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
   <body
     class="bg-gradient-to-br from-[#edf4ef] via-[#f8fbf9] to-[#edf4ef] min-h-screen"
   >
@@ -79,9 +77,11 @@
         <div class="mb-7">
           <a
             href="/cart.html"
+            aria-label="Back to cart"
+            title="Back to cart"
             class="inline-flex items-center px-3 py-2 bg-white shadow-sm rounded-full text-sm"
           >
-            <i class="ri-arrow-left-line text-lg"></i>
+            <i class="bi bi-arrow-left text-lg"></i>
           </a>
         </div>
 
@@ -130,7 +130,7 @@
                 <div
                   class="w-14 h-14 rounded-full bg-green-100 text-primary flex items-center justify-center text-2xl"
                 >
-                  <i class="ri-shopping-bag-3-line"></i>
+                  <i class="bi bi-bag"></i>
                 </div>
               </div>
               <div class="space-y-2.5 text-slate-700 text-base">
@@ -240,7 +240,7 @@
                       id="pickupUseLocationBtn"
                       class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap"
                     >
-                      <i class="ri-map-pin-2-line"></i> Use the Location
+                      <i class="bi bi-geo-alt"></i> Use the Location
                     </button>
                     <h4 class="font-semibold text-gray-800">
                       Find a Store Near You
@@ -263,7 +263,7 @@
                       id="pickupFindBtn"
                       class="bg-primary text-white px-4 flex items-center justify-center whitespace-nowrap !rounded-none"
                     >
-                      <i class="ri-search-line mr-2"></i> Find
+                      <i class="bi bi-search mr-2"></i> Find
                     </button>
                   </div>
                 </div>
@@ -458,27 +458,12 @@
                       >
                     </label>
                   </div>
-                  <div id="deliverySavedAddressSection" class="mb-3">
-                    <div class="flex items-center justify-between mb-2">
-                      <h5 class="text-sm font-semibold text-gray-700">
-                        Saved addresses
-                      </h5>
-                      <p
-                        id="deliverySavedAddressBadge"
-                        class="text-sm font-medium text-primary hidden"
-                      ></p>
-                    </div>
-                    <div
-                      id="deliverySavedAddressCards"
-                      class="grid grid-cols-1 md:grid-cols-2 gap-3"
-                    ></div>
-                  </div>
                   <button
                     type="button"
                     id="useLocationBtn"
                     class="mb-3 flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition"
                   >
-                    <i class="ri-map-pin-2-line"></i> Use My Location
+                    <i class="bi bi-geo-alt"></i> Use My Location
                   </button>
                   <p id="geoStatus" class="mb-3 text-sm text-gray-500"></p>
                   <div
@@ -510,13 +495,37 @@
                     </div>
                   </div>
                 </div>
+                <div id="deliverySavedAddressSection" class="mb-6">
+                  <button
+                    type="button"
+                    id="deliverySavedAddressToggle"
+                    class="w-full flex items-center justify-between gap-3 py-2 text-left"
+                    aria-expanded="true"
+                    aria-controls="deliverySavedAddressContent"
+                  >
+                    <span class="font-semibold text-gray-800">Saved Addresses</span>
+                    <span class="flex items-center gap-2">
+                    <p
+                      id="deliverySavedAddressBadge"
+                      class="text-sm font-medium text-primary hidden"
+                    ></p>
+                    <i id="deliverySavedAddressChevron" class="bi bi-chevron-up text-gray-500"></i>
+                    </span>
+                  </button>
+                  <div id="deliverySavedAddressContent">
+                  <div
+                    id="deliverySavedAddressCards"
+                    class="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch"
+                  ></div>
+                  </div>
+                </div>
                 <div class="mb-6">
                   <h4 class="font-semibold text-gray-800 mb-3">
                     Delivery Options
                   </h4>
-                  <div class="space-y-3" id="deliveryOptionsGroup">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="deliveryOptionsGroup">
                     <label
-                      class="delivery-option-card flex items-center justify-between p-3 border border-primary bg-primary/5 rounded cursor-pointer"
+                      class="delivery-option-card flex h-full flex-col items-start justify-between gap-3 p-4 border border-primary bg-primary/5 rounded-xl cursor-pointer"
                       data-option="standard"
                     >
                       <div class="flex items-center">
@@ -532,7 +541,7 @@
                       <span class="text-sm text-gray-500">30-45 min</span>
                     </label>
                     <label
-                      class="delivery-option-card flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition"
+                      class="delivery-option-card flex h-full flex-col items-start justify-between gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-primary transition"
                       data-option="express"
                     >
                       <div class="flex items-center">
@@ -549,7 +558,7 @@
                       >
                     </label>
                     <label
-                      class="delivery-option-card flex items-center justify-between p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition"
+                      class="delivery-option-card flex h-full flex-col items-start justify-between gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-primary transition"
                       data-option="scheduled"
                     >
                       <div class="flex items-center">
@@ -650,6 +659,53 @@
       }
 
       /* Load cart summary */
+      let summaryItems = [];
+
+      function selectedDeliveryPricing() {
+        if (orderMode === "pickup") return { label: "Pickup", fee: 0 };
+        const option =
+          document.querySelector('input[name="delivery-option"]:checked')
+            ?.value || "standard";
+        if (option === "express")
+          return { label: "Express delivery", fee: 20 };
+        if (option === "scheduled")
+          return { label: "Scheduled delivery", fee: 0 };
+        return { label: "Standard delivery", fee: 0 };
+      }
+
+      function renderOrderSummary() {
+        const summary = document.getElementById("summary");
+        const totalAmount = document.getElementById("totalAmount");
+        const snapshot = document.getElementById("snapshotTotal");
+        if (!summaryItems.length) {
+          summary.innerHTML =
+            '<p class="text-gray-600">Your cart is empty</p>';
+          totalAmount.textContent = "₹ 0";
+          if (snapshot) snapshot.textContent = "₹ 0";
+          return;
+        }
+
+        let subtotal = 0;
+        let html = "";
+        summaryItems.forEach((item) => {
+          const lineTotal =
+            (item.price || 0) * (item.quantity || 1);
+          subtotal += lineTotal;
+          html += `<div class="flex justify-between gap-3"><span>${item.name} x${item.quantity}</span><span>₹ ${lineTotal}</span></div>`;
+        });
+        const tax = Math.round(subtotal * 0.1);
+        const delivery = selectedDeliveryPricing();
+        const finalTotal = subtotal + tax + delivery.fee;
+        html += `<div class="border-t border-gray-200 my-3 pt-3">
+      <div class="flex justify-between text-gray-700 mb-2"><span>Subtotal</span><span>₹ ${subtotal}</span></div>
+      <div class="flex justify-between text-gray-700 mb-2"><span>Tax (10%)</span><span>₹ ${tax}</span></div>
+      <div class="flex justify-between text-gray-700 mb-2"><span>${delivery.label}</span><span class="${delivery.fee ? "text-orange-600 font-semibold" : "text-green-600"}">${delivery.fee ? `₹ ${delivery.fee}` : "Free"}</span></div>
+    </div>`;
+        summary.innerHTML = html;
+        totalAmount.textContent = "₹ " + finalTotal;
+        if (snapshot) snapshot.textContent = "₹ " + finalTotal;
+      }
+
       async function loadSummary() {
         const token = localStorage.getItem("gs_token");
         let url = "/api/cart";
@@ -659,6 +715,9 @@
             headers: token ? { Authorization: "Bearer " + token } : {},
           });
           const data = await r.json();
+          summaryItems = Array.isArray(data.items) ? data.items : [];
+          renderOrderSummary();
+          return;
           if (!data.items || !data.items.length) {
             document.getElementById("summary").innerHTML =
               '<p class="text-gray-600">Your cart is empty</p>';
@@ -714,6 +773,7 @@
           const active = orderMode === "pickup";
           pickupToggle.className = `px-4 py-3 rounded-xl text-sm font-semibold transition shadow-sm ${active ? "bg-white text-slate-900 ring-1 ring-green-200" : "bg-transparent text-slate-500 hover:text-slate-900"}`;
         }
+        renderOrderSummary();
       }
       document
         .getElementById("modeToggleDelivery")
@@ -861,9 +921,10 @@
       document
         .querySelectorAll('input[name="delivery-option"]')
         .forEach((radio) => {
-          radio.addEventListener("change", () =>
-            updateDeliveryOptionUI(document),
-          );
+          radio.addEventListener("change", () => {
+            updateDeliveryOptionUI(document);
+            renderOrderSummary();
+          });
         });
 
       updateDeliveryOptionUI(document);
@@ -894,10 +955,49 @@
 
       async function reverseGeocode(lat, lon) {
         const r = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`,
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=en&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`,
         );
         if (!r.ok) throw new Error("Reverse geocoding failed");
         return await r.json();
+      }
+
+      function parseFullDeliveryLocation(data) {
+        const address = data.address || {};
+        const detailedAddress = [
+          address.house_number,
+          address.road ||
+            address.pedestrian ||
+            address.footway ||
+            address.path ||
+            address.residential,
+          address.neighbourhood || address.quarter,
+          address.suburb,
+          address.city_district,
+          address.city ||
+            address.town ||
+            address.village ||
+            address.municipality,
+          address.county || address.state_district,
+          address.state,
+          address.postcode,
+          address.country,
+        ]
+          .filter(
+            (part, index, values) =>
+              part && values.indexOf(part) === index,
+          )
+          .join(", ");
+        return {
+          fullAddress: data.display_name || detailedAddress,
+          city:
+            address.city ||
+            address.town ||
+            address.village ||
+            address.municipality ||
+            address.county ||
+            "",
+          postcode: address.postcode || "",
+        };
       }
 
       function applyAccountDefaultsPayment() {
@@ -929,6 +1029,29 @@
 
       let orderForSomeoneElse = false;
       let deliveryAddressSource = "saved";
+      const deliverySavedAddressToggle = document.getElementById(
+        "deliverySavedAddressToggle",
+      );
+      if (deliverySavedAddressToggle) {
+        deliverySavedAddressToggle.addEventListener("click", () => {
+          const content = document.getElementById(
+            "deliverySavedAddressContent",
+          );
+          const chevron = document.getElementById(
+            "deliverySavedAddressChevron",
+          );
+          const expanded =
+            deliverySavedAddressToggle.getAttribute("aria-expanded") ===
+            "true";
+          deliverySavedAddressToggle.setAttribute(
+            "aria-expanded",
+            String(!expanded),
+          );
+          if (content) content.classList.toggle("hidden", expanded);
+          if (chevron)
+            chevron.className = `bi ${expanded ? "bi-chevron-down" : "bi-chevron-up"} text-gray-500`;
+        });
+      }
       let deliveryNormalValues = { name: "", phone: "" };
 
       function captureDeliveryNormalValues() {
@@ -1053,6 +1176,12 @@
       /* Use my location for delivery */
       async function attemptDeliveryGeolocation() {
         const status = document.getElementById("geoStatus");
+        const button = document.getElementById("useLocationBtn");
+        if (button) {
+          button.disabled = true;
+          button.innerHTML =
+            '<i class="bi bi-geo-alt"></i> Getting location...';
+        }
         if (status) status.textContent = "Locating...";
         try {
           deliveryAddressSource = "new";
@@ -1071,19 +1200,28 @@
           const { latitude: lat, longitude: lon } = pos.coords;
           if (status) status.textContent = "Fetching address...";
           const j = await reverseGeocode(lat, lon);
-          const addr = j.address || {};
+          const location = parseFullDeliveryLocation(j);
+          if (!location.fullAddress)
+            throw new Error("No address found for this location");
           document.getElementById("deliveryStreet").value =
-            [addr.road, addr.house_number].filter(Boolean).join(" ") ||
-            j.display_name ||
-            "";
-          document.getElementById("deliveryCity").value =
-            addr.city || addr.town || addr.village || addr.county || "";
-          document.getElementById("deliveryZip").value = addr.postcode || "";
+            location.fullAddress;
+          document.getElementById("deliveryCity").value = location.city;
+          document.getElementById("deliveryZip").value = location.postcode;
           updateDeliveryAddressSourceUI();
-          if (status) status.textContent = "Location filled";
+          const accuracy = Math.round(pos.coords.accuracy || 0);
+          if (status)
+            status.textContent = `Complete address filled${accuracy ? ` (GPS accuracy about ${accuracy} m)` : ""}.`;
         } catch (err) {
-          if (status) status.textContent = "Unable to use location";
+          if (status)
+            status.textContent =
+              "Unable to fetch the complete address. Please enter it manually.";
           console.error(err);
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.innerHTML =
+              '<i class="bi bi-geo-alt"></i> Use My Location';
+          }
         }
       }
 
@@ -1172,7 +1310,9 @@
           });
         });
 
+      let orderSubmissionInProgress = false;
       async function placeOrder() {
+        if (orderSubmissionInProgress) return;
         const msg = document.getElementById("checkoutMessage");
         if (msg) msg.classList.add("hidden");
         const mode = orderMode;
@@ -1250,32 +1390,82 @@
           };
         }
 
+        const submitButtons = [
+          document.getElementById("pickupContinueBtn"),
+          document.getElementById("deliveryContinueBtn"),
+        ].filter(Boolean);
+        orderSubmissionInProgress = true;
+        submitButtons.forEach((button) => {
+          button.disabled = true;
+          button.classList.add("opacity-60", "cursor-not-allowed");
+        });
+        const activeButton =
+          mode === "pickup"
+            ? document.getElementById("pickupContinueBtn")
+            : document.getElementById("deliveryContinueBtn");
+        const originalButtonText = activeButton
+          ? activeButton.textContent
+          : "";
+        if (activeButton) activeButton.textContent = "Placing Order...";
+
         try {
           const headers = Object.assign(
             { "Content-Type": "application/json" },
             token ? { Authorization: "Bearer " + token } : {},
           );
+
+          /*
+           * External payment processing is intentionally disabled for now.
+           * Restore this block when online payments are enabled:
+           *
+           * const paymentResponse = await fetch("/api/payments/create-session", {
+           *   method: "POST",
+           *   headers,
+           *   body: JSON.stringify({
+           *     clientId: body.clientId,
+           *     successUrl: window.location.origin + "/order-confirmation.html",
+           *     cancelUrl: window.location.href,
+           *   }),
+           * });
+           * const paymentSession = await paymentResponse.json();
+           * if (paymentSession.url) {
+           *   window.location.assign(paymentSession.url);
+           *   return;
+           * }
+           */
+
           const res = await fetch("/api/orders", {
             method: "POST",
             headers,
             body: JSON.stringify(body),
+            signal: AbortSignal.timeout(12000),
           });
           const data = await res.json();
-          if (res.ok && (data._id || data.orderId)) {
+          if (res.ok && data.orderId) {
             setMessage("Order placed! Redirecting...", "success");
             localStorage.removeItem(clientIdKey);
-            setTimeout(
-              () =>
-                (window.location.href =
-                  "/order-confirmation.html?orderId=" +
-                  (data._id || data.orderId)),
-              900,
+            window.location.assign(
+              "/order-confirmation.html?orderId=" +
+                encodeURIComponent(data.orderId),
             );
+            return;
           } else {
             setMessage(data.error || "Order failed", "error");
           }
         } catch (err) {
-          setMessage("Network error", "error");
+          setMessage(
+            err.name === "TimeoutError"
+              ? "Order request timed out. Please try again."
+              : "Could not place the order. Please try again.",
+            "error",
+          );
+        } finally {
+          orderSubmissionInProgress = false;
+          submitButtons.forEach((button) => {
+            button.disabled = false;
+            button.classList.remove("opacity-60", "cursor-not-allowed");
+          });
+          if (activeButton) activeButton.textContent = originalButtonText;
         }
       }
 
@@ -1358,7 +1548,7 @@
           const isDefault = !!address.isDefault;
           const card = document.createElement("button");
           card.type = "button";
-          card.className = `w-full text-left rounded-xl border p-3 transition ${selected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-gray-200 hover:border-primary"}`;
+          card.className = `w-full h-full text-left rounded-xl border p-4 transition ${selected ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-gray-200 hover:border-primary"}`;
           card.innerHTML = `
       <div class="flex items-start justify-between gap-3">
         <div>

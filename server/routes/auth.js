@@ -4,6 +4,7 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { secret } = require("../middleware/auth");
+const { ensureLocalAccounts, LOCAL_USER } = require("../utils/localAccounts");
 
 // POST /api/auth/register { name, email, password }
 router.post("/register", async (req, res) => {
@@ -48,7 +49,13 @@ router.post("/login", async (req, res) => {
   if (!email || !password)
     return res.status(400).json({ error: "email,password required" });
   try {
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
+    // The local seed command resets users. Restore the requested local account
+    // on demand so an existing development session cannot become unusable.
+    if (!user && String(email).toLowerCase() === LOCAL_USER.email) {
+      await ensureLocalAccounts();
+      user = await User.findOne({ email: LOCAL_USER.email });
+    }
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
     const ok = await user.verifyPassword(password);
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });

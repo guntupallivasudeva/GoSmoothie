@@ -44,7 +44,7 @@ async function ensureSnapshotProducts() {
     }
     if (!existing.category) updates.category = item.category;
     if (!existing.type) updates.type = item.type || "Vegetarian";
-    if (!storedImage || isLegacyExternalImage) updates.image = item.image;
+    if (!storedImage || isCatalogManagedImage) updates.image = item.image;
     if (existing.isFeatured === undefined)
       updates.isFeatured = !!item.isFeatured;
     if (existing.featuredOrder === undefined || existing.featuredOrder === null)

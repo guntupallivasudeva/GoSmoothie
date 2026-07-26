@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="/api-client.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Full Menu - GoSmoothie</title>
@@ -10,12 +11,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
-  <style>
+<style>
     body { font-family: 'Poppins', sans-serif; }
     .menu-card:hover .nutrition-panel { opacity: 1; visibility: visible; }
     .nutrition-panel { opacity: 0; visibility: hidden; transition: all 0.25s ease; }
   </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-gradient-to-br from-green-50 via-white to-orange-50 min-h-screen">
   <header class="bg-white shadow-sm sticky top-0 z-50">
@@ -30,7 +31,7 @@
       <div class="flex items-center space-x-4">
         <div class="relative">
           <button id="cartBtn" class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-primary transition">
-            <i class="ri-shopping-cart-2-line text-xl"></i>
+            <i class="bi bi-cart text-xl"></i>
             <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
           </button>
         </div>
@@ -45,10 +46,10 @@
           <div id="userMenuDropdown" class="absolute right-0 top-full pt-2 w-48 opacity-0 invisible pointer-events-none translate-y-1 transition-all duration-150 z-50">
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
               <a href="/profile.html" class="block px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-primary transition flex items-center gap-2">
-                <i class="ri-user-line"></i> My Profile
+                <i class="bi bi-person"></i> My Profile
               </a>
               <button id="logoutBtn" class="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition flex items-center gap-2 border-t">
-                <i class="ri-logout-box-r-line"></i> Logout
+                <i class="bi bi-box-arrow-right"></i> Logout
               </button>
             </div>
           </div>
@@ -62,8 +63,8 @@
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(74,222,128,0.14),_transparent_35%),radial-gradient(circle_at_bottom_left,_rgba(249,115,22,0.10),_transparent_30%)]"></div>
       <div class="relative container mx-auto px-4 py-14 md:py-16">
         <div class="max-w-3xl">
-          <a href="/main.html" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition rounded-lg shadow-sm mb-6 font-medium">
-            <i class="ri-arrow-left-line text-lg"></i> Back to Home
+          <a href="/main.html" aria-label="Back to home" title="Back to home" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition rounded-lg shadow-sm mb-6 font-medium">
+            <i class="bi bi-arrow-left text-lg"></i>
           </a>
           <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-semibold mb-4">
             Full Menu Collection
@@ -698,7 +699,7 @@
     }
 
     function updateCartCount(){
-      const badge = document.querySelector('header .ri-shopping-cart-2-line').parentElement.querySelector('span');
+      const badge = document.getElementById('cartBtn').querySelector('span');
       const token = getToken();
       let url = '/api/cart';
       if(!token) url += '?clientId=' + getClientId();
@@ -709,6 +710,53 @@
           if(badge) badge.textContent = count;
         })
         .catch(() => {});
+    }
+
+    function cartUrl(path = ''){
+      const token = getToken();
+      return '/api/cart' + path + (token ? '' : '?clientId=' + encodeURIComponent(getClientId()));
+    }
+
+    async function fetchMenuCart(){
+      const res = await fetch(cartUrl(), { headers: authHeaders(), signal: AbortSignal.timeout(5000) });
+      if(!res.ok) throw new Error('Failed to load cart');
+      return res.json();
+    }
+
+    function setMenuCardState(card, item){
+      const button = card.querySelector('.add-to-cart');
+      const input = card.querySelector('.qty-input');
+      if(item){
+        button.dataset.inCart = '1';
+        button.dataset.cartId = item.cartId || item.id;
+        button.textContent = 'Remove from Cart';
+        button.classList.remove('bg-primary', 'hover:bg-green-600');
+        button.classList.add('bg-red-500', 'hover:bg-red-600');
+        input.value = item.quantity || 1;
+      }else{
+        button.dataset.inCart = '0';
+        delete button.dataset.cartId;
+        button.textContent = 'Add to Cart';
+        button.classList.remove('bg-red-500', 'hover:bg-red-600');
+        button.classList.add('bg-primary', 'hover:bg-green-600');
+        input.value = 1;
+      }
+    }
+
+    async function syncMenuCards(){
+      try{
+        const cart = await fetchMenuCart();
+        document.querySelectorAll('.menu-card').forEach(card => {
+          const productId = card.dataset.productId || '';
+          const item = (cart.items || []).find(entry =>
+            (productId && entry.productId === productId) ||
+            (!productId && entry.name === card.dataset.name)
+          );
+          setMenuCardState(card, item);
+        });
+      }catch(err){
+        console.error(err);
+      }
     }
 
     function renderMenu() {
@@ -723,7 +771,7 @@
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             ${section.items.map(item => `
-              <article class="menu-card bg-white rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2" data-name="${item.name}" data-price="${item.price}" data-type="${item.type.toLowerCase()}">
+              <article class="menu-card bg-white rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2" data-product-id="${item.productId || ''}" data-name="${item.name}" data-price="${item.price}" data-image="${item.image || ''}" data-type="${item.type.toLowerCase()}">
                 <div class="relative aspect-[4/3] bg-stone-50">
                   <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover object-center">
                   <div class="nutrition-panel absolute inset-0 bg-black/75 p-5 text-white flex flex-col justify-center">
@@ -766,6 +814,7 @@
       `).join('');
       attachCardHandlers();
       applyMenuFilter();
+      syncMenuCards();
     }
 
     function applyMenuFilter() {
@@ -809,10 +858,10 @@
 
         // set type/icon
         icon.className = '';
-        if(type === 'warning') icon.innerHTML = '<i class="ri-alert-line text-yellow-500"></i>';
-        else if(type === 'error') icon.innerHTML = '<i class="ri-close-circle-line text-red-500"></i>';
-        else if(type === 'success') icon.innerHTML = '<i class="ri-checkbox-circle-line text-green-500"></i>';
-        else icon.innerHTML = '<i class="ri-information-line text-blue-500"></i>';
+        if(type === 'warning') icon.innerHTML = '<i class="bi bi-exclamation-triangle text-yellow-500"></i>';
+        else if(type === 'error') icon.innerHTML = '<i class="bi bi-x-circle text-red-500"></i>';
+        else if(type === 'success') icon.innerHTML = '<i class="bi bi-check-circle text-green-500"></i>';
+        else icon.innerHTML = '<i class="bi bi-info-circle text-blue-500"></i>';
 
         modal.classList.remove('hidden');
         modal.setAttribute('aria-hidden', 'false');
@@ -839,41 +888,49 @@
     function attachCardHandlers(){
       document.querySelectorAll('.menu-card').forEach(card => {
         const dec = card.querySelector('.qty-dec');
-        const inc = card.querySelector('.qty-input');
+        const inc = card.querySelector('.qty-inc');
         const input = card.querySelector('.qty-input');
         const addBtn = card.querySelector('.add-to-cart');
 
-        dec.addEventListener('click', () => { input.value = Math.max(1, parseInt(input.value || 1) - 1); });
-        inc.addEventListener('click', () => { input.value = Math.max(1, parseInt(input.value || 1) + 1); });
+        const changeQuantity = async nextQuantity => {
+          input.value = Math.max(1, parseInt(nextQuantity, 10) || 1);
+          if(addBtn.dataset.inCart !== '1' || !addBtn.dataset.cartId) return;
+          try{
+            const res = await fetch(cartUrl('/' + addBtn.dataset.cartId), {
+              method: 'PUT',
+              headers: Object.assign({'Content-Type':'application/json'}, authHeaders()),
+              body: JSON.stringify({quantity: parseInt(input.value, 10)}),
+              signal: AbortSignal.timeout(5000)
+            });
+            if(!res.ok) throw new Error('Quantity update failed');
+            window.dispatchEvent(new Event('cartUpdated'));
+          }catch(err){
+            showToastMenu(err.message, 'error');
+            syncMenuCards();
+          }
+        };
+
+        dec.addEventListener('click', () => changeQuantity(parseInt(input.value || 1, 10) - 1));
+        inc.addEventListener('click', () => changeQuantity(parseInt(input.value || 1, 10) + 1));
+        input.addEventListener('change', () => changeQuantity(input.value));
         addBtn.addEventListener('click', async () => {
           const name = card.dataset.name;
           const price = parseFloat(card.dataset.price) || 0;
+          const productId = card.dataset.productId || '';
+          const image = card.dataset.image || '';
           const qty = parseInt(input.value || 1);
-          const body = { name, price, quantity: qty };
+          const body = { productId, name, price, image, quantity: qty };
           const token = getToken();
           if(!token) body.clientId = getClientId();
 
-          // Check if already in cart
-          let isInCart = false;
-          try {
-            const cartRes = await fetch('/api/cart', { headers: authHeaders(), signal: AbortSignal.timeout(5000) });
-            if(cartRes.ok) {
-              const cartData = await cartRes.json();
-              isInCart = cartData.items && cartData.items.some(item => item.name === name);
-            }
-          } catch(e) {}
-
-          if(isInCart) {
+          if(addBtn.dataset.inCart === '1') {
             // Remove from cart
             try {
-              const existingItem = await fetch('/api/cart', { headers: authHeaders(), signal: AbortSignal.timeout(5000) }).then(r => r.json());
-              const item = existingItem.items.find(i => i.name === name);
-              if(item) {
-                const delRes = await fetch('/api/cart/' + item._id, { method: 'DELETE', headers: authHeaders(), signal: AbortSignal.timeout(5000) });
+              const itemId = addBtn.dataset.cartId;
+              if(itemId) {
+                const delRes = await fetch(cartUrl('/' + itemId), { method: 'DELETE', headers: authHeaders(), signal: AbortSignal.timeout(5000) });
                 if(delRes.ok) {
-                  addBtn.textContent = 'Add to Cart';
-                  addBtn.classList.remove('!bg-red-500', 'hover:!bg-red-600');
-                  addBtn.classList.add('!bg-primary', 'hover:!bg-green-600');
+                  setMenuCardState(card, null);
                   showToastMenu('Item removed from cart', 'success');
                   window.dispatchEvent(new Event('cartUpdated'));
                 } else {
@@ -893,9 +950,12 @@
                 signal: AbortSignal.timeout(5000)
               });
               if(res.ok) {
-                addBtn.textContent = 'Remove from Cart';
-                addBtn.classList.remove('!bg-primary', 'hover:!bg-green-600');
-                addBtn.classList.add('!bg-red-500', 'hover:!bg-red-600');
+                const cart = await res.json();
+                const item = (cart.items || []).find(entry =>
+                  (productId && entry.productId === productId) ||
+                  (!productId && entry.name === name)
+                );
+                setMenuCardState(card, item);
                 showToastMenu('Added to cart!', 'success');
                 window.dispatchEvent(new Event('cartUpdated'));
               } else {
@@ -929,6 +989,7 @@
     window.addEventListener('cartUpdated', () => {
       updateCartCount();
       updateUserMenu();
+      syncMenuCards();
     });
 
     renderMenu();
@@ -938,16 +999,16 @@
 
   <!-- Global Modal (hidden by default) -->
   <div id="globalModalMenu" class="hidden fixed inset-0 z-60 flex items-center justify-center bg-black/50" aria-hidden="true">
-    <div role="dialog" aria-modal="true" aria-labelledby="modalTitleMenu" class="bg-white dark:bg-gray-800 max-w-md w-full rounded-xl shadow-lg p-6 mx-4">
+    <div role="dialog" aria-modal="true" aria-labelledby="modalTitleMenu" class="bg-white max-w-md w-full rounded-xl shadow-lg p-6 mx-4">
       <div class="flex items-start gap-4">
         <div id="modalIconMenu" class="text-2xl"></div>
         <div class="flex-1">
-          <h3 id="modalTitleMenu" class="text-lg font-semibold text-gray-900 dark:text-gray-100">Title</h3>
-          <p id="modalMessageMenu" class="text-sm text-gray-600 dark:text-gray-300 mt-2">Message</p>
+          <h3 id="modalTitleMenu" class="text-lg font-semibold text-gray-900">Title</h3>
+          <p id="modalMessageMenu" class="text-sm text-gray-600 mt-2">Message</p>
         </div>
       </div>
       <div class="mt-6 flex justify-end gap-3">
-        <button id="modalCancelMenu" class="px-4 py-2 rounded-button bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100 hover:bg-gray-200 transition">Cancel</button>
+        <button id="modalCancelMenu" class="px-4 py-2 rounded-button bg-gray-100 text-gray-800 hover:bg-gray-200 transition">Cancel</button>
         <button id="modalOkMenu" class="px-4 py-2 rounded-button bg-primary text-white hover:bg-green-600 transition">OK</button>
       </div>
     </div>

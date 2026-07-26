@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="/api-client.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - GoSmoothie</title>
@@ -13,17 +14,16 @@
   <style>
     body { font-family: 'Poppins', sans-serif; }
   </style>
-    <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.js"></script>
-    <script src="/assets/icons.js"></script>
-    <script src="/assets/toast.js"></script>
+<script src="/assets/toast.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-gradient-to-br from-green-50 to-white min-h-screen">
   <!-- Header -->
   <header class="bg-white shadow-sm">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <a href="/main.html" class="flex items-center gap-2 text-gray-700 hover:text-primary transition">
-          <i data-lucide="arrow-left" class="w-5 h-5"></i> Back
+        <a href="/main.html" aria-label="Back to home" title="Back to home" class="flex items-center gap-2 text-gray-700 hover:text-primary transition">
+          <i class="bi bi-arrow-left w-5 h-5"></i>
         </a>
         <a href="/main.html" class="text-2xl font-['Pacifico'] text-primary">GoSmoothie</a>
       </div>
@@ -62,19 +62,19 @@
               <p class="font-medium text-gray-700 mb-2">Password conditions</p>
               <ul class="space-y-2">
                 <li id="regCheck1" class="flex items-center gap-2">
-                  <i data-lucide="x" class="w-5 h-5 text-gray-400" aria-hidden="true"></i>
+                  <i class="bi bi-x w-5 h-5 text-gray-400" aria-hidden="true"></i>
                   <span>At least 8 characters</span>
                 </li>
                 <li id="regCheck2" class="flex items-center gap-2">
-                  <i data-lucide="x" class="w-5 h-5 text-gray-400" aria-hidden="true"></i>
+                  <i class="bi bi-x w-5 h-5 text-gray-400" aria-hidden="true"></i>
                   <span>Contains uppercase letter (A-Z)</span>
                 </li>
                 <li id="regCheck3" class="flex items-center gap-2">
-                  <i data-lucide="x" class="w-5 h-5 text-gray-400" aria-hidden="true"></i>
+                  <i class="bi bi-x w-5 h-5 text-gray-400" aria-hidden="true"></i>
                   <span>Contains number (0-9)</span>
                 </li>
                 <li id="regCheck4" class="flex items-center gap-2">
-                  <i data-lucide="x" class="w-5 h-5 text-gray-400" aria-hidden="true"></i>
+                  <i class="bi bi-x w-5 h-5 text-gray-400" aria-hidden="true"></i>
                   <span>Contains special character (!@#$%...)</span>
                 </li>
               </ul>
@@ -121,10 +121,10 @@
         const isValid = s[regCheckRules[idx]];
         if(isValid){
           el.className = 'flex items-center gap-2 text-green-700';
-          if(icon) icon.outerHTML = '<i data-lucide="check" class="w-5 h-5 text-green-500"></i>';
+          if(icon) icon.outerHTML = '<i class="bi bi-check w-5 h-5 text-green-500"></i>';
         } else {
           el.className = 'flex items-center gap-2 text-gray-600';
-          if(icon) icon.outerHTML = '<i data-lucide="x" class="w-5 h-5 text-gray-400"></i>';
+          if(icon) icon.outerHTML = '<i class="bi bi-x w-5 h-5 text-gray-400"></i>';
         }
       });
     });
@@ -136,7 +136,11 @@
     errorMsg.classList.add('hidden');
     
     const f = new FormData(e.target);
-    const res = await fetch('/api/auth/register', { 
+    const apiBaseUrl = ['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.port !== '3000'
+      ? `http://${window.location.hostname}:3000`
+      : '';
+    const apiUrl = (path) => `${apiBaseUrl}${path}`;
+    const res = await fetch(apiUrl('/api/auth/register'), {
       method: 'POST', 
       headers: { 'Content-Type': 'application/json' }, 
       body: JSON.stringify({ 
@@ -153,7 +157,7 @@
       // merge anonymous cart into user cart
       const clientId = localStorage.getItem('gs_clientId');
       if(clientId) {
-        await fetch('/api/cart/merge', { 
+        await fetch(apiUrl('/api/cart/merge'), {
           method: 'POST', 
           headers: { 
             'Content-Type': 'application/json', 
@@ -182,11 +186,11 @@
       btn.type = 'button';
       btn.setAttribute('aria-label','Toggle password visibility');
       btn.className = 'absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 p-1';
-      btn.innerHTML = '<i data-lucide="eye" class="w-5 h-5"></i>';
+      btn.innerHTML = '<i class="bi bi-eye w-5 h-5"></i>';
       wrapper.appendChild(btn);
       btn.addEventListener('click', () => {
-        if(input.type === 'password'){ input.type = 'text'; btn.innerHTML = '<i data-lucide="eye-off" class="w-5 h-5"></i>'; }
-        else { input.type = 'password'; btn.innerHTML = '<i data-lucide="eye" class="w-5 h-5"></i>'; }
+        if(input.type === 'password'){ input.type = 'text'; btn.innerHTML = '<i class="bi bi-eye-slash w-5 h-5"></i>'; }
+        else { input.type = 'password'; btn.innerHTML = '<i class="bi bi-eye w-5 h-5"></i>'; }
       });
     });
   })();

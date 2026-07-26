@@ -58,12 +58,15 @@ function productPayload(body) {
 // GET /api/products
 router.get('/', async (req, res) => {
   try {
-    // Seeding must never block reads: if reconciling the snapshot fails we
-    // still serve whatever is already in the catalog.
-    try {
+    // Serve an existing catalog immediately. Reconciliation can involve many
+    // database writes and must not make the storefront exceed its 5s timeout.
+    const hasProducts = await Product.exists({});
+    if (hasProducts) {
+      ensureSnapshotProducts().catch((seedErr) => {
+        console.error('Product snapshot sync failed, serving existing catalog:', seedErr.message);
+      });
+    } else {
       await ensureSnapshotProducts();
-    } catch (seedErr) {
-      console.error('Product snapshot sync failed, serving existing catalog:', seedErr.message);
     }
 
     const includeArchived = String(req.query.includeArchived || '').toLowerCase() === 'true';

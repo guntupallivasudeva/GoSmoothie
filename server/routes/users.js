@@ -4,13 +4,18 @@ const User = require("../models/User");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-async function resolveAuthUser(authId) {
-  if (!authId) return null;
-  const byUserId = await User.findOne({ userId: String(authId) });
+async function resolveAuthUser(authId, authEmail) {
+  if (!authId && !authEmail) return null;
+  const byUserId = authId
+    ? await User.findOne({ userId: String(authId) })
+    : null;
   if (byUserId) return byUserId;
-  if (mongoose.Types.ObjectId.isValid(String(authId))) {
+  if (authId && mongoose.Types.ObjectId.isValid(String(authId))) {
     return User.findById(String(authId));
   }
+  // Local seed/reset activity can recreate a development account with a new
+  // numeric userId. The email in a verified JWT is still safe to use here.
+  if (authEmail) return User.findOne({ email: String(authEmail) });
   return null;
 }
 
@@ -19,11 +24,11 @@ router.get("/me", async (req, res) => {
   if (!req.user || !req.user.id)
     return res.status(401).json({ error: "Authentication required" });
   try {
-    const user = await User.findOne({ userId: String(req.user.id) })
-      .select("-passwordHash")
-      .lean();
+    const user = await resolveAuthUser(req.user.id, req.user.email);
     if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(user);
+    const safeUser = user.toObject ? user.toObject() : user;
+    delete safeUser.passwordHash;
+    res.json(safeUser);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -43,7 +48,7 @@ router.put("/me", async (req, res) => {
       hasPhone: typeof phone === "string" && phone.trim().length > 0,
       addressCount: Array.isArray(addresses) ? addresses.length : 0,
     });
-    const user = await resolveAuthUser(req.user.id);
+    const user = await resolveAuthUser(req.user.id, req.user.email);
     if (!user) return res.status(404).json({ error: "User not found" });
     if (name) user.name = name;
     if (email) user.email = email;
@@ -106,7 +111,7 @@ router.post("/change-password", async (req, res) => {
       .status(400)
       .json({ error: "oldPassword and newPassword required" });
   try {
-    const user = await resolveAuthUser(req.user.id);
+    const user = await resolveAuthUser(req.user.id, req.user.email);
     if (!user) return res.status(404).json({ error: "User not found" });
     const ok = await user.verifyPassword(passwordToCheck);
     if (!ok) return res.status(400).json({ error: "Old password incorrect" });
@@ -124,7 +129,7 @@ router.delete("/me", async (req, res) => {
   if (!req.user || !req.user.id)
     return res.status(401).json({ error: "Authentication required" });
   try {
-    const user = await resolveAuthUser(req.user.id);
+    const user = await resolveAuthUser(req.user.id, req.user.email);
     if (!user) return res.status(404).json({ error: "User not found" });
     const userId = user.userId;
     const Cart = require("../models/Cart");

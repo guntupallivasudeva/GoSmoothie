@@ -9,7 +9,12 @@ const {
 
 async function resolveUserForClient(req, providedClientId) {
   if (req.user && req.user.id) {
-    return await User.findOne({ userId: String(req.user.id) });
+    const byUserId = await User.findOne({ userId: String(req.user.id) });
+    if (byUserId) return byUserId;
+    // A valid development token can outlive a local seed that regenerated
+    // its numeric userId. Its signed email still identifies the account.
+    if (req.user.email) return User.findOne({ email: String(req.user.email) });
+    return null;
   }
   if (providedClientId && providedClientId.startsWith("u_")) {
     return await User.findOne({ userId: providedClientId.slice(2) });
@@ -75,10 +80,10 @@ function serializeCartItem(item) {
 router.get("/", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
-    if (!user)
-      return res
-        .status(400)
-        .json({ error: "clientId or authentication required" });
+    // A stale browser token must not make the storefront fail to render.
+    // Treat an unidentified read as an empty cart; writes still require an
+    // authenticated user or explicit clientId.
+    if (!user) return res.json({ carts: [], items: [] });
     const doc = await Cart.findOne({ userId: user.userId }).lean();
     const items = doc && Array.isArray(doc.carts) ? doc.carts : [];
     res.json({ carts: items, items: items.map(serializeCartItem) });

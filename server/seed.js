@@ -2,6 +2,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Product = require('./models/Product');
 const User = require('./models/User');
+const Admin = require('./models/Admin');
+const bcrypt = require('bcrypt');
 
 const MONGO = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/gosmoothie';
 mongoose.connect(MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -112,17 +114,34 @@ async function seed(){
     await Product.insertMany(products);
     console.log('✅ ' + products.length + ' products seeded');
 
-    // Clear existing users
-    await User.deleteMany({});
+    // Keep the requested local user so active development sessions retain the
+    // same userId after seeding products and demo data.
+    await User.deleteMany({ email: { $nin: ['vasu@local'] } });
     
     // Create demo user
-    const bcrypt = require('bcrypt');
     const hash = await bcrypt.hash('password123', 10);
     const demoUser = await User.create({ 
       name: 'Demo User', 
       email: 'demo@local', 
       passwordHash: hash 
     });
+    let vasuUser = await User.findOne({ email: 'vasu@local' });
+    if (!vasuUser) {
+      vasuUser = new User({ email: 'vasu@local' });
+    }
+    vasuUser.name = 'Vasu';
+    vasuUser.passwordHash = await bcrypt.hash('Vasu@1234', 10);
+    vasuUser.isActive = true;
+    vasuUser.isAnonymous = false;
+    await vasuUser.save();
+    let admin = await Admin.findOne({ email: 'admin@local' });
+    if (!admin) admin = new Admin({ email: 'admin@local' });
+    admin.name = 'Admin';
+    admin.passwordHash = await bcrypt.hash('Admin@1234', 10);
+    admin.role = 'admin';
+    admin.isActive = true;
+    admin.updatedAt = new Date();
+    await admin.save();
     console.log('✅ Demo user created');
     console.log('   Email: demo@local');
     console.log('   Password: password123');

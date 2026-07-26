@@ -7,8 +7,12 @@ const Address = require("../models/Address");
 const { generateOrderId } = require("../utils/idGenerator");
 
 async function resolveUser(req, clientId) {
-  if (req.user && req.user.id)
-    return await User.findOne({ userId: String(req.user.id) });
+  if (req.user && req.user.id) {
+    const byUserId = await User.findOne({ userId: String(req.user.id) });
+    if (byUserId) return byUserId;
+    if (req.user.email)
+      return await User.findOne({ email: String(req.user.email) });
+  }
   if (clientId && clientId.startsWith("u_"))
     return await User.findOne({ userId: clientId.slice(2) });
   if (clientId) return await User.findOne({ clientToken: clientId });
@@ -79,8 +83,10 @@ router.post("/", async (req, res) => {
       subtotal: i.subtotal,
     }));
     const subtotal = items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-    const tax = 0;
-    const deliveryFee = 0;
+    const tax = Math.round(subtotal * 0.1);
+    const deliveryOption = req.body?.fulfillment?.deliveryOption || "standard";
+    const deliveryFee =
+      req.body?.mode === "delivery" && deliveryOption === "express" ? 20 : 0;
     const totalAmount = subtotal + tax + deliveryFee;
     const existingDoc = await Order.findOne({ userId: user.userId }).lean();
     const existingOrderIds =

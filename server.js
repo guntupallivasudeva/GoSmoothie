@@ -30,8 +30,8 @@ app.use('/api/admins', require('./server/routes/admins'));
 // Serve static frontend files (project root)
 app.use(express.static(path.join(__dirname)));
 
-// Serve Bootstrap Icons assets from the installed package.
-app.use('/bootstrap-icons', express.static(path.join(__dirname, 'node_modules/bootstrap-icons/font')));
+// The application entry page is main.html, not index.html.
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'main.html')));
 
 // Browsers auto-request /favicon.ico; return 204 when no icon file exists.
 app.get('/favicon.ico', (req, res) => res.status(204).end());

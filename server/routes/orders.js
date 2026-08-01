@@ -4,14 +4,22 @@ const User = require("../models/User");
 const Cart = require("../models/Cart");
 const Order = require("../models/Order");
 const Address = require("../models/Address");
+const Payment = require("../models/Payment");
 const { generateOrderId } = require("../utils/idGenerator");
+const { codConfig } = require("../config/payments");
+const {
+  resolveTokenUser,
+  hasStaleSession,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
 
 async function resolveUser(req, clientId) {
   if (req.user && req.user.id) {
-    const byUserId = await User.findOne({ userId: String(req.user.id) });
-    if (byUserId) return byUserId;
-    if (req.user.email)
-      return await User.findOne({ email: String(req.user.email) });
+    const tokenUser = await resolveTokenUser(req);
+    if (tokenUser) return tokenUser;
+    // The token's account no longer exists; only an explicit clientId can
+    // identify the shopper now.
+    if (!clientId) return null;
   }
   if (clientId && clientId.startsWith("u_"))
     return await User.findOne({ userId: clientId.slice(2) });
@@ -68,6 +76,7 @@ router.post("/", async (req, res) => {
   const { clientId, addressId } = req.body;
   try {
     const user = await resolveUser(req, clientId);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -88,6 +97,20 @@ router.post("/", async (req, res) => {
     const deliveryFee =
       req.body?.mode === "delivery" && deliveryOption === "express" ? 20 : 0;
     const totalAmount = subtotal + tax + deliveryFee;
+    // The browser proposes a mode; the server decides what is allowed and what
+    // payment status follows from it.
+    const paymentMode = req.body?.paymentMode === "cod" ? "cod" : "online";
+    if (paymentMode === "cod") {
+      const cod = codConfig();
+      if (!cod.enabled)
+        return res
+          .status(400)
+          .json({ error: "Cash on Delivery is currently unavailable" });
+      if (totalAmount > cod.maxOrderTotal)
+        return res.status(400).json({
+          error: `Cash on Delivery is available on orders up to ₹${cod.maxOrderTotal}. Please choose an online payment method.`,
+        });
+    }
     const existingDoc = await Order.findOne({ userId: user.userId }).lean();
     const existingOrderIds =
       existingDoc && Array.isArray(existingDoc.orders)
@@ -102,6 +125,9 @@ router.post("/", async (req, res) => {
     const address = addressId
       ? addressList.find((a) => a.addressId === String(addressId))
       : addressList.find((a) => a.isDefault) || {};
+    // Only the label of the selected method is kept; the checkout modal never
+    // sends card numbers, CVVs or UPI credentials.
+    const paymentMethod = String(req.body?.paymentMethod || "").slice(0, 60);
     const orderObj = {
       orderId,
       paymentId: "",
@@ -112,7 +138,9 @@ router.post("/", async (req, res) => {
       deliveryFee,
       totalAmount,
       orderStatus: "confirmed",
-      paymentStatus: "unpaid",
+      paymentStatus: paymentMode === "cod" ? "cash due" : "paid",
+      paymentMethod,
+      paymentMode,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -122,7 +150,42 @@ router.post("/", async (req, res) => {
       { upsert: true },
     );
     await Cart.deleteOne({ userId: user.userId });
-    res.json({ orderId, total: totalAmount, order: orderObj });
+
+    // Record payment in the Payment collection for the ledger
+    const paymentId = "PAY-" + orderId;
+    const paymentRecord = {
+      paymentId,
+      userName: user.name || "",
+      userEmail: user.email || "",
+      userPhone: user.phoneNumber || "",
+      paymentMethod: paymentMethod || "Unknown",
+      amountPaid: totalAmount,
+      transactionId: "",
+      paymentStatus: paymentMode === "cod" ? "cash due" : "paid",
+      orderId,
+      createdAt: new Date(),
+    };
+
+    await Payment.findOneAndUpdate(
+      { userId: user.userId },
+      {
+        $push: { payments: paymentRecord },
+        $set: { updatedAt: new Date() },
+      },
+      { upsert: true },
+    );
+
+    // Also update the order's paymentId
+    await Order.updateOne(
+      { "orders.orderId": orderId },
+      { $set: { "orders.$.paymentId": paymentId } },
+    );
+
+    res.json({
+      orderId,
+      total: totalAmount,
+      order: { ...orderObj, paymentId },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

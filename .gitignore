@@ -51,3 +51,7 @@ Thumbs.db
 backup/
 extra/
 docs/
+
+#import scripts
+importImages.js
+reimportImages.js

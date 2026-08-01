@@ -76,7 +76,8 @@ GoSmoothie/
 
 - **Provider**: MongoDB Atlas
 - **Database**: GoSmoothie
-- **Demo Account**: `demo@local` / `password123`
+- **Accounts**: users are created through registration and read from MongoDB (no built-in demo users)
+- **Admin**: run `npm run create-admin` to create the dashboard admin (`admin@local` / `Admin@123`, name `Admin`)
 
 ## 📖 See Also
 

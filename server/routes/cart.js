@@ -6,15 +6,20 @@ const {
   generateUniqueNumericId,
   isExactNumericId,
 } = require("../utils/idGenerator");
+const {
+  resolveTokenUser,
+  hasStaleSession,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
 
 async function resolveUserForClient(req, providedClientId) {
   if (req.user && req.user.id) {
-    const byUserId = await User.findOne({ userId: String(req.user.id) });
-    if (byUserId) return byUserId;
-    // A valid development token can outlive a local seed that regenerated
-    // its numeric userId. Its signed email still identifies the account.
-    if (req.user.email) return User.findOne({ email: String(req.user.email) });
-    return null;
+    const tokenUser = await resolveTokenUser(req);
+    if (tokenUser) return tokenUser;
+    // The token's account is gone. Fall back to an anonymous cart when the
+    // client supplied one, so the visitor can keep shopping; callers use
+    // hasStaleSession() to report the dead session when there is no fallback.
+    if (!providedClientId) return null;
   }
   if (providedClientId && providedClientId.startsWith("u_")) {
     return await User.findOne({ userId: providedClientId.slice(2) });
@@ -77,12 +82,20 @@ function serializeCartItem(item) {
   };
 }
 
+async function serializeUserCart(userId) {
+  const doc = await Cart.findOne({ userId }).lean();
+  const items = doc && Array.isArray(doc.carts) ? doc.carts : [];
+  return { carts: items, items: items.map(serializeCartItem) };
+}
+
 router.get("/", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
-    // A stale browser token must not make the storefront fail to render.
-    // Treat an unidentified read as an empty cart; writes still require an
-    // authenticated user or explicit clientId.
+    // A dead session is reported so the browser can drop the stored token
+    // rather than silently showing an empty cart forever.
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
+    // An unidentified anonymous read is simply an empty cart; writes still
+    // require an authenticated user or an explicit clientId.
     if (!user) return res.json({ carts: [], items: [] });
     const doc = await Cart.findOne({ userId: user.userId }).lean();
     const items = doc && Array.isArray(doc.carts) ? doc.carts : [];
@@ -99,6 +112,7 @@ router.post("/", async (req, res) => {
       req,
       req.body.clientId || req.query.clientId,
     );
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -175,6 +189,7 @@ router.post("/", async (req, res) => {
 router.put("/:cartId", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -202,6 +217,7 @@ router.put("/:cartId", async (req, res) => {
 router.delete("/:cartId", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -229,7 +245,11 @@ router.delete("/:cartId", async (req, res) => {
 
 router.delete("/", async (req, res) => {
   try {
-    const user = await resolveUserForClient(req, req.query.clientId);
+    const user = await resolveUserForClient(
+      req,
+      req.body?.clientId || req.query.clientId,
+    );
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -248,10 +268,13 @@ router.post("/merge", async (req, res) => {
   const { clientId } = req.body;
   if (!clientId) return res.status(400).json({ error: "clientId required" });
   try {
-    const anon = await resolveUserForClient(req, clientId);
-    const user = await User.findOne({ userId: String(req.user.id) });
-    if (!anon || !user)
-      return res.status(404).json({ error: "User not found" });
+    const user = await resolveTokenUser(req);
+    if (!user) return sendSessionInvalid(res);
+    // Resolve the anonymous cart owner without the token taking precedence.
+    const anon = await resolveUserForClient({ body: {}, query: {} }, clientId);
+    if (!anon) return res.status(404).json({ error: "User not found" });
+    if (anon.userId === user.userId)
+      return res.json(await serializeUserCart(user.userId));
     const anonDoc = await Cart.findOne({ userId: anon.userId });
     if (anonDoc) {
       const userDoc = await Cart.findOne({ userId: user.userId });
@@ -279,11 +302,12 @@ router.post("/merge", async (req, res) => {
       }
       await Cart.deleteOne({ userId: anon.userId });
     }
-    await User.findOneAndDelete({ userId: anon.userId });
-    const mergedDoc = await Cart.findOne({ userId: user.userId }).lean();
-    const items =
-      mergedDoc && Array.isArray(mergedDoc.carts) ? mergedDoc.carts : [];
-    res.json({ carts: items, items: items.map(serializeCartItem) });
+    // Only the throwaway guest record is removed. A clientId of the form
+    // "u_<userId>" can resolve to a real account, which must never be deleted.
+    if (anon.isAnonymous) {
+      await User.findOneAndDelete({ userId: anon.userId, isAnonymous: true });
+    }
+    res.json(await serializeUserCart(user.userId));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

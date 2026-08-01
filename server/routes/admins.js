@@ -11,8 +11,21 @@ const Address = require("../models/Address");
 const Cart = require("../models/Cart");
 const UserPayment = require("../models/UserPayment");
 const { buildToken, requireAdmin } = require("../middleware/auth");
-const { ensureSnapshotProducts } = require("../utils/productCatalog");
-const { ensureLocalAccounts, LOCAL_ADMIN } = require("../utils/localAccounts");
+
+// Escape a value so it can be used inside a RegExp literal safely.
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Admin records keep the exact email casing they were created with, so match
+// exactly first and fall back to a case-insensitive lookup for sign-in.
+async function findAdminByEmail(email) {
+  const exact = await Admin.findOne({ email });
+  if (exact) return exact;
+  return Admin.findOne({
+    email: { $regex: `^${escapeRegex(email)}$`, $options: "i" },
+  });
+}
 
 async function flattenOrders() {
   const [orders, users] = await Promise.all([
@@ -35,6 +48,8 @@ async function flattenOrders() {
         paymentId: order.paymentId || "",
         orderStatus: order.orderStatus || "pending",
         paymentStatus: order.paymentStatus || "unpaid",
+        paymentMethod: order.paymentMethod || "",
+        paymentMode: order.paymentMode || "online",
         subtotal: order.subtotal || 0,
         totalAmount: order.totalAmount || 0,
         itemCount: Array.isArray(order.items)
@@ -91,16 +106,6 @@ async function flattenPayments() {
 }
 
 async function buildDashboard() {
-  // A catalog refresh must not prevent the admin from seeing operational data.
-  // The products endpoint follows the same resilient behavior.
-  try {
-    await ensureSnapshotProducts();
-  } catch (seedErr) {
-    console.error(
-      "Product snapshot sync failed, serving existing dashboard data:",
-      seedErr.message,
-    );
-  }
   const [
     orders,
     payments,
@@ -218,11 +223,8 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).json({ error: "email,password required" });
-    let admin = await Admin.findOne({ email });
-    if (!admin && String(email).toLowerCase() === LOCAL_ADMIN.email) {
-      await ensureLocalAccounts();
-      admin = await Admin.findOne({ email: LOCAL_ADMIN.email });
-    }
+    // Admin accounts come from the database only; nothing is hardcoded here.
+    const admin = await findAdminByEmail(String(email).trim());
     if (!admin || !admin.isActive)
       return res.status(400).json({ error: "Invalid admin credentials" });
     const ok = await admin.verifyPassword(password);

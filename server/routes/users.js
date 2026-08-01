@@ -3,20 +3,15 @@ const router = express.Router();
 const User = require("../models/User");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const {
+  resolveTokenUser,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
 
-async function resolveAuthUser(authId, authEmail) {
-  if (!authId && !authEmail) return null;
-  const byUserId = authId
-    ? await User.findOne({ userId: String(authId) })
-    : null;
-  if (byUserId) return byUserId;
-  if (authId && mongoose.Types.ObjectId.isValid(String(authId))) {
-    return User.findById(String(authId));
-  }
-  // Local seed/reset activity can recreate a development account with a new
-  // numeric userId. The email in a verified JWT is still safe to use here.
-  if (authEmail) return User.findOne({ email: String(authEmail) });
-  return null;
+// Resolves the account behind a verified token. Shared with the cart, order,
+// address and payment routes so every endpoint agrees on who the caller is.
+function resolveAuthUser(authId, authEmail) {
+  return resolveTokenUser({ user: { id: authId, email: authEmail } });
 }
 
 // GET /api/users/me
@@ -25,7 +20,8 @@ router.get("/me", async (req, res) => {
     return res.status(401).json({ error: "Authentication required" });
   try {
     const user = await resolveAuthUser(req.user.id, req.user.email);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    // A verified token with no matching account means the session is dead.
+    if (!user) return sendSessionInvalid(res);
     const safeUser = user.toObject ? user.toObject() : user;
     delete safeUser.passwordHash;
     res.json(safeUser);
@@ -49,7 +45,8 @@ router.put("/me", async (req, res) => {
       addressCount: Array.isArray(addresses) ? addresses.length : 0,
     });
     const user = await resolveAuthUser(req.user.id, req.user.email);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    // A verified token with no matching account means the session is dead.
+    if (!user) return sendSessionInvalid(res);
     if (name) user.name = name;
     if (email) user.email = email;
     if (typeof phone === "string") user.phone = phone.trim();
@@ -112,7 +109,8 @@ router.post("/change-password", async (req, res) => {
       .json({ error: "oldPassword and newPassword required" });
   try {
     const user = await resolveAuthUser(req.user.id, req.user.email);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    // A verified token with no matching account means the session is dead.
+    if (!user) return sendSessionInvalid(res);
     const ok = await user.verifyPassword(passwordToCheck);
     if (!ok) return res.status(400).json({ error: "Old password incorrect" });
     user.passwordHash = await bcrypt.hash(newPassword, 10);
@@ -130,7 +128,8 @@ router.delete("/me", async (req, res) => {
     return res.status(401).json({ error: "Authentication required" });
   try {
     const user = await resolveAuthUser(req.user.id, req.user.email);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    // A verified token with no matching account means the session is dead.
+    if (!user) return sendSessionInvalid(res);
     const userId = user.userId;
     const Cart = require("../models/Cart");
     const Order = require("../models/Order");

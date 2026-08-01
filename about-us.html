@@ -1,416 +1,766 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - GoSmoothie</title>
-  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
-  <script>tailwind.config={theme:{extend:{colors:{primary:'#4ade80',secondary:'#f97316'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Poppins', sans-serif; }
-    .fade-in { animation: fadeIn 0.8s ease-in; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .hero-gradient { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); }
-    .card-hover { transition: all 0.3s ease; }
-    .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-    .stat-counter { font-size: 2.5rem; font-weight: 700; color: #4ade80; }
-  </style>
-<script src="/assets/toast.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-</head>
-<body class="bg-gradient-to-br from-gray-50 to-white">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - GoSmoothie</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4ade80", secondary: "#f97316" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Header -->
-  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="/main.html" class="text-3xl font-['Pacifico'] text-primary">GoSmoothie</a>
-      <nav class="hidden md:flex space-x-8">
-        <a href="/main.html" class="text-gray-700 hover:text-primary transition font-medium">Home</a>
-        <a href="/about-us.html" class="text-primary font-semibold">About Us</a>
-        <a href="/cart.html" class="text-gray-700 hover:text-primary transition font-medium">Cart</a>
-      </nav>
-      <a href="/main.html" class="md:hidden text-primary font-['Pacifico']">GoSmoothie</a>
-    </div>
-  </header>
-
-  <!-- Hero Section -->
-  <section class="hero-gradient text-white pt-32 pb-20">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <a href="/main.html" aria-label="Back to home" title="Back to home" class="inline-flex items-center gap-2 px-4 py-2 bg-white text-gray-700 hover:bg-gray-100 transition rounded-lg shadow-sm mb-6 font-medium">
-        <i class="bi bi-arrow-left w-5 h-5"></i>
-      </a>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="fade-in">
-          <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Crafting Health, One Smoothie at a Time
-          </h1>
-          <p class="text-lg text-green-50 mb-8 leading-relaxed">
-            Welcome to GoSmoothie – where fresh ingredients meet passion for wellness. We believe everyone deserves access to nutritious, delicious smoothies delivered right to their doorstep.
-          </p>
-          <div class="flex gap-4">
-            <a href="/main.html" class="bg-white text-primary px-8 py-3 rounded-button font-semibold hover:bg-gray-100 transition">
-              Order Now
-            </a>
-            <a href="#contact" class="border-2 border-white text-white px-8 py-3 rounded-button font-semibold hover:bg-white/10 transition">
-              Get in Touch
-            </a>
-          </div>
-        </div>
-        <div class="fade-in">
-          <div class="relative">
-            <div class="absolute -inset-4 bg-white/20 rounded-3xl blur-2xl"></div>
-            <img src="https://readdy.ai/api/search-image?query=fresh%20colorful%20smoothies%20in%20glass%20bowls%20with%20fruits%20toppings%20healthy%20drink&width=500&height=500&seq=21&orientation=squarish"
-                 onerror="this.onerror=null;this.src='/server/images/smoothie-bowl.jpg'"
-                 alt="Fresh Smoothies" class="relative rounded-3xl shadow-2xl object-cover w-full h-96" decoding="async">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Mission Section -->
-  <section class="py-20 bg-white">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <div class="text-center mb-16 fade-in">
-        <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Mission</h2>
-        <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="card-hover bg-gradient-to-br from-green-50 to-transparent p-8 rounded-2xl border border-green-200">
-          <div class="text-4xl text-primary mb-4"><i class="bi bi-leaf w-[1em] h-[1em]"></i></div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">100% Fresh</h3>
-          <p class="text-gray-600">We source only the freshest, highest-quality ingredients from local farms to ensure every smoothie is packed with nutrients and flavor.</p>
-        </div>
-        <div class="card-hover bg-gradient-to-br from-orange-50 to-transparent p-8 rounded-2xl border border-orange-200">
-          <div class="text-4xl text-secondary mb-4"><i class="bi bi-heart w-[1em] h-[1em]"></i></div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Health First</h3>
-          <p class="text-gray-600">Your wellness is our priority. Every blend is crafted to deliver maximum nutrition without artificial additives or preservatives.</p>
-        </div>
-        <div class="card-hover bg-gradient-to-br from-green-50 to-transparent p-8 rounded-2xl border border-green-200">
-          <div class="text-4xl text-primary mb-4"><i class="bi bi-truck w-[1em] h-[1em]"></i></div>
-          <h3 class="text-xl font-bold text-gray-900 mb-3">Quick Delivery</h3>
-          <p class="text-gray-600">Your smoothie should be fresh. That's why we deliver to your door within minutes of preparation, maintaining optimal freshness.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Our Story -->
-  <section class="py-20 bg-gradient-to-br from-gray-50 to-white">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="fade-in">
-          <img src="https://readdy.ai/api/search-image?query=smoothie%20bar%20cafe%20interior%20modern%20design%20healthy%20drinks%20counter&width=500&height=600&seq=22&orientation=portrait"
-               onerror="this.onerror=null;this.src='/server/images/smoothie-bowl.jpg'"
-               alt="GoSmoothie Store" class="rounded-3xl shadow-2xl object-cover w-full h-96" loading="lazy" decoding="async">
-        </div>
-        <div class="fade-in">
-          <h2 class="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
-          <div class="w-12 h-1 bg-primary rounded-full mb-6"></div>
-          <p class="text-gray-600 text-lg mb-4 leading-relaxed">
-            Founded in 2022, GoSmoothie started with a simple vision: to make healthy living accessible to everyone. What began as a small smoothie stand in a local market has grown into a thriving delivery service trusted by thousands.
-          </p>
-          <p class="text-gray-600 text-lg mb-4 leading-relaxed">
-            Our founder, a fitness enthusiast and nutritionist, noticed a gap in the market for fresh, affordable smoothies delivered on-demand. With a passion for health and wellness, GoSmoothie was born.
-          </p>
-          <p class="text-gray-600 text-lg mb-6 leading-relaxed">
-            Today, we're proud to serve our community with the finest blends, supporting local farmers, and inspiring thousands to embrace a healthier lifestyle.
-          </p>
-          <div class="flex gap-4 flex-wrap">
-            <div class="flex items-center gap-3 text-primary">
-              <i class="bi bi-check w-6 h-6"></i>
-              <span class="font-semibold">FSSAI Certified</span>
-            </div>
-            <div class="flex items-center gap-3 text-primary">
-              <i class="bi bi-check w-6 h-6"></i>
-              <span class="font-semibold">Eco-Friendly</span>
-            </div>
-            <div class="flex items-center gap-3 text-primary">
-              <i class="bi bi-check w-6 h-6"></i>
-              <span class="font-semibold">Certified Organic</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Team Section -->
-  <section class="py-20 bg-white">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <div class="text-center mb-16 fade-in">
-        <h2 class="text-4xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
-        <div class="w-16 h-1 bg-primary mx-auto rounded-full mb-6"></div>
-        <p class="text-gray-600 text-lg max-w-2xl mx-auto">Passionate individuals dedicated to bringing health and happiness to your life</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Team Member 1 -->
-        <div class="card-hover bg-gradient-to-br from-green-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center">
-          <div class="mb-4">
-            <img src="https://readdy.ai/api/search-image?query=professional%20portrait%20man%20nutritionist%20health%20expert%20friendly%20smile&width=200&height=200&seq=23&orientation=squarish"
-                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Ananya+R&size=256&background=10b981&color=ffffff&bold=true'"
-                 alt="Ananya R, Founder" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-primary" loading="lazy" decoding="async">
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-1">Ananya R</h3>
-          <p class="text-primary font-semibold text-sm mb-3">Founder & Nutritionist</p>
-          <p class="text-gray-600 text-sm mb-4">Passionate nutritionist with 10+ years of expertise. Dedicated to making wellness accessible to everyone.</p>
-          <div class="flex justify-center gap-3">
-            <a href="#" class="text-primary hover:text-primary/70 transition"><i class="bi bi-linkedin w-5 h-5"></i></a>
-            <a href="#" class="text-primary hover:text-primary/70 transition"><i class="bi bi-twitter-x w-5 h-5"></i></a>
-          </div>
-        </div>
-
-        <!-- Team Member 2 -->
-        <div class="card-hover bg-gradient-to-br from-orange-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center">
-          <div class="mb-4">
-            <img src="https://readdy.ai/api/search-image?query=professional%20portrait%20woman%20business%20manager%20operations%20skilled%20leader&width=200&height=200&seq=24&orientation=squarish"
-                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Sneha+K&size=256&background=f97316&color=ffffff&bold=true'"
-                 alt="Sneha K, Operations Manager" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-secondary" loading="lazy" decoding="async">
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-1">Sneha K</h3>
-          <p class="text-secondary font-semibold text-sm mb-3">Operations Manager</p>
-          <p class="text-gray-600 text-sm mb-4">Supply chain expert ensuring fresh ingredients reach you every time. 8+ years of operational excellence.</p>
-          <div class="flex justify-center gap-3">
-            <a href="#" class="text-secondary hover:text-secondary/70 transition"><i class="bi bi-linkedin w-5 h-5"></i></a>
-            <a href="#" class="text-secondary hover:text-secondary/70 transition"><i class="bi bi-twitter-x w-5 h-5"></i></a>
-          </div>
-        </div>
-
-        <!-- Team Member 3 -->
-        <div class="card-hover bg-gradient-to-br from-green-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center">
-          <div class="mb-4">
-            <img src="https://readdy.ai/api/search-image?query=professional%20portrait%20man%20chef%20cook%20culinary%20expert%20kitchen&width=200&height=200&seq=25&orientation=squarish"
-                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Sravanthi+P&size=256&background=10b981&color=ffffff&bold=true'"
-                 alt="Sravanthi P, Head Chef" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-primary" loading="lazy" decoding="async">
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-1">Sravanthi P</h3>
-          <p class="text-primary font-semibold text-sm mb-3">Head Chef</p>
-          <p class="text-gray-600 text-sm mb-4">Culinary innovator creating unique flavor combinations. Expert in healthy, delicious recipe development.</p>
-          <div class="flex justify-center gap-3">
-            <a href="#" class="text-primary hover:text-primary/70 transition"><i class="bi bi-linkedin w-5 h-5"></i></a>
-            <a href="#" class="text-primary hover:text-primary/70 transition"><i class="bi bi-instagram w-5 h-5"></i></a>
-          </div>
-        </div>
-
-        <!-- Team Member 4 -->
-        <div class="card-hover bg-gradient-to-br from-orange-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center">
-          <div class="mb-4">
-            <img src="https://readdy.ai/api/search-image?query=professional%20portrait%20woman%20tech%20developer%20software%20engineer%20modern&width=200&height=200&seq=26&orientation=squarish"
-                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=G+V&size=256&background=f97316&color=ffffff&bold=true'"
-                 alt="G. VasuDeva, Tech Lead" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-secondary" loading="lazy" decoding="async">
-          </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-1">G. VasuDeva</h3>
-          <p class="text-secondary font-semibold text-sm mb-3">Tech Lead</p>
-          <p class="text-gray-600 text-sm mb-4">Full-stack developer building seamless experiences. Passionate about innovative technology solutions.</p>
-          <div class="flex justify-center gap-3">
-            <a href="#" class="text-secondary hover:text-secondary/70 transition"><i class="bi bi-github w-5 h-5"></i></a>
-            <a href="#" class="text-secondary hover:text-secondary/70 transition"><i class="bi bi-linkedin w-5 h-5"></i></a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <section class="hero-gradient text-white py-20">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold mb-4">By The Numbers</h2>
-        <div class="w-16 h-1 bg-white mx-auto rounded-full"></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-        <div class="card-hover">
-          <div class="stat-counter text-white">50K+</div>
-          <p class="text-green-50 text-lg mt-2">Happy Customers</p>
-        </div>
-        <div class="card-hover">
-          <div class="stat-counter text-white">2K+</div>
-          <p class="text-green-50 text-lg mt-2">Daily Orders</p>
-        </div>
-        <div class="card-hover">
-          <div class="stat-counter text-white">98%</div>
-          <p class="text-green-50 text-lg mt-2">Satisfaction Rate</p>
-        </div>
-        <div class="card-hover">
-          <div class="stat-counter text-white">100%</div>
-          <p class="text-green-50 text-lg mt-2">Fresh Ingredients</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Core Values -->
-  <section class="py-20 bg-white">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <div class="text-center mb-16 fade-in">
-        <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
-        <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="card-hover p-8 rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-transparent">
-          <div class="flex items-start gap-4">
-            <div class="text-3xl text-primary pt-2"><i class="bi bi-award w-[1em] h-[1em]"></i></div>
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 mb-2">Quality Excellence</h3>
-              <p class="text-gray-600">We never compromise on quality. Every ingredient is carefully selected and every blend is quality-tested before delivery.</p>
-            </div>
-          </div>
-        </div>
-        <div class="card-hover p-8 rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-transparent">
-          <div class="flex items-start gap-4">
-            <div class="text-3xl text-secondary pt-2"><i class="bi bi-globe w-[1em] h-[1em]"></i></div>
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 mb-2">Sustainability</h3>
-              <p class="text-gray-600">We're committed to protecting our planet. Using eco-friendly packaging and supporting local farmers for a better future.</p>
-            </div>
-          </div>
-        </div>
-        <div class="card-hover p-8 rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-transparent">
-          <div class="flex items-start gap-4">
-            <div class="text-3xl text-primary pt-2"><i class="bi bi-people w-[1em] h-[1em]"></i></div>
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 mb-2">Community Focus</h3>
-              <p class="text-gray-600">We believe in building strong communities. Supporting local causes and contributing to the health of our society.</p>
-            </div>
-          </div>
-        </div>
-        <div class="card-hover p-8 rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-transparent">
-          <div class="flex items-start gap-4">
-            <div class="text-3xl text-secondary pt-2"><i class="bi bi-lightbulb w-[1em] h-[1em]"></i></div>
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 mb-2">Innovation</h3>
-              <p class="text-gray-600">We're constantly innovating. Experimenting with new flavors, recipes, and delivery methods to improve your experience.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="py-20 bg-gradient-to-r from-primary to-primary/80 text-white">
-    <div class="container mx-auto px-4 max-w-4xl text-center">
-      <h2 class="text-4xl md:text-5xl font-bold mb-6">Join Our Wellness Community</h2>
-      <p class="text-lg text-green-50 mb-8 leading-relaxed">
-        Experience the GoSmoothie difference today. Fresh, nutritious smoothies delivered to your doorstep. Your health journey starts here.
-      </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/main.html" class="bg-white text-primary px-8 py-4 rounded-button font-bold text-lg hover:bg-gray-100 transition inline-flex items-center justify-center gap-2">
-          <i class="bi bi-cart w-5 h-5"></i> Start Ordering
-        </a>
-        <a href="#contact" class="border-2 border-white text-white px-8 py-4 rounded-button font-bold text-lg hover:bg-white/10 transition inline-flex items-center justify-center gap-2">
-          <i class="bi bi-envelope w-5 h-5"></i> Contact Us
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contact" class="py-20 bg-white">
-    <div class="container mx-auto px-4 max-w-4xl">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold text-gray-900 mb-4">Get In Touch</h2>
-        <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        <div class="text-center card-hover p-6">
-          <div class="text-4xl text-primary mb-4"><i class="bi bi-geo-alt w-[1em] h-[1em]"></i></div>
-          <h3 class="font-bold text-gray-900 mb-2">Address</h3>
-          <p class="text-gray-600">123 Health Street, Wellness City, HC 12345</p>
-        </div>
-        <div class="text-center card-hover p-6">
-          <div class="text-4xl text-secondary mb-4"><i class="bi bi-telephone w-[1em] h-[1em]"></i></div>
-          <h3 class="font-bold text-gray-900 mb-2">Phone</h3>
-          <p class="text-gray-600"><a href="tel:+919876543210" class="hover:text-primary transition">+91 9876 543 210</a></p>
-        </div>
-        <div class="text-center card-hover p-6">
-          <div class="text-4xl text-primary mb-4"><i class="bi bi-envelope w-[1em] h-[1em]"></i></div>
-          <h3 class="font-bold text-gray-900 mb-2">Email</h3>
-          <p class="text-gray-600"><a href="mailto:hello@gosmoothie.com" class="hover:text-primary transition">hello@gosmoothie.com</a></p>
-        </div>
-      </div>
-      <form class="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <input type="text" placeholder="Your Name" class="px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition">
-          <input type="email" placeholder="Your Email" class="px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition">
-        </div>
-        <textarea placeholder="Your Message" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition mb-6 resize-none"></textarea>
-        <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-button hover:bg-primary/90 transition flex items-center justify-center gap-2">
-          <i class="bi bi-send w-5 h-5"></i> Send Message
-        </button>
-      </form>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-gray-900 text-gray-300 py-12">
-    <div class="container mx-auto px-4 max-w-6xl">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-        <div>
-          <a href="/main.html" class="text-2xl font-['Pacifico'] text-primary mb-4 inline-block">GoSmoothie</a>
-          <p class="text-sm">Crafting health, one smoothie at a time.</p>
-        </div>
-        <div>
-          <h4 class="text-white font-bold mb-4">Quick Links</h4>
-          <ul class="space-y-2 text-sm">
-            <li><a href="/main.html" class="hover:text-primary transition">Home</a></li>
-            <li><a href="/about-us.html" class="hover:text-primary transition">About Us</a></li>
-            <li><a href="/cart.html" class="hover:text-primary transition">Cart</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="text-white font-bold mb-4">Contact</h4>
-          <ul class="space-y-2 text-sm">
-            <li>hello@gosmoothie.com</li>
-            <li>+91 9876 543 210</li>
-            <li>123 Health Street</li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="text-white font-bold mb-4">Follow Us</h4>
-          <div class="flex gap-4">
-            <a href="#" class="text-primary hover:text-white transition text-xl"><i class="bi bi-facebook w-5 h-5"></i></a>
-            <a href="#" class="text-primary hover:text-white transition text-xl"><i class="bi bi-twitter-x w-5 h-5"></i></a>
-            <a href="#" class="text-primary hover:text-white transition text-xl"><i class="bi bi-instagram w-5 h-5"></i></a>
-            <a href="#" class="text-primary hover:text-white transition text-xl"><i class="bi bi-youtube w-5 h-5"></i></a>
-          </div>
-        </div>
-      </div>
-      <div class="border-t border-gray-700 pt-8 text-center text-sm">
-        <p>&copy; 2024 GoSmoothie. All rights reserved. | <a href="#" class="text-primary hover:underline">Privacy Policy</a> | <a href="#" class="text-primary hover:underline">Terms of Service</a></p>
-      </div>
-    </div>
-  </footer>
-
-<!-- Back to top button -->
-<button id="toTopBtn" aria-label="Scroll to top" class="hidden fixed bottom-6 right-6 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:scale-105 transition-transform">
-  <i class="bi bi-arrow-up w-5 h-5"></i>
-</button>
-
-<script>
-  (function(){
-    function toggleHomeLink(){
-      const isHome = (window.location.pathname === '/' || window.location.pathname.endsWith('main.html') || window.location.pathname.endsWith('index.html'));
-      document.querySelectorAll('header nav a').forEach(a => {
-        if(a.textContent && a.textContent.trim().toLowerCase() === 'home'){
-          a.style.display = isHome ? 'none' : '';
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+      }
+      .fade-in {
+        animation: fadeIn 0.8s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
-      });
-    }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .hero-gradient {
+        background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .stat-counter {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #4ade80;
+      }
+    </style>
+    <script src="/assets/toast.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+  </head>
+  <body class="bg-gradient-to-br from-gray-50 to-white">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+      <div
+        class="container mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <a href="/main.html" class="text-3xl font-['Pacifico'] text-primary"
+          >GoSmoothie</a
+        >
+        <nav class="hidden md:flex space-x-8">
+          <a
+            href="/main.html"
+            class="text-gray-700 hover:text-primary transition font-medium"
+            >Home</a
+          >
+          <a href="/about-us.html" class="text-primary font-semibold"
+            >About Us</a
+          >
+          <a
+            href="/cart.html"
+            class="text-gray-700 hover:text-primary transition font-medium"
+            >Cart</a
+          >
+        </nav>
+        <a href="/main.html" class="md:hidden text-primary font-['Pacifico']"
+          >GoSmoothie</a
+        >
+      </div>
+    </header>
 
-    const toTopBtn = document.getElementById('toTopBtn');
-    function onScroll(){ if(window.scrollY > 200) toTopBtn.classList.remove('hidden'); else toTopBtn.classList.add('hidden'); }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    toTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 'smooth' }));
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white pt-32 pb-20">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <a
+          href="/main.html"
+          aria-label="Back to home"
+          title="Back to home"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition rounded-lg font-medium shadow-sm mb-6"
+        >
+          <i class="bi bi-arrow-left text-lg"></i>
+        </a>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="fade-in">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+              Crafting Health, One Smoothie at a Time
+            </h1>
+            <p class="text-lg text-green-50 mb-8 leading-relaxed">
+              Welcome to GoSmoothie – where fresh ingredients meet passion for
+              wellness. We believe everyone deserves access to nutritious,
+              delicious smoothies delivered right to their doorstep.
+            </p>
+            <div class="flex gap-4">
+              <a
+                href="/main.html"
+                class="bg-white text-primary px-8 py-3 rounded-button font-semibold hover:bg-gray-100 transition"
+              >
+                Order Now
+              </a>
+              <a
+                href="#contact"
+                class="border-2 border-white text-white px-8 py-3 rounded-button font-semibold hover:bg-white/10 transition"
+              >
+                Get in Touch
+              </a>
+            </div>
+          </div>
+          <div class="fade-in">
+            <div class="relative">
+              <div
+                class="absolute -inset-4 bg-white/20 rounded-3xl blur-2xl"
+              ></div>
+              <img
+                src="https://readdy.ai/api/search-image?query=fresh%20colorful%20smoothies%20in%20glass%20bowls%20with%20fruits%20toppings%20healthy%20drink&width=500&height=500&seq=21&orientation=squarish"
+                onerror="
+                  this.onerror = null;
+                  this.src = '/assets/images/smoothie-bowl.jpg';
+                "
+                alt="Fresh Smoothies"
+                class="relative rounded-3xl shadow-2xl object-cover w-full h-96"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    toggleHomeLink();
-    window.addEventListener('popstate', toggleHomeLink);
-  })();
-</script>
+    <!-- Mission Section -->
+    <section class="py-20 bg-white">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="text-center mb-16 fade-in">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Mission</h2>
+          <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div
+            class="card-hover bg-gradient-to-br from-green-50 to-transparent p-8 rounded-2xl border border-green-200"
+          >
+            <div class="text-4xl text-primary mb-4">
+              <i class="bi bi-leaf w-[1em] h-[1em]"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">100% Fresh</h3>
+            <p class="text-gray-600">
+              We source only the freshest, highest-quality ingredients from
+              local farms to ensure every smoothie is packed with nutrients and
+              flavor.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-gradient-to-br from-orange-50 to-transparent p-8 rounded-2xl border border-orange-200"
+          >
+            <div class="text-4xl text-secondary mb-4">
+              <i class="bi bi-heart w-[1em] h-[1em]"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Health First</h3>
+            <p class="text-gray-600">
+              Your wellness is our priority. Every blend is crafted to deliver
+              maximum nutrition without artificial additives or preservatives.
+            </p>
+          </div>
+          <div
+            class="card-hover bg-gradient-to-br from-green-50 to-transparent p-8 rounded-2xl border border-green-200"
+          >
+            <div class="text-4xl text-primary mb-4">
+              <i class="bi bi-truck w-[1em] h-[1em]"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">Quick Delivery</h3>
+            <p class="text-gray-600">
+              Your smoothie should be fresh. That's why we deliver to your door
+              within minutes of preparation, maintaining optimal freshness.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
 
-</body>
+    <!-- Our Story -->
+    <section class="py-20 bg-gradient-to-br from-gray-50 to-white">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="fade-in">
+            <img
+              src="https://readdy.ai/api/search-image?query=smoothie%20bar%20cafe%20interior%20modern%20design%20healthy%20drinks%20counter&width=500&height=600&seq=22&orientation=portrait"
+              onerror="
+                this.onerror = null;
+                this.src = '/assets/images/smoothie-bowl.jpg';
+              "
+              alt="GoSmoothie Store"
+              class="rounded-3xl shadow-2xl object-cover w-full h-96"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="fade-in">
+            <h2 class="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
+            <div class="w-12 h-1 bg-primary rounded-full mb-6"></div>
+            <p class="text-gray-600 text-lg mb-4 leading-relaxed">
+              Founded in 2022, GoSmoothie started with a simple vision: to make
+              healthy living accessible to everyone. What began as a small
+              smoothie stand in a local market has grown into a thriving
+              delivery service trusted by thousands.
+            </p>
+            <p class="text-gray-600 text-lg mb-4 leading-relaxed">
+              Our founder, a fitness enthusiast and nutritionist, noticed a gap
+              in the market for fresh, affordable smoothies delivered on-demand.
+              With a passion for health and wellness, GoSmoothie was born.
+            </p>
+            <p class="text-gray-600 text-lg mb-6 leading-relaxed">
+              Today, we're proud to serve our community with the finest blends,
+              supporting local farmers, and inspiring thousands to embrace a
+              healthier lifestyle.
+            </p>
+            <div class="flex gap-4 flex-wrap">
+              <div class="flex items-center gap-3 text-primary">
+                <i class="bi bi-check w-6 h-6"></i>
+                <span class="font-semibold">FSSAI Certified</span>
+              </div>
+              <div class="flex items-center gap-3 text-primary">
+                <i class="bi bi-check w-6 h-6"></i>
+                <span class="font-semibold">Eco-Friendly</span>
+              </div>
+              <div class="flex items-center gap-3 text-primary">
+                <i class="bi bi-check w-6 h-6"></i>
+                <span class="font-semibold">Certified Organic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-20 bg-white">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="text-center mb-16 fade-in">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
+          <div class="w-16 h-1 bg-primary mx-auto rounded-full mb-6"></div>
+          <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+            Passionate individuals dedicated to bringing health and happiness to
+            your life
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Team Member 1 -->
+          <div
+            class="card-hover bg-gradient-to-br from-green-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center"
+          >
+            <div class="mb-4">
+              <img
+                src="https://readdy.ai/api/search-image?query=professional%20portrait%20man%20nutritionist%20health%20expert%20friendly%20smile&width=200&height=200&seq=23&orientation=squarish"
+                onerror="
+                  this.onerror = null;
+                  this.src =
+                    'https://ui-avatars.com/api/?name=Ananya+R&size=256&background=10b981&color=ffffff&bold=true';
+                "
+                alt="Ananya R, Founder"
+                class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-primary"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Ananya R</h3>
+            <p class="text-primary font-semibold text-sm mb-3">
+              Founder & Nutritionist
+            </p>
+            <p class="text-gray-600 text-sm mb-4">
+              Passionate nutritionist with 10+ years of expertise. Dedicated to
+              making wellness accessible to everyone.
+            </p>
+            <div class="flex justify-center gap-3">
+              <a href="#" class="text-primary hover:text-primary/70 transition"
+                ><i class="bi bi-linkedin w-5 h-5"></i
+              ></a>
+              <a href="#" class="text-primary hover:text-primary/70 transition"
+                ><i class="bi bi-twitter-x w-5 h-5"></i
+              ></a>
+            </div>
+          </div>
+
+          <!-- Team Member 2 -->
+          <div
+            class="card-hover bg-gradient-to-br from-orange-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center"
+          >
+            <div class="mb-4">
+              <img
+                src="https://readdy.ai/api/search-image?query=professional%20portrait%20woman%20business%20manager%20operations%20skilled%20leader&width=200&height=200&seq=24&orientation=squarish"
+                onerror="
+                  this.onerror = null;
+                  this.src =
+                    'https://ui-avatars.com/api/?name=Sneha+K&size=256&background=f97316&color=ffffff&bold=true';
+                "
+                alt="Sneha K, Operations Manager"
+                class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-secondary"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Sneha K</h3>
+            <p class="text-secondary font-semibold text-sm mb-3">
+              Operations Manager
+            </p>
+            <p class="text-gray-600 text-sm mb-4">
+              Supply chain expert ensuring fresh ingredients reach you every
+              time. 8+ years of operational excellence.
+            </p>
+            <div class="flex justify-center gap-3">
+              <a
+                href="#"
+                class="text-secondary hover:text-secondary/70 transition"
+                ><i class="bi bi-linkedin w-5 h-5"></i
+              ></a>
+              <a
+                href="#"
+                class="text-secondary hover:text-secondary/70 transition"
+                ><i class="bi bi-twitter-x w-5 h-5"></i
+              ></a>
+            </div>
+          </div>
+
+          <!-- Team Member 3 -->
+          <div
+            class="card-hover bg-gradient-to-br from-green-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center"
+          >
+            <div class="mb-4">
+              <img
+                src="https://readdy.ai/api/search-image?query=professional%20portrait%20man%20chef%20cook%20culinary%20expert%20kitchen&width=200&height=200&seq=25&orientation=squarish"
+                onerror="
+                  this.onerror = null;
+                  this.src =
+                    'https://ui-avatars.com/api/?name=Sravanthi+P&size=256&background=10b981&color=ffffff&bold=true';
+                "
+                alt="Sravanthi P, Head Chef"
+                class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-primary"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Sravanthi P</h3>
+            <p class="text-primary font-semibold text-sm mb-3">Head Chef</p>
+            <p class="text-gray-600 text-sm mb-4">
+              Culinary innovator creating unique flavor combinations. Expert in
+              healthy, delicious recipe development.
+            </p>
+            <div class="flex justify-center gap-3">
+              <a href="#" class="text-primary hover:text-primary/70 transition"
+                ><i class="bi bi-linkedin w-5 h-5"></i
+              ></a>
+              <a href="#" class="text-primary hover:text-primary/70 transition"
+                ><i class="bi bi-instagram w-5 h-5"></i
+              ></a>
+            </div>
+          </div>
+
+          <!-- Team Member 4 -->
+          <div
+            class="card-hover bg-gradient-to-br from-orange-50 to-white rounded-2xl overflow-hidden border border-gray-200 p-6 text-center"
+          >
+            <div class="mb-4">
+              <img
+                src="https://readdy.ai/api/search-image?query=professional%20portrait%20woman%20tech%20developer%20software%20engineer%20modern&width=200&height=200&seq=26&orientation=squarish"
+                onerror="
+                  this.onerror = null;
+                  this.src =
+                    'https://ui-avatars.com/api/?name=G+V&size=256&background=f97316&color=ffffff&bold=true';
+                "
+                alt="G. VasuDeva, Tech Lead"
+                class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-secondary"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">G. VasuDeva</h3>
+            <p class="text-secondary font-semibold text-sm mb-3">Tech Lead</p>
+            <p class="text-gray-600 text-sm mb-4">
+              Full-stack developer building seamless experiences. Passionate
+              about innovative technology solutions.
+            </p>
+            <div class="flex justify-center gap-3">
+              <a
+                href="#"
+                class="text-secondary hover:text-secondary/70 transition"
+                ><i class="bi bi-github w-5 h-5"></i
+              ></a>
+              <a
+                href="#"
+                class="text-secondary hover:text-secondary/70 transition"
+                ><i class="bi bi-linkedin w-5 h-5"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="hero-gradient text-white py-20">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="text-center mb-12">
+          <h2 class="text-4xl font-bold mb-4">By The Numbers</h2>
+          <div class="w-16 h-1 bg-white mx-auto rounded-full"></div>
+        </div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center"
+        >
+          <div class="card-hover">
+            <div class="stat-counter text-white">50K+</div>
+            <p class="text-green-50 text-lg mt-2">Happy Customers</p>
+          </div>
+          <div class="card-hover">
+            <div class="stat-counter text-white">2K+</div>
+            <p class="text-green-50 text-lg mt-2">Daily Orders</p>
+          </div>
+          <div class="card-hover">
+            <div class="stat-counter text-white">98%</div>
+            <p class="text-green-50 text-lg mt-2">Satisfaction Rate</p>
+          </div>
+          <div class="card-hover">
+            <div class="stat-counter text-white">100%</div>
+            <p class="text-green-50 text-lg mt-2">Fresh Ingredients</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Values -->
+    <section class="py-20 bg-white">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="text-center mb-16 fade-in">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
+          <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div
+            class="card-hover p-8 rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-transparent"
+          >
+            <div class="flex items-start gap-4">
+              <div class="text-3xl text-primary pt-2">
+                <i class="bi bi-award w-[1em] h-[1em]"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                  Quality Excellence
+                </h3>
+                <p class="text-gray-600">
+                  We never compromise on quality. Every ingredient is carefully
+                  selected and every blend is quality-tested before delivery.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="card-hover p-8 rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-transparent"
+          >
+            <div class="flex items-start gap-4">
+              <div class="text-3xl text-secondary pt-2">
+                <i class="bi bi-globe w-[1em] h-[1em]"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                  Sustainability
+                </h3>
+                <p class="text-gray-600">
+                  We're committed to protecting our planet. Using eco-friendly
+                  packaging and supporting local farmers for a better future.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="card-hover p-8 rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-transparent"
+          >
+            <div class="flex items-start gap-4">
+              <div class="text-3xl text-primary pt-2">
+                <i class="bi bi-people w-[1em] h-[1em]"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">
+                  Community Focus
+                </h3>
+                <p class="text-gray-600">
+                  We believe in building strong communities. Supporting local
+                  causes and contributing to the health of our society.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div
+            class="card-hover p-8 rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-transparent"
+          >
+            <div class="flex items-start gap-4">
+              <div class="text-3xl text-secondary pt-2">
+                <i class="bi bi-lightbulb w-[1em] h-[1em]"></i>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Innovation</h3>
+                <p class="text-gray-600">
+                  We're constantly innovating. Experimenting with new flavors,
+                  recipes, and delivery methods to improve your experience.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section
+      class="py-20 bg-gradient-to-r from-primary to-primary/80 text-white"
+    >
+      <div class="container mx-auto px-4 max-w-4xl text-center">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">
+          Join Our Wellness Community
+        </h2>
+        <p class="text-lg text-green-50 mb-8 leading-relaxed">
+          Experience the GoSmoothie difference today. Fresh, nutritious
+          smoothies delivered to your doorstep. Your health journey starts here.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a
+            href="/main.html"
+            class="bg-white text-primary px-8 py-4 rounded-button font-bold text-lg hover:bg-gray-100 transition inline-flex items-center justify-center gap-2"
+          >
+            <i class="bi bi-cart w-5 h-5"></i> Start Ordering
+          </a>
+          <a
+            href="#contact"
+            class="border-2 border-white text-white px-8 py-4 rounded-button font-bold text-lg hover:bg-white/10 transition inline-flex items-center justify-center gap-2"
+          >
+            <i class="bi bi-envelope w-5 h-5"></i> Contact Us
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+      <div class="container mx-auto px-4 max-w-4xl">
+        <div class="text-center mb-16">
+          <h2 class="text-4xl font-bold text-gray-900 mb-4">Get In Touch</h2>
+          <div class="w-16 h-1 bg-primary mx-auto rounded-full"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div class="text-center card-hover p-6">
+            <div class="text-4xl text-primary mb-4">
+              <i class="bi bi-geo-alt w-[1em] h-[1em]"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">Address</h3>
+            <p class="text-gray-600">
+              123 Health Street, Wellness City, HC 12345
+            </p>
+          </div>
+          <div class="text-center card-hover p-6">
+            <div class="text-4xl text-secondary mb-4">
+              <i class="bi bi-telephone w-[1em] h-[1em]"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">Phone</h3>
+            <p class="text-gray-600">
+              <a href="tel:+919876543210" class="hover:text-primary transition"
+                >+91 9876 543 210</a
+              >
+            </p>
+          </div>
+          <div class="text-center card-hover p-6">
+            <div class="text-4xl text-primary mb-4">
+              <i class="bi bi-envelope w-[1em] h-[1em]"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">Email</h3>
+            <p class="text-gray-600">
+              <a
+                href="mailto:hello@gosmoothie.com"
+                class="hover:text-primary transition"
+                >hello@gosmoothie.com</a
+              >
+            </p>
+          </div>
+        </div>
+        <form
+          class="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <input
+              type="text"
+              placeholder="Your Name"
+              class="px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition"
+            />
+            <input
+              type="email"
+              placeholder="Your Email"
+              class="px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition"
+            />
+          </div>
+          <textarea
+            placeholder="Your Message"
+            rows="5"
+            class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-primary transition mb-6 resize-none"
+          ></textarea>
+          <button
+            type="submit"
+            class="w-full bg-primary text-white font-bold py-3 rounded-button hover:bg-primary/90 transition flex items-center justify-center gap-2"
+          >
+            <i class="bi bi-send w-5 h-5"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12">
+      <div class="container mx-auto px-4 max-w-6xl">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <a
+              href="/main.html"
+              class="text-2xl font-['Pacifico'] text-primary mb-4 inline-block"
+              >GoSmoothie</a
+            >
+            <p class="text-sm">Crafting health, one smoothie at a time.</p>
+          </div>
+          <div>
+            <h4 class="text-white font-bold mb-4">Quick Links</h4>
+            <ul class="space-y-2 text-sm">
+              <li>
+                <a href="/main.html" class="hover:text-primary transition"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a href="/about-us.html" class="hover:text-primary transition"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a href="/cart.html" class="hover:text-primary transition"
+                  >Cart</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-white font-bold mb-4">Contact</h4>
+            <ul class="space-y-2 text-sm">
+              <li>hello@gosmoothie.com</li>
+              <li>+91 9876 543 210</li>
+              <li>123 Health Street</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-white font-bold mb-4">Follow Us</h4>
+            <div class="flex gap-4">
+              <a
+                href="#"
+                class="text-primary hover:text-white transition text-xl"
+                ><i class="bi bi-facebook w-5 h-5"></i
+              ></a>
+              <a
+                href="#"
+                class="text-primary hover:text-white transition text-xl"
+                ><i class="bi bi-twitter-x w-5 h-5"></i
+              ></a>
+              <a
+                href="#"
+                class="text-primary hover:text-white transition text-xl"
+                ><i class="bi bi-instagram w-5 h-5"></i
+              ></a>
+              <a
+                href="#"
+                class="text-primary hover:text-white transition text-xl"
+                ><i class="bi bi-youtube w-5 h-5"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-gray-700 pt-8 text-center text-sm">
+          <p>
+            &copy; 2024 GoSmoothie. All rights reserved. |
+            <a href="#" class="text-primary hover:underline">Privacy Policy</a>
+            |
+            <a href="#" class="text-primary hover:underline"
+              >Terms of Service</a
+            >
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Back to top button -->
+    <button
+      id="toTopBtn"
+      aria-label="Scroll to top"
+      class="hidden fixed bottom-6 right-6 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:scale-105 transition-transform"
+    >
+      <i class="bi bi-arrow-up w-5 h-5"></i>
+    </button>
+
+    <script>
+      (function () {
+        function toggleHomeLink() {
+          const isHome =
+            window.location.pathname === "/" ||
+            window.location.pathname.endsWith("main.html") ||
+            window.location.pathname.endsWith("index.html");
+          document.querySelectorAll("header nav a").forEach((a) => {
+            if (
+              a.textContent &&
+              a.textContent.trim().toLowerCase() === "home"
+            ) {
+              a.style.display = isHome ? "none" : "";
+            }
+          });
+        }
+
+        const toTopBtn = document.getElementById("toTopBtn");
+        function onScroll() {
+          if (window.scrollY > 200) toTopBtn.classList.remove("hidden");
+          else toTopBtn.classList.add("hidden");
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        toTopBtn.addEventListener("click", () =>
+          window.scrollTo({ top: 0, behavior: "smooth" }),
+        );
+
+        toggleHomeLink();
+        window.addEventListener("popstate", toggleHomeLink);
+      })();
+    </script>
+  </body>
 </html>

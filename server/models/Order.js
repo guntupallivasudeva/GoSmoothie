@@ -23,6 +23,12 @@ const OrderSubSchema = new mongoose.Schema(
     totalAmount: { type: Number, default: 0 },
     orderStatus: { type: String, default: "confirmed" },
     paymentStatus: { type: String, default: "unpaid" },
+    // Method chosen in the checkout payment modal, e.g. "UPI QR" or
+    // "Netbanking · HDFC Bank". No card or UPI credentials are ever stored.
+    paymentMethod: { type: String, default: "" },
+    // "online" | "cod" — kept alongside the label so cash orders can be
+    // filtered without parsing display text.
+    paymentMode: { type: String, default: "online" },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

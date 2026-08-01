@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <script src="/api-client.js"></script>
+  <head>
+    <script src="/api-client.js"></script>
+    <script src="/session.js"></script>
+    <!-- Brand registry for the payment modal's logos (window.GoSmoothieBrands). -->
+    <script src="/payment-brands.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Checkout - GoSmoothie</title>
@@ -37,13 +40,253 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-<style>
+    <style>
       body {
         font-family: "Poppins", sans-serif;
       }
+
+      /* ---------- Payment options modal ---------- */
+      /* Animations mirror the cart and profile cards (same easing and travel)
+         so the modal feels part of the same app. */
+      #payModal.is-open {
+        display: flex;
+      }
+      #payModal .pay-backdrop {
+        animation: pay-fade 0.24s ease-out both;
+      }
+      #payModal .pay-shell {
+        animation: pay-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+        box-shadow:
+          0 30px 70px rgba(15, 23, 42, 0.28),
+          0 8px 24px rgba(74, 222, 128, 0.14);
+      }
+      @keyframes pay-fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes pay-rise {
+        from {
+          opacity: 0;
+          transform: translateY(22px) scale(0.975);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      /* Brand rail: the app's green gradient instead of a third-party blue. */
+      .pay-brand {
+        background:
+          radial-gradient(
+            120% 90% at 100% 0%,
+            rgba(255, 255, 255, 0.22),
+            transparent 60%
+          ),
+          linear-gradient(160deg, #15803d 0%, #16a34a 42%, #4ade80 100%);
+      }
+      .pay-brand-wave {
+        position: absolute;
+        inset: auto -20% -18% -20%;
+        height: 62%;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.16),
+          rgba(255, 255, 255, 0.04)
+        );
+        transform: skewY(-9deg);
+        pointer-events: none;
+      }
+      .pay-brand-blob {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(26px);
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .pay-summary-card {
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 14px 30px rgba(6, 78, 59, 0.18);
+      }
+      .pay-side-row {
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .pay-side-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(6, 78, 59, 0.18);
+      }
+      /* Method rail */
+      .pay-method {
+        transition:
+          background 0.22s ease,
+          box-shadow 0.22s ease,
+          color 0.22s ease;
+      }
+      .pay-method:hover {
+        background: rgba(74, 222, 128, 0.08);
+      }
+      .pay-method[aria-selected="true"] {
+        background: linear-gradient(
+          90deg,
+          rgba(74, 222, 128, 0.18),
+          rgba(255, 255, 255, 0)
+        );
+        box-shadow: inset 3px 0 0 #16a34a;
+      }
+      /* An ineligible method stays visible and focusable (so its reason can be
+         read) but loses the hover affordance. */
+      .pay-method[aria-disabled="true"]:hover {
+        background: transparent;
+      }
+      /* Content panes */
+      .pay-pane {
+        animation: pay-pane-in 0.3s ease-out both;
+      }
+      @keyframes pay-pane-in {
+        from {
+          opacity: 0;
+          transform: translateX(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .pay-row {
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          background 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      .pay-row:hover {
+        transform: translateY(-2px);
+        border-color: rgba(74, 222, 128, 0.6);
+        background: rgba(240, 253, 244, 0.75);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+      }
+      .pay-row[aria-pressed="true"] {
+        border-color: #22c55e;
+        background: rgba(240, 253, 244, 0.9);
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+      }
+      /* Lettered placeholder: still the fallback for a brand with no artwork
+         and for a logo that fails to load. */
+      .pay-chip {
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 0.35rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.02em;
+      }
+      /* Brand marks. The box has fixed dimensions and the image is contained
+         inside it, so logos of any aspect ratio share one footprint and nothing
+         shifts while they load. */
+      .pay-logo-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        overflow: hidden;
+      }
+      .pay-logo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+      }
+      /* method rail */
+      .pay-logo-box--sm {
+        width: 1.5rem;
+        height: 1.25rem;
+      }
+      /* bank and wallet rows */
+      .pay-logo-box--md {
+        width: 2rem;
+        height: 1.5rem;
+      }
+      /* "Scan the QR using any UPI App" strip */
+      .pay-logo-box--lg {
+        width: 2.25rem;
+        height: 1.5rem;
+      }
+      /* QR is hidden until requested, exactly like a real checkout sheet. */
+      .pay-qr {
+        transition:
+          filter 0.35s ease,
+          opacity 0.35s ease;
+      }
+      .pay-qr.is-hidden {
+        filter: blur(6px);
+        opacity: 0.55;
+      }
+      .pay-field {
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      .pay-field:focus {
+        outline: none;
+        border-color: #22c55e;
+        box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.22);
+      }
+      .pay-cta {
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
+      }
+      .pay-cta:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 26px rgba(15, 23, 42, 0.18);
+      }
+      .pay-cta:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      /* Bottom sheets (contact details, offers) */
+      .pay-sheet {
+        animation: pay-sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      @keyframes pay-sheet-up {
+        from {
+          opacity: 0;
+          transform: translateY(26px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .pay-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(34, 197, 94, 0.45) transparent;
+      }
+      .pay-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .pay-scroll::-webkit-scrollbar-thumb {
+        background: rgba(34, 197, 94, 0.4);
+        border-radius: 9999px;
+      }
     </style>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-</head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+  </head>
   <body
     class="bg-gradient-to-br from-[#edf4ef] via-[#f8fbf9] to-[#edf4ef] min-h-screen"
   >
@@ -76,10 +319,10 @@
       <div class="container mx-auto px-4 max-w-6xl">
         <div class="mb-7">
           <a
-            href="/cart.html"
-            aria-label="Back to cart"
-            title="Back to cart"
-            class="inline-flex items-center px-3 py-2 bg-white shadow-sm rounded-full text-sm"
+            href="/main.html"
+            aria-label="Back to home"
+            title="Back to home"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition rounded-lg font-medium shadow-sm"
           >
             <i class="bi bi-arrow-left text-lg"></i>
           </a>
@@ -503,27 +746,35 @@
                     aria-expanded="true"
                     aria-controls="deliverySavedAddressContent"
                   >
-                    <span class="font-semibold text-gray-800">Saved Addresses</span>
+                    <span class="font-semibold text-gray-800"
+                      >Saved Addresses</span
+                    >
                     <span class="flex items-center gap-2">
-                    <p
-                      id="deliverySavedAddressBadge"
-                      class="text-sm font-medium text-primary hidden"
-                    ></p>
-                    <i id="deliverySavedAddressChevron" class="bi bi-chevron-up text-gray-500"></i>
+                      <p
+                        id="deliverySavedAddressBadge"
+                        class="text-sm font-medium text-primary hidden"
+                      ></p>
+                      <i
+                        id="deliverySavedAddressChevron"
+                        class="bi bi-chevron-up text-gray-500"
+                      ></i>
                     </span>
                   </button>
                   <div id="deliverySavedAddressContent">
-                  <div
-                    id="deliverySavedAddressCards"
-                    class="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch"
-                  ></div>
+                    <div
+                      id="deliverySavedAddressCards"
+                      class="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch"
+                    ></div>
                   </div>
                 </div>
                 <div class="mb-6">
                   <h4 class="font-semibold text-gray-800 mb-3">
                     Delivery Options
                   </h4>
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3" id="deliveryOptionsGroup">
+                  <div
+                    class="grid grid-cols-1 md:grid-cols-3 gap-3"
+                    id="deliveryOptionsGroup"
+                  >
                     <label
                       class="delivery-option-card flex h-full flex-col items-start justify-between gap-3 p-4 border border-primary bg-primary/5 rounded-xl cursor-pointer"
                       data-option="standard"
@@ -648,14 +899,11 @@
 
     <script>
       /* Utilities */
-      const clientIdKey = "gs_clientId";
+      // Shared session so checkout uses the same identity as the cart page.
+      const session = window.GoSmoothieSession;
+      const clientIdKey = session.CLIENT_KEY;
       function getClientId() {
-        let id = localStorage.getItem(clientIdKey);
-        if (!id) {
-          id = "c_" + Date.now() + Math.random().toString(36).slice(2, 9);
-          localStorage.setItem(clientIdKey, id);
-        }
-        return id;
+        return session.getClientId();
       }
 
       /* Load cart summary */
@@ -666,11 +914,31 @@
         const option =
           document.querySelector('input[name="delivery-option"]:checked')
             ?.value || "standard";
-        if (option === "express")
-          return { label: "Express delivery", fee: 20 };
+        if (option === "express") return { label: "Express delivery", fee: 20 };
         if (option === "scheduled")
           return { label: "Scheduled delivery", fee: 0 };
         return { label: "Standard delivery", fee: 0 };
+      }
+
+      // Single source for the amounts, shared by the summary panel and the
+      // payment modal so both always show the same total.
+      function currentOrderTotals() {
+        const subtotal = summaryItems.reduce(
+          (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+          0,
+        );
+        const tax = Math.round(subtotal * 0.1);
+        const delivery = selectedDeliveryPricing();
+        return {
+          itemCount: summaryItems.reduce(
+            (sum, item) => sum + (item.quantity || 1),
+            0,
+          ),
+          subtotal,
+          tax,
+          delivery,
+          finalTotal: subtotal + tax + delivery.fee,
+        };
       }
 
       function renderOrderSummary() {
@@ -678,24 +946,18 @@
         const totalAmount = document.getElementById("totalAmount");
         const snapshot = document.getElementById("snapshotTotal");
         if (!summaryItems.length) {
-          summary.innerHTML =
-            '<p class="text-gray-600">Your cart is empty</p>';
+          summary.innerHTML = '<p class="text-gray-600">Your cart is empty</p>';
           totalAmount.textContent = "₹ 0";
           if (snapshot) snapshot.textContent = "₹ 0";
           return;
         }
 
-        let subtotal = 0;
         let html = "";
         summaryItems.forEach((item) => {
-          const lineTotal =
-            (item.price || 0) * (item.quantity || 1);
-          subtotal += lineTotal;
+          const lineTotal = (item.price || 0) * (item.quantity || 1);
           html += `<div class="flex justify-between gap-3"><span>${item.name} x${item.quantity}</span><span>₹ ${lineTotal}</span></div>`;
         });
-        const tax = Math.round(subtotal * 0.1);
-        const delivery = selectedDeliveryPricing();
-        const finalTotal = subtotal + tax + delivery.fee;
+        const { subtotal, tax, delivery, finalTotal } = currentOrderTotals();
         html += `<div class="border-t border-gray-200 my-3 pt-3">
       <div class="flex justify-between text-gray-700 mb-2"><span>Subtotal</span><span>₹ ${subtotal}</span></div>
       <div class="flex justify-between text-gray-700 mb-2"><span>Tax (10%)</span><span>₹ ${tax}</span></div>
@@ -714,6 +976,9 @@
           const r = await fetch(url, {
             headers: token ? { Authorization: "Bearer " + token } : {},
           });
+          // A rejected session is handled by session.js; anything else that is
+          // not a success must not be treated as an empty cart.
+          if (!r.ok) return;
           const data = await r.json();
           summaryItems = Array.isArray(data.items) ? data.items : [];
           renderOrderSummary();
@@ -983,8 +1248,7 @@
           address.country,
         ]
           .filter(
-            (part, index, values) =>
-              part && values.indexOf(part) === index,
+            (part, index, values) => part && values.indexOf(part) === index,
           )
           .join(", ");
         return {
@@ -1041,8 +1305,7 @@
             "deliverySavedAddressChevron",
           );
           const expanded =
-            deliverySavedAddressToggle.getAttribute("aria-expanded") ===
-            "true";
+            deliverySavedAddressToggle.getAttribute("aria-expanded") === "true";
           deliverySavedAddressToggle.setAttribute(
             "aria-expanded",
             String(!expanded),
@@ -1219,8 +1482,7 @@
         } finally {
           if (button) {
             button.disabled = false;
-            button.innerHTML =
-              '<i class="bi bi-geo-alt"></i> Use My Location';
+            button.innerHTML = '<i class="bi bi-geo-alt"></i> Use My Location';
           }
         }
       }
@@ -1311,8 +1573,14 @@
         });
 
       let orderSubmissionInProgress = false;
-      async function placeOrder() {
-        if (orderSubmissionInProgress) return;
+
+      /*
+       * Checkout runs in two steps now: collectOrderRequest() validates the
+       * form and builds the request, the payment modal collects the payment
+       * choice, and submitOrder() sends it. That way the modal can only open
+       * for an order that is actually ready to be placed.
+       */
+      function collectOrderRequest() {
         const msg = document.getElementById("checkoutMessage");
         if (msg) msg.classList.add("hidden");
         const mode = orderMode;
@@ -1343,7 +1611,6 @@
         }
 
         const customer = { name, phone, forSomeoneElse: orderForSomeoneElse };
-        const token = localStorage.getItem("gs_token");
         const body = {
           customer,
           mode,
@@ -1390,6 +1657,12 @@
           };
         }
 
+        return { body, mode };
+      }
+
+      async function submitOrder(body, mode) {
+        if (orderSubmissionInProgress) return;
+        const token = localStorage.getItem("gs_token");
         const submitButtons = [
           document.getElementById("pickupContinueBtn"),
           document.getElementById("deliveryContinueBtn"),
@@ -1403,9 +1676,7 @@
           mode === "pickup"
             ? document.getElementById("pickupContinueBtn")
             : document.getElementById("deliveryContinueBtn");
-        const originalButtonText = activeButton
-          ? activeButton.textContent
-          : "";
+        const originalButtonText = activeButton ? activeButton.textContent : "";
         if (activeButton) activeButton.textContent = "Placing Order...";
 
         try {
@@ -1469,12 +1740,36 @@
         }
       }
 
+      /*
+       * "Place Order & Pay" now opens the payment options modal. The order is
+       * only submitted once a payment method has been chosen there.
+       */
+      async function startCheckout() {
+        if (orderSubmissionInProgress) return;
+        const request = collectOrderRequest();
+        if (!request) return;
+        if (window.GoSmoothiePayModal) {
+          window.GoSmoothiePayModal.open(request);
+          return;
+        }
+        // Without the modal (script blocked), keep the original direct flow.
+        await submitOrder(request.body, request.mode);
+      }
+
+      // The payment modal calls back here once a method has been selected.
+      window.GoSmoothieCheckout = {
+        submitOrder,
+        currentOrderTotals,
+        setMessage,
+        getOrderMode: () => orderMode,
+      };
+
       document
         .getElementById("pickupContinueBtn")
-        .addEventListener("click", placeOrder);
+        .addEventListener("click", startCheckout);
       document
         .getElementById("deliveryContinueBtn")
-        .addEventListener("click", placeOrder);
+        .addEventListener("click", startCheckout);
 
       /* Init */
       updateModeUI(orderMode);
@@ -1558,7 +1853,7 @@
           <p class="text-sm text-gray-700">${address.street || ""}</p>
           <p class="text-sm text-gray-500">${address.city || ""} ${address.zip || ""}</p>
         </div>
-        <span class="text-xs font-semibold px-2 py-1 rounded-full ${selected ? "bg-primary text-white" : "bg-gray-100 text-gray-600"}">${selected ? (isDefault ? "Default" : "Selected") : isDefault ? "Default" : "Use"}</span>
+        ${selected ? '<i class="bi bi-patch-check-fill text-green-500 text-xl"></i>' : isDefault ? '<span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700">Default</span>' : '<span class="text-xs font-semibold px-2 py-1 rounded-full bg-gray-100 text-gray-600">Use</span>'}
       </div>
     `;
           card.addEventListener("click", () => selectSavedAddress(idx));
@@ -1639,6 +1934,1638 @@
       loadSavedAddresses();
       updateDeliveryRecipientUI();
       updateDeliveryAddressSourceUI();
+    </script>
+
+    <!-- ===================== Payment options modal =====================
+         Opens from "Place Order & Pay". Layout follows a standard checkout
+         sheet (brand rail, method rail, method pane) in GoSmoothie's own
+         colours. No real gateway is involved: the selected method is recorded
+         with the order. -->
+    <div
+      id="payModal"
+      class="hidden fixed inset-0 z-[120] items-center justify-center p-3 md:p-6"
+      aria-hidden="true"
+    >
+      <div
+        class="pay-backdrop absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+        data-pay-dismiss
+      ></div>
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="payModalTitle"
+        class="pay-shell relative flex w-full max-w-5xl h-[min(94vh,650px)] overflow-hidden rounded-[1.5rem] bg-white"
+      >
+        <!-- Brand rail -->
+        <aside
+          class="pay-brand relative hidden md:flex w-[38%] shrink-0 flex-col p-6 text-white"
+        >
+          <div
+            class="pay-brand-blob"
+            style="
+              width: 220px;
+              height: 220px;
+              top: -60px;
+              right: -70px;
+              background: #bbf7d0;
+            "
+          ></div>
+          <div
+            class="pay-brand-blob"
+            style="
+              width: 180px;
+              height: 180px;
+              bottom: 90px;
+              left: -60px;
+              background: #86efac;
+            "
+          ></div>
+          <div class="pay-brand-wave"></div>
+
+          <div class="relative flex items-center gap-3 mb-6">
+            <span
+              class="w-11 h-11 rounded-xl bg-white/95 text-primary flex items-center justify-center shadow-lg"
+            >
+              <i class="bi bi-cup-straw text-xl text-green-600"></i>
+            </span>
+            <span class="text-lg font-semibold tracking-wide">GoSmoothie</span>
+          </div>
+
+          <div class="pay-summary-card relative rounded-2xl p-4 mb-3">
+            <p class="text-sm font-medium text-slate-600">Price Summary</p>
+            <p class="mt-1 flex items-baseline gap-1 text-slate-900">
+              <span id="paySummaryTotal" class="text-2xl font-bold">₹0</span>
+              <span id="paySummaryMeta" class="text-xs text-slate-500"
+                >incl. taxes</span
+              >
+            </p>
+          </div>
+
+          <button
+            type="button"
+            id="payContactRow"
+            class="pay-side-row relative w-full flex items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 text-left text-slate-800"
+          >
+            <span
+              class="w-7 h-7 rounded-lg bg-green-100 text-green-700 flex items-center justify-center"
+            >
+              <i class="bi bi-person-fill text-sm"></i>
+            </span>
+            <span class="flex-1 text-sm font-medium"
+              >Using as <span id="payContactLabel">+91</span></span
+            >
+            <i class="bi bi-chevron-right text-slate-400 text-sm"></i>
+          </button>
+
+          <button
+            type="button"
+            id="payOffersRow"
+            class="pay-side-row relative mt-3 w-full flex items-center gap-3 rounded-2xl bg-green-50/95 px-4 py-3 text-left text-green-800"
+          >
+            <span
+              class="w-7 h-7 rounded-lg bg-white text-green-600 flex items-center justify-center"
+            >
+              <i class="bi bi-tag-fill text-sm"></i>
+            </span>
+            <span class="flex-1 text-sm font-semibold">Offers on UPI</span>
+            <i class="bi bi-chevron-right text-green-500 text-sm"></i>
+          </button>
+
+          <div class="relative mt-auto pt-8">
+            <p
+              class="flex items-center gap-2 text-xs font-medium text-white/85"
+            >
+              <i class="bi bi-shield-lock-fill"></i> Secured by
+              <span class="font-semibold">GoSmoothie Pay</span>
+            </p>
+          </div>
+        </aside>
+
+        <!-- Right column: header + method rail + pane -->
+        <div class="flex min-w-0 flex-1 flex-col">
+          <div
+            class="relative flex items-center justify-center border-b border-slate-200 px-4 py-3.5"
+          >
+            <h2
+              id="payModalTitle"
+              class="text-[15px] font-semibold text-slate-800"
+            >
+              Payment Options
+            </h2>
+            <div class="absolute right-3 flex items-center gap-1">
+              <button
+                type="button"
+                id="payMoreBtn"
+                aria-label="More options"
+                class="w-8 h-8 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition"
+              >
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <button
+                type="button"
+                id="payCloseBtn"
+                aria-label="Close payment options"
+                class="w-8 h-8 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition"
+              >
+                <i class="bi bi-x-lg text-sm"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex min-h-0 flex-1">
+            <!-- Method rail -->
+            <div
+              id="payMethodRail"
+              role="tablist"
+              aria-label="Payment methods"
+              class="pay-scroll w-[38%] max-w-[220px] shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50/60"
+            >
+              <button
+                type="button"
+                role="tab"
+                class="pay-method w-full px-4 py-4 text-left"
+                data-method="upi"
+                aria-selected="true"
+              >
+                <span
+                  class="flex items-center justify-between gap-2 text-sm font-semibold text-slate-800"
+                  >UPI
+                  <!-- Marks are filled from the brand registry on init; see
+                       renderStaticMarks() below. -->
+                  <span
+                    class="flex items-center gap-1"
+                    data-brand-marks="google-pay,phonepe,bhim,paytm"
+                    data-brand-size="sm"
+                  ></span>
+                </span>
+                <span
+                  class="mt-2 inline-block rounded-md bg-green-100 px-2 py-1 text-[11px] font-semibold text-green-700"
+                  >Upto 1.5% savings...</span
+                >
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="pay-method w-full px-4 py-4 text-left"
+                data-method="card"
+                aria-selected="false"
+              >
+                <span
+                  class="flex items-center justify-between gap-2 text-sm font-semibold text-slate-800"
+                  >Cards
+                  <span
+                    class="flex items-center gap-1"
+                    data-brand-marks="visa,mastercard,rupay,amex"
+                    data-brand-size="sm"
+                  ></span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="pay-method w-full px-4 py-4 text-left"
+                data-method="netbanking"
+                aria-selected="false"
+              >
+                <span
+                  class="flex items-center justify-between gap-2 text-sm font-semibold text-slate-800"
+                  >Netbanking
+                  <span
+                    class="flex items-center gap-1"
+                    data-brand-marks="sbi,hdfc,icici,kotak"
+                    data-brand-size="sm"
+                  ></span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                class="pay-method w-full px-4 py-4 text-left"
+                data-method="wallet"
+                aria-selected="false"
+              >
+                <span
+                  class="flex items-center justify-between gap-2 text-sm font-semibold text-slate-800"
+                  >Wallet
+                  <span
+                    class="flex items-center gap-1"
+                    data-brand-marks="amazon-pay,phonepe,mobikwik,airtel-payments-bank"
+                    data-brand-size="sm"
+                  ></span>
+                </span>
+              </button>
+
+              <!-- Cash: no savings badge, because the UPI offer never applies
+                   to it. Wording is reworded by order mode when the modal
+                   opens. -->
+              <button
+                type="button"
+                role="tab"
+                class="pay-method w-full px-4 py-4 text-left"
+                data-method="cod"
+                aria-selected="false"
+              >
+                <span
+                  class="flex items-center justify-between gap-2 text-sm font-semibold text-slate-800"
+                  ><span data-cod-rail-title>Cash on Delivery</span>
+                  <i
+                    class="bi bi-cash-coin text-base text-green-600"
+                    aria-hidden="true"
+                  ></i>
+                </span>
+                <span
+                  class="mt-2 block text-[11px] font-medium text-slate-500"
+                  data-cod-rail-note
+                  >Pay when it arrives</span
+                >
+              </button>
+            </div>
+
+            <!-- Method panes -->
+            <div
+              id="payPaneWrap"
+              class="pay-scroll min-w-0 flex-1 overflow-y-auto bg-white p-5"
+            >
+              <!-- UPI -->
+              <section
+                class="pay-pane"
+                data-pane="upi"
+                role="tabpanel"
+                aria-label="UPI"
+              >
+                <h3 class="text-base font-semibold text-slate-800">
+                  Available Offers
+                </h3>
+                <div
+                  class="mt-3 flex items-center gap-3 rounded-xl bg-green-50 px-4 py-3 ring-1 ring-green-100"
+                >
+                  <span
+                    class="w-7 h-7 rounded-lg bg-white text-green-600 flex items-center justify-center shrink-0"
+                  >
+                    <i class="bi bi-percent text-sm"></i>
+                  </span>
+                  <p class="text-sm text-slate-700">
+                    Upto 1.5% savings with GoSmoothie UPI txn
+                  </p>
+                </div>
+
+                <h3 class="mt-6 text-base font-semibold text-slate-800">
+                  UPI QR
+                </h3>
+                <div
+                  class="mt-3 grid grid-cols-1 gap-4 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100 sm:grid-cols-[170px_1fr]"
+                >
+                  <div class="relative">
+                    <div
+                      id="payQr"
+                      class="pay-qr is-hidden mx-auto flex h-[150px] w-[150px] items-center justify-center rounded-xl bg-white p-2 ring-1 ring-slate-200"
+                    ></div>
+                    <button
+                      type="button"
+                      id="payShowQrBtn"
+                      class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-slate-800 shadow-md ring-1 ring-slate-200 hover:bg-green-50 hover:text-green-700 transition"
+                    >
+                      Show QR
+                    </button>
+                  </div>
+                  <div>
+                    <p class="text-sm text-slate-600">
+                      Scan the QR using any UPI App
+                    </p>
+                    <div
+                      class="mt-2 flex flex-wrap items-center gap-2"
+                      data-brand-marks="bhim,google-pay,paytm,phonepe,amazon-pay,gosmoothie"
+                      data-brand-size="lg"
+                    ></div>
+                    <p
+                      class="mt-3 rounded-lg bg-green-100 px-3 py-2 text-xs font-semibold text-green-800"
+                    >
+                      Upto 1.5% savings with GoSmoothie UPI txns
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-5">
+                  <label
+                    for="payUpiId"
+                    class="block text-sm font-medium text-slate-700"
+                    >Or pay using a UPI ID</label
+                  >
+                  <input
+                    id="payUpiId"
+                    type="text"
+                    inputmode="email"
+                    placeholder="yourname@upi"
+                    class="pay-field mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm placeholder:text-slate-400"
+                  />
+                  <p
+                    id="payUpiError"
+                    class="mt-2 hidden text-xs font-medium text-red-600"
+                  ></p>
+                </div>
+
+                <button
+                  type="button"
+                  class="pay-cta mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+                  data-pay-submit="upi"
+                >
+                  Pay <span data-pay-amount>₹0</span>
+                </button>
+              </section>
+
+              <!-- Cards -->
+              <section
+                class="pay-pane hidden"
+                data-pane="card"
+                role="tabpanel"
+                aria-label="Cards"
+              >
+                <h3 class="text-base font-semibold text-slate-800">
+                  Add a new card
+                </h3>
+                <div
+                  class="mt-4 overflow-hidden rounded-xl border border-slate-200"
+                >
+                  <input
+                    id="payCardNumber"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="cc-number"
+                    maxlength="23"
+                    placeholder="Card Number"
+                    class="pay-field w-full border-b border-slate-200 px-4 py-3.5 text-sm placeholder:text-slate-400"
+                  />
+                  <div class="grid grid-cols-2">
+                    <input
+                      id="payCardExpiry"
+                      type="text"
+                      inputmode="numeric"
+                      autocomplete="cc-exp"
+                      maxlength="7"
+                      placeholder="MM / YY"
+                      class="pay-field border-r border-slate-200 px-4 py-3.5 text-sm placeholder:text-slate-400"
+                    />
+                    <input
+                      id="payCardCvv"
+                      type="password"
+                      inputmode="numeric"
+                      autocomplete="cc-csc"
+                      maxlength="4"
+                      placeholder="CVV"
+                      class="pay-field px-4 py-3.5 text-sm placeholder:text-slate-400"
+                    />
+                  </div>
+                </div>
+                <p
+                  id="payCardError"
+                  class="mt-2 hidden text-xs font-medium text-red-600"
+                ></p>
+
+                <label
+                  class="mt-4 flex items-center gap-3 text-sm text-slate-700"
+                >
+                  <input
+                    id="payCardSave"
+                    type="checkbox"
+                    class="h-4 w-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                  />
+                  Save this card as per RBI guidelines
+                </label>
+
+                <button
+                  type="button"
+                  class="pay-cta mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+                  data-pay-submit="card"
+                >
+                  Continue
+                </button>
+              </section>
+
+              <!-- Netbanking -->
+              <section
+                class="pay-pane hidden"
+                data-pane="netbanking"
+                role="tabpanel"
+                aria-label="Netbanking"
+              >
+                <div class="relative">
+                  <i
+                    class="bi bi-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  ></i>
+                  <input
+                    id="payBankSearch"
+                    type="search"
+                    placeholder="Search for Banks"
+                    class="pay-field w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 text-sm placeholder:text-slate-400"
+                  />
+                </div>
+
+                <div id="payBankSuggestedWrap">
+                  <h3 class="mt-5 text-sm font-semibold text-slate-500">
+                    Suggested Banks
+                  </h3>
+                  <div id="payBankSuggested" class="mt-2 space-y-2"></div>
+                </div>
+                <div id="payBankAllWrap">
+                  <h3 class="mt-5 text-sm font-semibold text-slate-500">
+                    All Banks
+                  </h3>
+                  <div id="payBankAll" class="mt-2 space-y-2"></div>
+                </div>
+                <p id="payBankEmpty" class="mt-5 hidden text-sm text-slate-500">
+                  No banks match that search.
+                </p>
+
+                <button
+                  type="button"
+                  class="pay-cta mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+                  data-pay-submit="netbanking"
+                  disabled
+                >
+                  Pay <span data-pay-amount>₹0</span>
+                </button>
+              </section>
+
+              <!-- Wallet -->
+              <section
+                class="pay-pane hidden"
+                data-pane="wallet"
+                role="tabpanel"
+                aria-label="Wallet"
+              >
+                <h3 class="text-base font-semibold text-slate-800">
+                  All Wallet Options
+                </h3>
+                <div id="payWalletList" class="mt-3 space-y-2"></div>
+
+                <button
+                  type="button"
+                  class="pay-cta mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+                  data-pay-submit="wallet"
+                  disabled
+                >
+                  Pay <span data-pay-amount>₹0</span>
+                </button>
+              </section>
+
+              <!-- Cash on Delivery: collects nothing, so it has no inputs. The
+                   amount uses the shared [data-pay-amount] binding, so it always
+                   matches the brand rail and the order summary. -->
+              <section
+                class="pay-pane hidden"
+                data-pane="cod"
+                role="tabpanel"
+                aria-label="Cash on Delivery"
+              >
+                <h3
+                  class="text-base font-semibold text-slate-800"
+                  data-cod-title
+                >
+                  Cash on Delivery
+                </h3>
+                <p class="mt-1 text-sm text-slate-500" data-cod-lead>
+                  Hand the cash to our delivery partner.
+                </p>
+
+                <div
+                  class="mt-4 flex items-center gap-3 rounded-2xl bg-green-50 px-4 py-4 ring-1 ring-green-100"
+                >
+                  <span
+                    class="w-9 h-9 rounded-xl bg-white text-green-600 flex items-center justify-center shrink-0 ring-1 ring-green-100"
+                  >
+                    <i class="bi bi-cash-coin" aria-hidden="true"></i>
+                  </span>
+                  <div class="min-w-0">
+                    <p
+                      class="text-xs font-medium text-slate-500"
+                      data-cod-amount-label
+                    >
+                      Payable on delivery
+                    </p>
+                    <p class="text-lg font-bold text-slate-900">
+                      <span data-pay-amount>₹0</span>
+                    </p>
+                  </div>
+                </div>
+
+                <ul class="mt-4 space-y-2 text-sm text-slate-600">
+                  <li class="flex items-start gap-2">
+                    <i
+                      class="bi bi-check2 mt-0.5 text-green-600"
+                      aria-hidden="true"
+                    ></i>
+                    <span data-cod-note-change
+                      >Keep exact change handy so the handover is quick.</span
+                    >
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i
+                      class="bi bi-check2 mt-0.5 text-green-600"
+                      aria-hidden="true"
+                    ></i>
+                    <span
+                      >No online payment needed — nothing is charged now.</span
+                    >
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i
+                      class="bi bi-check2 mt-0.5 text-green-600"
+                      aria-hidden="true"
+                    ></i>
+                    <span
+                      >You get the same order confirmation as an online
+                      payment.</span
+                    >
+                  </li>
+                </ul>
+
+                <p
+                  id="payCodNotice"
+                  role="status"
+                  class="mt-4 hidden rounded-xl bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700 ring-1 ring-amber-100"
+                ></p>
+
+                <button
+                  type="button"
+                  class="pay-cta mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+                  data-pay-submit="cod"
+                >
+                  Place Order
+                </button>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom sheet: edit contact details -->
+        <div
+          id="payContactSheet"
+          class="hidden absolute inset-0 z-20 flex-col justify-end bg-slate-900/45"
+          aria-hidden="true"
+        >
+          <div class="flex-1" data-pay-sheet-dismiss></div>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payContactTitle"
+            class="pay-sheet relative rounded-t-[1.5rem] bg-white px-6 pb-7 pt-6 shadow-2xl"
+          >
+            <button
+              type="button"
+              aria-label="Close"
+              class="absolute right-4 top-4 w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              data-pay-sheet-dismiss
+            >
+              <i class="bi bi-x-lg text-sm"></i>
+            </button>
+            <h3 id="payContactTitle" class="text-2xl font-bold text-slate-900">
+              Edit contact details
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+              Enter mobile number to continue
+            </p>
+            <div
+              class="mt-5 flex items-stretch overflow-hidden rounded-xl border border-slate-200"
+            >
+              <span
+                class="flex items-center gap-2 border-r border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-700"
+              >
+                🇮🇳 +91
+              </span>
+              <input
+                id="payContactInput"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                placeholder="10 digit mobile number"
+                class="pay-field flex-1 px-4 py-3.5 text-sm placeholder:text-slate-400"
+              />
+            </div>
+            <p
+              id="payContactError"
+              class="mt-2 hidden text-xs font-medium text-red-600"
+            ></p>
+            <button
+              type="button"
+              id="payContactSaveBtn"
+              class="pay-cta mt-5 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom sheet: offers -->
+        <div
+          id="payOffersSheet"
+          class="hidden absolute inset-0 z-20 flex-col justify-end bg-slate-900/45"
+          aria-hidden="true"
+        >
+          <div class="flex-1" data-pay-sheet-dismiss></div>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payOffersTitle"
+            class="pay-sheet relative rounded-t-[1.5rem] bg-white px-6 pb-7 pt-6 shadow-2xl"
+          >
+            <button
+              type="button"
+              aria-label="Close"
+              class="absolute right-4 top-4 w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
+              data-pay-sheet-dismiss
+            >
+              <i class="bi bi-x-lg text-sm"></i>
+            </button>
+            <h3 id="payOffersTitle" class="text-2xl font-bold text-slate-900">
+              Save more
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">with payment offers</p>
+            <div
+              class="mt-5 overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100"
+            >
+              <div class="flex items-start gap-3 p-4">
+                <span
+                  class="w-8 h-8 rounded-lg bg-white text-green-600 flex items-center justify-center shrink-0 ring-1 ring-green-100"
+                >
+                  <i class="bi bi-percent"></i>
+                </span>
+                <p class="flex-1 text-sm text-slate-700">
+                  Upto 1.5% savings with GoSmoothie UPI txn
+                </p>
+                <button
+                  type="button"
+                  id="payOfferApplyBtn"
+                  class="text-sm font-semibold text-green-600 hover:text-green-700 transition"
+                >
+                  Apply
+                </button>
+              </div>
+              <p
+                class="border-t border-slate-200 px-4 py-3 text-xs text-slate-500"
+              >
+                Upto 1.5% savings with GoSmoothie UPI txns • T&amp;Cs
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header "..." menu -->
+        <div
+          id="payMoreMenu"
+          class="hidden absolute right-4 top-14 z-30 w-52 overflow-hidden rounded-xl bg-white shadow-xl ring-1 ring-slate-200"
+        >
+          <button
+            type="button"
+            id="payMoreOffersBtn"
+            class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-slate-700 hover:bg-green-50 hover:text-green-700 transition"
+          >
+            <i class="bi bi-tag"></i> View offers
+          </button>
+          <button
+            type="button"
+            id="payMoreContactBtn"
+            class="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-3 text-left text-sm text-slate-700 hover:bg-green-50 hover:text-green-700 transition"
+          >
+            <i class="bi bi-person"></i> Edit contact details
+          </button>
+          <button
+            type="button"
+            id="payMoreCancelBtn"
+            class="flex w-full items-center gap-2 border-t border-slate-100 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 transition"
+          >
+            <i class="bi bi-x-circle"></i> Cancel payment
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /*
+       * Payment options modal controller.
+       *
+       * The modal only collects a payment choice; the order itself is still
+       * placed by window.GoSmoothieCheckout.submitOrder(). No card details or
+       * UPI ids are stored or sent anywhere: only the method label travels with
+       * the order (for example "Card •••• 4242"), because this build has no
+       * payment gateway configured.
+       */
+      (function initPaymentModal() {
+        const modal = document.getElementById("payModal");
+        if (!modal) return;
+
+        const checkout = () => window.GoSmoothieCheckout || {};
+        const rail = document.getElementById("payMethodRail");
+        const methodButtons = Array.from(
+          rail.querySelectorAll("[data-method]"),
+        );
+        const panes = Array.from(modal.querySelectorAll("[data-pane]"));
+        const amountLabels = Array.from(
+          modal.querySelectorAll("[data-pay-amount]"),
+        );
+        const summaryTotal = document.getElementById("paySummaryTotal");
+        const summaryMeta = document.getElementById("paySummaryMeta");
+        const contactLabel = document.getElementById("payContactLabel");
+        const contactSheet = document.getElementById("payContactSheet");
+        const contactInput = document.getElementById("payContactInput");
+        const contactError = document.getElementById("payContactError");
+        const offersSheet = document.getElementById("payOffersSheet");
+        const moreMenu = document.getElementById("payMoreMenu");
+        const qrBox = document.getElementById("payQr");
+        const showQrBtn = document.getElementById("payShowQrBtn");
+        const codRailItem = rail.querySelector('[data-method="cod"]');
+        const codNotice = document.getElementById("payCodNotice");
+        const codText = {
+          railTitle: modal.querySelector("[data-cod-rail-title]"),
+          railNote: modal.querySelector("[data-cod-rail-note]"),
+          title: modal.querySelector("[data-cod-title]"),
+          lead: modal.querySelector("[data-cod-lead]"),
+          amountLabel: modal.querySelector("[data-cod-amount-label]"),
+          changeNote: modal.querySelector("[data-cod-note-change]"),
+        };
+
+        let pendingRequest = null;
+        let activeMethod = "upi";
+        let selectedBank = "";
+        let selectedWallet = "";
+        let offerApplied = false;
+        let lastFocused = null;
+
+        // `slug` points at payment-brands.js, which owns the artwork and the
+        // lettered-chip fallback. `short`/`color` stay as a last resort for a
+        // slug the registry does not know.
+        const SUGGESTED_BANKS = [
+          {
+            slug: "sbi",
+            name: "State Bank of India",
+            short: "SB",
+            color: "#22409a",
+          },
+          { slug: "hdfc", name: "HDFC Bank", short: "HD", color: "#e11d2e" },
+          { slug: "icici", name: "ICICI Bank", short: "IC", color: "#f58220" },
+          {
+            slug: "kotak",
+            name: "Kotak Mahindra Bank",
+            short: "KO",
+            color: "#ed1c24",
+          },
+          { slug: "axis", name: "Axis Bank", short: "AX", color: "#97144d" },
+        ];
+        const ALL_BANKS = [
+          {
+            slug: "airtel-payments-bank",
+            name: "Airtel Payments Bank",
+            short: "AI",
+            color: "#e40000",
+          },
+          {
+            slug: "indian-bank",
+            name: "Indian Bank (Erstwhile Allahabad Bank)",
+            short: "IN",
+            color: "#1d4ed8",
+          },
+          {
+            slug: "bank-of-baroda",
+            name: "Bank of Baroda",
+            short: "BB",
+            color: "#f97316",
+          },
+          {
+            slug: "canara",
+            name: "Canara Bank",
+            short: "CA",
+            color: "#0e7490",
+          },
+          {
+            slug: "pnb",
+            name: "Punjab National Bank",
+            short: "PN",
+            color: "#a16207",
+          },
+          {
+            slug: "union-bank",
+            name: "Union Bank of India",
+            short: "UN",
+            color: "#b91c1c",
+          },
+          {
+            slug: "idfc-first",
+            name: "IDFC FIRST Bank",
+            short: "ID",
+            color: "#7c3aed",
+          },
+          { slug: "yes-bank", name: "Yes Bank", short: "YE", color: "#1e3a8a" },
+          {
+            slug: "indusind",
+            name: "IndusInd Bank",
+            short: "IU",
+            color: "#be123c",
+          },
+          {
+            slug: "federal-bank",
+            name: "Federal Bank",
+            short: "FE",
+            color: "#047857",
+          },
+        ];
+        const WALLETS = [
+          {
+            slug: "amazon-pay",
+            name: "Amazon Pay",
+            short: "az",
+            color: "#232f3e",
+          },
+          { slug: "phonepe", name: "PhonePe", short: "Pp", color: "#5f259f" },
+          { slug: "mobikwik", name: "Mobikwik", short: "Mw", color: "#2563eb" },
+          {
+            slug: "airtel-payments-bank",
+            name: "Airtel Payments Bank",
+            short: "Ai",
+            color: "#e40000",
+          },
+          {
+            slug: "ola-money",
+            name: "Ola Money (Postpaid + Wallet)",
+            short: "Ol",
+            color: "#166534",
+          },
+        ];
+
+        /* ---------- brand marks ---------- */
+        const brands = () => window.GoSmoothieBrands || null;
+
+        // One mark, or the row's own lettered chip if the registry is missing.
+        function brandMark(entry, options) {
+          const registry = brands();
+          if (registry) return registry.mark(entry.slug, options);
+          const naming = (options || {}).decorative
+            ? ' aria-hidden="true"'
+            : ` role="img" aria-label="${entry.name}"`;
+          return `<span class="pay-chip shrink-0" style="background:${entry.color}" data-brand="${entry.slug}"${naming}>${entry.short}</span>`;
+        }
+
+        /**
+         * The method rail and the UPI QR strip are static markup, so their marks
+         * are filled once from the registry here rather than hard-coded in HTML.
+         * That keeps a single source for artwork, sizes and fallbacks, and means
+         * a brand losing its file needs no HTML edit.
+         */
+        function renderStaticMarks() {
+          const registry = brands();
+          if (!registry) return;
+          modal.querySelectorAll("[data-brand-marks]").forEach((holder) => {
+            const size = holder.dataset.brandSize || "sm";
+            holder.innerHTML = holder.dataset.brandMarks
+              .split(",")
+              .map((slug) => slug.trim())
+              .filter(Boolean)
+              // Rail and QR-strip marks name their brand: nothing beside them
+              // repeats it.
+              .map((slug) => registry.mark(slug, { size, decorative: false }))
+              .join("");
+          });
+        }
+
+        /**
+         * A logo that fails to load is replaced by that brand's lettered chip.
+         * `error` does not bubble, so this has to listen in the capture phase,
+         * which also covers rows rendered after load.
+         */
+        function handleBrandImageError(event) {
+          const img = event.target;
+          if (
+            !img ||
+            img.tagName !== "IMG" ||
+            !img.classList.contains("pay-logo")
+          )
+            return;
+          const registry = brands();
+          const slug = img.dataset.brand || "";
+          const box = img.closest(".pay-logo-box") || img;
+          const decorative = img.getAttribute("aria-hidden") === "true";
+          const chip = registry
+            ? registry.chip(slug, { decorative })
+            : `<span class="pay-chip shrink-0" data-brand="${slug}" style="background:#334155"${decorative ? ' aria-hidden="true"' : ""}>?</span>`;
+          box.outerHTML = chip;
+        }
+
+        const rupees = (value) =>
+          "₹" + Number(value || 0).toLocaleString("en-IN");
+
+        /* ---------- cash on delivery configuration ---------- */
+        /*
+         * Cash availability and its limit live on the server
+         * (GET /api/payments/options, backed by server/config/payments.js).
+         * These defaults mirror the server's own defaults so a failed, slow or
+         * malformed config read never blocks checkout; the server enforces the
+         * real rule when the order is placed either way.
+         */
+        const COD_FALLBACK = Object.freeze({
+          enabled: true,
+          maxOrderTotal: 2000,
+          currency: "INR",
+        });
+        let codOptions = COD_FALLBACK;
+
+        // Each field is validated on its own, so one bad value does not throw
+        // away a good one.
+        function normaliseCodOptions(payload) {
+          const cod = (payload && payload.cod) || {};
+          const limit = cod.maxOrderTotal;
+          return {
+            enabled:
+              typeof cod.enabled === "boolean"
+                ? cod.enabled
+                : COD_FALLBACK.enabled,
+            maxOrderTotal:
+              typeof limit === "number" && Number.isFinite(limit) && limit > 0
+                ? limit
+                : COD_FALLBACK.maxOrderTotal,
+            currency:
+              typeof cod.currency === "string" && cod.currency.trim()
+                ? cod.currency.trim()
+                : COD_FALLBACK.currency,
+          };
+        }
+
+        // The cached configuration, for eligibility and pane wording.
+        function codConfig() {
+          return codOptions;
+        }
+
+        /*
+         * Fetched once on page load rather than on every modal open: these are
+         * configuration values, not order state, and re-reading them per open
+         * would add a request to a path the shopper takes repeatedly.
+         * Every failure mode (non-ok response, network error, unparseable body)
+         * silently keeps the fallback.
+         */
+        async function loadCodOptions() {
+          try {
+            const response = await fetch("/api/payments/options", {
+              headers: { Accept: "application/json" },
+            });
+            if (!response || !response.ok) return;
+            codOptions = normaliseCodOptions(await response.json());
+          } catch (error) {
+            /* keep COD_FALLBACK: a config read must never break checkout */
+          }
+        }
+
+        /* ---------- cash on delivery wording and eligibility ---------- */
+        /*
+         * One pane serves both order modes, so every string that reads wrongly
+         * for a pickup lives here rather than in the markup. The markup ships
+         * the delivery wording, which is what a shopper sees before the mode is
+         * known.
+         */
+        const COD_WORDING = {
+          delivery: {
+            railTitle: "Cash on Delivery",
+            railNote: "Pay when it arrives",
+            title: "Cash on Delivery",
+            lead: "Hand the cash to our delivery partner.",
+            amountLabel: "Payable on delivery",
+            changeNote: "Keep exact change handy so the handover is quick.",
+            noun: "Cash on Delivery",
+            // The label stored on the order. Deliberately not the pane heading:
+            // staff read this in the dashboard, so it names the arrangement.
+            orderLabel: "Cash on Delivery",
+          },
+          pickup: {
+            railTitle: "Pay at counter",
+            railNote: "Pay when you collect",
+            title: "Pay at counter",
+            lead: "Pay in cash when you collect your order.",
+            amountLabel: "Payable at the counter",
+            changeNote: "Keep exact change handy so the pickup is quick.",
+            noun: "Paying at the counter",
+            orderLabel: "Cash at Counter",
+          },
+        };
+
+        function codWording() {
+          const mode = checkout().getOrderMode
+            ? checkout().getOrderMode()
+            : "delivery";
+          return COD_WORDING[mode === "pickup" ? "pickup" : "delivery"];
+        }
+
+        /*
+         * Read the configuration at the moment eligibility is computed, never
+         * once at startup: the options fetch can resolve after the first read.
+         * The reason is shopper-facing and names the limit, so an ineligible
+         * shopper knows what to do instead of meeting a dead confirm button.
+         */
+        function codEligibility() {
+          const config = codConfig();
+          const words = codWording();
+          if (!config.enabled) {
+            return {
+              eligible: false,
+              reason: `${words.noun} is not available right now. Please choose an online payment method.`,
+            };
+          }
+          const totals = checkout().currentOrderTotals
+            ? checkout().currentOrderTotals()
+            : { finalTotal: 0 };
+          const total = Number(totals.finalTotal) || 0;
+          if (total > config.maxOrderTotal) {
+            return {
+              eligible: false,
+              reason: `${words.noun} is available on orders up to ${rupees(config.maxOrderTotal)}. Please choose an online method for this order.`,
+            };
+          }
+          return { eligible: true, reason: "" };
+        }
+
+        // Muting is two utilities plus aria-disabled; both are removed again the
+        // moment the order becomes eligible, so nothing sticks between opens.
+        const COD_MUTED_CLASSES = ["opacity-50", "cursor-not-allowed"];
+
+        /**
+         * Applies the mode wording and the eligibility state to the rail item,
+         * the pane and the confirm button. Called on open and whenever the
+         * delivery option changes behind the modal.
+         */
+        function refreshCodState() {
+          const words = codWording();
+          Object.keys(codText).forEach((key) => {
+            if (codText[key]) codText[key].textContent = words[key];
+          });
+
+          const { eligible, reason } = codEligibility();
+          if (codRailItem) {
+            if (eligible) {
+              codRailItem.removeAttribute("aria-disabled");
+              codRailItem.classList.remove(...COD_MUTED_CLASSES);
+            } else {
+              codRailItem.setAttribute("aria-disabled", "true");
+              codRailItem.classList.add(...COD_MUTED_CLASSES);
+            }
+          }
+          if (codNotice) {
+            codNotice.textContent = eligible ? "" : reason;
+            codNotice.classList.toggle("hidden", eligible);
+          }
+          const confirmButton = submitButtonFor("cod");
+          if (confirmButton) confirmButton.disabled = !eligible;
+          return eligible;
+        }
+
+        /* ---------- amounts ---------- */
+        function refreshAmounts() {
+          const totals = checkout().currentOrderTotals
+            ? checkout().currentOrderTotals()
+            : { finalTotal: 0, itemCount: 0 };
+          const amount = totals.finalTotal || 0;
+          if (summaryTotal) summaryTotal.textContent = rupees(amount);
+          if (summaryMeta) {
+            const items = totals.itemCount || 0;
+            summaryMeta.textContent = `incl. taxes · ${items} item${items === 1 ? "" : "s"}`;
+          }
+          amountLabels.forEach((el) => {
+            el.textContent = rupees(amount);
+          });
+        }
+
+        /* ---------- QR placeholder ---------- */
+        // A deterministic pattern stands in for a real gateway QR code.
+        function renderQr() {
+          if (!qrBox || qrBox.dataset.rendered === "1") return;
+          const size = 21;
+          let seed = 7;
+          const next = () => {
+            seed = (seed * 1103515245 + 12345) % 2147483648;
+            return seed / 2147483648;
+          };
+          let cells = "";
+          for (let row = 0; row < size; row += 1) {
+            for (let col = 0; col < size; col += 1) {
+              const finder =
+                (row < 7 && col < 7) ||
+                (row < 7 && col > size - 8) ||
+                (row > size - 8 && col < 7);
+              const on = finder
+                ? (row % 6 === 0 && col < 7) ||
+                  (col % 6 === 0 && row < 7) ||
+                  (row > 1 && row < 5 && col > 1 && col < 5) ||
+                  (row < 7 &&
+                    col > size - 8 &&
+                    (row % 6 === 0 || col % 6 === 0)) ||
+                  (row > size - 8 &&
+                    col < 7 &&
+                    (row % 6 === 0 || col % 6 === 0))
+                : next() > 0.52;
+              if (on) {
+                cells += `<rect x="${col}" y="${row}" width="1" height="1" fill="#0f172a"></rect>`;
+              }
+            }
+          }
+          qrBox.innerHTML = `<svg viewBox="0 0 ${size} ${size}" class="h-full w-full" role="img" aria-label="UPI QR code placeholder">${cells}</svg>`;
+          qrBox.dataset.rendered = "1";
+        }
+
+        /* ---------- lists ---------- */
+        function bankRow(bank) {
+          return `
+            <button type="button" class="pay-row flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left"
+                    data-bank="${bank.name}" aria-pressed="${selectedBank === bank.name}">
+              ${brandMark(bank, { size: "md", decorative: true })}
+              <span class="flex-1 text-sm font-medium text-slate-800">${bank.name}</span>
+              <i class="bi bi-chevron-right text-slate-400 text-sm"></i>
+            </button>`;
+        }
+
+        function walletRow(wallet) {
+          return `
+            <button type="button" class="pay-row flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-left"
+                    data-wallet="${wallet.name}" aria-pressed="${selectedWallet === wallet.name}">
+              ${brandMark(wallet, { size: "md", decorative: true })}
+              <span class="flex-1 text-sm font-medium text-slate-800">${wallet.name}</span>
+              <i class="bi bi-chevron-right text-slate-400 text-sm"></i>
+            </button>`;
+        }
+
+        function renderBanks(term = "") {
+          const query = term.trim().toLowerCase();
+          const match = (bank) => bank.name.toLowerCase().includes(query);
+          const suggested = SUGGESTED_BANKS.filter(match);
+          const all = ALL_BANKS.filter(match);
+          document.getElementById("payBankSuggested").innerHTML = suggested
+            .map(bankRow)
+            .join("");
+          document.getElementById("payBankAll").innerHTML = all
+            .map(bankRow)
+            .join("");
+          document
+            .getElementById("payBankSuggestedWrap")
+            .classList.toggle("hidden", !suggested.length);
+          document
+            .getElementById("payBankAllWrap")
+            .classList.toggle("hidden", !all.length);
+          document
+            .getElementById("payBankEmpty")
+            .classList.toggle("hidden", suggested.length + all.length > 0);
+        }
+
+        function renderWallets() {
+          document.getElementById("payWalletList").innerHTML =
+            WALLETS.map(walletRow).join("");
+        }
+
+        function submitButtonFor(method) {
+          return modal.querySelector(`[data-pay-submit="${method}"]`);
+        }
+
+        /* ---------- method switching ---------- */
+        function selectMethod(method) {
+          // An ineligible method keeps its rail item (so its reason stays
+          // readable) but cannot become the active pane.
+          const target = methodButtons.find(
+            (button) => button.dataset.method === method,
+          );
+          if (target && target.getAttribute("aria-disabled") === "true") return;
+          activeMethod = method;
+          methodButtons.forEach((button) => {
+            button.setAttribute(
+              "aria-selected",
+              button.dataset.method === method ? "true" : "false",
+            );
+          });
+          panes.forEach((pane) => {
+            const isActive = pane.dataset.pane === method;
+            pane.classList.toggle("hidden", !isActive);
+            if (isActive) {
+              // Restart the entrance animation on every switch.
+              pane.classList.remove("pay-pane");
+              void pane.offsetWidth;
+              pane.classList.add("pay-pane");
+            }
+          });
+          document.getElementById("payPaneWrap").scrollTop = 0;
+        }
+
+        /* ---------- sheets ---------- */
+        function openSheet(sheet) {
+          closeMoreMenu();
+          sheet.classList.remove("hidden");
+          sheet.classList.add("flex");
+          sheet.setAttribute("aria-hidden", "false");
+        }
+        function closeSheet(sheet) {
+          sheet.classList.add("hidden");
+          sheet.classList.remove("flex");
+          sheet.setAttribute("aria-hidden", "true");
+        }
+        function closeAllSheets() {
+          closeSheet(contactSheet);
+          closeSheet(offersSheet);
+        }
+        function closeMoreMenu() {
+          moreMenu.classList.add("hidden");
+        }
+
+        /* ---------- contact number ---------- */
+        function activePhoneField() {
+          const mode = checkout().getOrderMode
+            ? checkout().getOrderMode()
+            : "delivery";
+          return document.getElementById(
+            mode === "pickup" ? "pickupPhone" : "deliveryPhone",
+          );
+        }
+
+        function refreshContactLabel() {
+          const field = activePhoneField();
+          const digits = String((field && field.value) || "").replace(
+            /\D/g,
+            "",
+          );
+          const local = digits.slice(-10);
+          if (contactLabel) {
+            contactLabel.textContent = local
+              ? "+91 " + local.replace(/(\d{5})(\d{5})/, "$1 $2")
+              : "+91 —";
+          }
+          if (contactInput) contactInput.value = local;
+        }
+
+        /* ---------- payment confirmation ---------- */
+        function describeSelection() {
+          if (activeMethod === "upi") {
+            const upiId = document.getElementById("payUpiId").value.trim();
+            return upiId ? `UPI · ${upiId}` : "UPI QR";
+          }
+          if (activeMethod === "card") {
+            const digits = document
+              .getElementById("payCardNumber")
+              .value.replace(/\D/g, "");
+            return `Card •••• ${digits.slice(-4)}`;
+          }
+          if (activeMethod === "netbanking")
+            return `Netbanking · ${selectedBank}`;
+          if (activeMethod === "cod") return codWording().orderLabel;
+          return `Wallet · ${selectedWallet}`;
+        }
+
+        function showError(el, message) {
+          if (!el) return;
+          el.textContent = message;
+          el.classList.toggle("hidden", !message);
+        }
+
+        function validateSelection() {
+          if (activeMethod === "upi") {
+            const value = document.getElementById("payUpiId").value.trim();
+            // The QR path needs no id; a typed id must look like one.
+            if (value && !/^[\w.\-]{2,}@[a-zA-Z]{2,}$/.test(value)) {
+              showError(
+                document.getElementById("payUpiError"),
+                "Enter a UPI ID like yourname@upi, or pay using the QR.",
+              );
+              return false;
+            }
+            showError(document.getElementById("payUpiError"), "");
+            return true;
+          }
+          if (activeMethod === "card") {
+            const error = document.getElementById("payCardError");
+            const digits = document
+              .getElementById("payCardNumber")
+              .value.replace(/\D/g, "");
+            const expiry = document
+              .getElementById("payCardExpiry")
+              .value.trim();
+            const cvv = document.getElementById("payCardCvv").value.trim();
+            if (digits.length < 13 || digits.length > 19) {
+              showError(error, "Enter a valid card number.");
+              return false;
+            }
+            const parts = expiry.split("/").map((part) => part.trim());
+            const month = Number(parts[0]);
+            const year = Number(parts[1]);
+            if (
+              !month ||
+              month < 1 ||
+              month > 12 ||
+              !parts[1] ||
+              parts[1].length !== 2
+            ) {
+              showError(error, "Enter the expiry as MM / YY.");
+              return false;
+            }
+            const now = new Date();
+            const expiryDate = new Date(2000 + year, month, 0, 23, 59, 59);
+            if (expiryDate < now) {
+              showError(error, "That card has expired.");
+              return false;
+            }
+            if (!/^\d{3,4}$/.test(cvv)) {
+              showError(error, "Enter the 3 or 4 digit CVV.");
+              return false;
+            }
+            showError(error, "");
+            return true;
+          }
+          if (activeMethod === "netbanking") return !!selectedBank;
+          // Nothing is collected for cash, so eligibility is the whole check.
+          // refreshCodState() re-reads the mode and total and writes the reason
+          // into the notice, so a blocked confirm always explains itself.
+          if (activeMethod === "cod") return refreshCodState();
+          return !!selectedWallet;
+        }
+
+        async function confirmPayment() {
+          if (!pendingRequest) return;
+          if (!validateSelection()) return;
+          const button = submitButtonFor(activeMethod);
+          const originalText = button ? button.innerHTML : "";
+          if (button) {
+            button.disabled = true;
+            button.innerHTML = "Processing...";
+          }
+          const paymentMethod = describeSelection();
+          const isCash = activeMethod === "cod";
+          // Read everything needed before close(), which resets the state.
+          const mode = pendingRequest.mode;
+          const body = Object.assign({}, pendingRequest.body, {
+            paymentMethod,
+            // The server derives paymentStatus from this, never from the label.
+            paymentMode: isCash ? "cod" : "online",
+            // The offer is a UPI promotion, so it never rides on a cash order
+            // even if it was applied before the shopper switched to cash.
+            offerApplied: isCash ? false : offerApplied,
+          });
+          close();
+          if (checkout().setMessage) {
+            checkout().setMessage(
+              `${paymentMethod} selected. Placing your order...`,
+              "success",
+            );
+          }
+          try {
+            await checkout().submitOrder(body, mode);
+          } finally {
+            if (button) {
+              button.disabled = false;
+              button.innerHTML = originalText;
+            }
+          }
+        }
+
+        /* ---------- open / close ---------- */
+        function resetOfferButton() {
+          const button = document.getElementById("payOfferApplyBtn");
+          button.textContent = "Apply";
+          button.classList.remove("text-slate-400");
+          button.disabled = false;
+        }
+
+        function open(request) {
+          pendingRequest = request;
+          lastFocused = document.activeElement;
+          offerApplied = false;
+          resetOfferButton();
+          selectedBank = "";
+          selectedWallet = "";
+          document.getElementById("payUpiId").value = "";
+          showError(document.getElementById("payUpiError"), "");
+          showError(document.getElementById("payCardError"), "");
+          ["payCardNumber", "payCardExpiry", "payCardCvv"].forEach((id) => {
+            document.getElementById(id).value = "";
+          });
+          document.getElementById("payCardSave").checked = false;
+          document.getElementById("payBankSearch").value = "";
+          renderBanks();
+          renderWallets();
+          submitButtonFor("netbanking").disabled = true;
+          submitButtonFor("wallet").disabled = true;
+          selectMethod("upi");
+          refreshAmounts();
+          // Wording and eligibility are recalculated per open, so a mode or
+          // total changed behind the modal is always reflected.
+          refreshCodState();
+          refreshContactLabel();
+          closeAllSheets();
+          closeMoreMenu();
+          modal.classList.remove("hidden");
+          modal.classList.add("is-open");
+          modal.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+          window.setTimeout(() => {
+            document.getElementById("payCloseBtn").focus();
+          }, 40);
+        }
+
+        function close() {
+          modal.classList.add("hidden");
+          modal.classList.remove("is-open");
+          modal.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+          closeAllSheets();
+          closeMoreMenu();
+          pendingRequest = null;
+          if (lastFocused && lastFocused.focus) lastFocused.focus();
+        }
+
+        /* ---------- events ---------- */
+        methodButtons.forEach((button) => {
+          button.addEventListener("click", () =>
+            selectMethod(button.dataset.method),
+          );
+        });
+
+        modal.querySelectorAll("[data-pay-dismiss]").forEach((el) => {
+          el.addEventListener("click", close);
+        });
+        document.getElementById("payCloseBtn").addEventListener("click", close);
+
+        modal.querySelectorAll("[data-pay-sheet-dismiss]").forEach((el) => {
+          el.addEventListener("click", closeAllSheets);
+        });
+
+        modal.querySelectorAll("[data-pay-submit]").forEach((button) => {
+          button.addEventListener("click", confirmPayment);
+        });
+
+        document.getElementById("payMoreBtn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          moreMenu.classList.toggle("hidden");
+        });
+        document
+          .getElementById("payMoreOffersBtn")
+          .addEventListener("click", () => openSheet(offersSheet));
+        document
+          .getElementById("payMoreContactBtn")
+          .addEventListener("click", () => {
+            refreshContactLabel();
+            openSheet(contactSheet);
+            contactInput.focus();
+          });
+        document
+          .getElementById("payMoreCancelBtn")
+          .addEventListener("click", close);
+        modal.addEventListener("click", closeMoreMenu);
+
+        document
+          .getElementById("payContactRow")
+          .addEventListener("click", () => {
+            refreshContactLabel();
+            openSheet(contactSheet);
+            contactInput.focus();
+          });
+        document
+          .getElementById("payOffersRow")
+          .addEventListener("click", () => openSheet(offersSheet));
+
+        // Saving the number here also updates the checkout form, so the two
+        // never disagree about where the confirmation should go.
+        document
+          .getElementById("payContactSaveBtn")
+          .addEventListener("click", () => {
+            const digits = contactInput.value.replace(/\D/g, "");
+            if (digits.length !== 10) {
+              showError(contactError, "Enter a 10 digit mobile number.");
+              return;
+            }
+            showError(contactError, "");
+            const field = activePhoneField();
+            if (field) {
+              field.value = digits;
+              field.dispatchEvent(new Event("input", { bubbles: true }));
+            }
+            if (pendingRequest && pendingRequest.body.customer) {
+              pendingRequest.body.customer.phone = digits;
+            }
+            refreshContactLabel();
+            closeSheet(contactSheet);
+          });
+
+        document
+          .getElementById("payOfferApplyBtn")
+          .addEventListener("click", (event) => {
+            offerApplied = true;
+            event.currentTarget.textContent = "Applied";
+            event.currentTarget.classList.add("text-slate-400");
+            event.currentTarget.disabled = true;
+            closeSheet(offersSheet);
+          });
+
+        showQrBtn.addEventListener("click", () => {
+          renderQr();
+          qrBox.classList.remove("is-hidden");
+          showQrBtn.classList.add("hidden");
+        });
+
+        document
+          .getElementById("payBankSearch")
+          .addEventListener("input", (event) =>
+            renderBanks(event.target.value),
+          );
+
+        // Bank and wallet rows are rendered dynamically, so delegate.
+        document
+          .getElementById("payPaneWrap")
+          .addEventListener("click", (event) => {
+            const bankRowEl = event.target.closest("[data-bank]");
+            if (bankRowEl) {
+              selectedBank = bankRowEl.dataset.bank;
+              modal
+                .querySelectorAll("[data-bank]")
+                .forEach((el) =>
+                  el.setAttribute(
+                    "aria-pressed",
+                    el.dataset.bank === selectedBank ? "true" : "false",
+                  ),
+                );
+              submitButtonFor("netbanking").disabled = false;
+              return;
+            }
+            const walletRowEl = event.target.closest("[data-wallet]");
+            if (walletRowEl) {
+              selectedWallet = walletRowEl.dataset.wallet;
+              modal
+                .querySelectorAll("[data-wallet]")
+                .forEach((el) =>
+                  el.setAttribute(
+                    "aria-pressed",
+                    el.dataset.wallet === selectedWallet ? "true" : "false",
+                  ),
+                );
+              submitButtonFor("wallet").disabled = false;
+            }
+          });
+
+        /* ---------- input formatting ---------- */
+        const cardNumber = document.getElementById("payCardNumber");
+        cardNumber.addEventListener("input", () => {
+          const digits = cardNumber.value.replace(/\D/g, "").slice(0, 19);
+          cardNumber.value = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+        });
+        const cardExpiry = document.getElementById("payCardExpiry");
+        cardExpiry.addEventListener("input", () => {
+          const digits = cardExpiry.value.replace(/\D/g, "").slice(0, 4);
+          cardExpiry.value =
+            digits.length > 2
+              ? `${digits.slice(0, 2)} / ${digits.slice(2)}`
+              : digits;
+        });
+        const cardCvv = document.getElementById("payCardCvv");
+        cardCvv.addEventListener("input", () => {
+          cardCvv.value = cardCvv.value.replace(/\D/g, "").slice(0, 4);
+        });
+        contactInput.addEventListener("input", () => {
+          contactInput.value = contactInput.value
+            .replace(/\D/g, "")
+            .slice(0, 10);
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape" || modal.classList.contains("hidden"))
+            return;
+          if (!contactSheet.classList.contains("hidden")) {
+            closeSheet(contactSheet);
+            return;
+          }
+          if (!offersSheet.classList.contains("hidden")) {
+            closeSheet(offersSheet);
+            return;
+          }
+          if (!moreMenu.classList.contains("hidden")) {
+            closeMoreMenu();
+            return;
+          }
+          close();
+        });
+
+        // Keep the modal total in step with delivery option changes made behind
+        // it, and re-check cash eligibility because the fee moves the total.
+        document
+          .querySelectorAll('input[name="delivery-option"]')
+          .forEach((input) =>
+            input.addEventListener("change", () => {
+              refreshAmounts();
+              refreshCodState();
+            }),
+          );
+
+        // Capture phase: image `error` events do not bubble.
+        modal.addEventListener("error", handleBrandImageError, true);
+        renderStaticMarks();
+        loadCodOptions();
+
+        window.GoSmoothiePayModal = {
+          open,
+          close,
+          refreshAmounts,
+          codConfig,
+          codEligibility,
+        };
+      })();
     </script>
   </body>
 </html>

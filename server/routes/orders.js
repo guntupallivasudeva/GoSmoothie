@@ -41,7 +41,6 @@ router.get("/", async (req, res) => {
     }
     const pageNumber = Math.max(1, parseInt(page, 10) || 1);
     const pageSize = Math.max(1, Math.min(100, parseInt(limit, 10) || 20));
-    // when querying across all users, return per-user order documents (admin view)
     const [items, total] = await Promise.all([
       Order.find(query)
         .sort({ createdAt: -1 })
@@ -51,6 +50,22 @@ router.get("/", async (req, res) => {
       Order.countDocuments(query),
     ]);
     res.json({ items, total, page: pageNumber, limit: pageSize });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// GET /api/orders/my — fetch logged-in user's orders
+router.get("/my", async (req, res) => {
+  try {
+    const user = await resolveTokenUser(req);
+    if (!user) return res.status(401).json({ error: "Authentication required" });
+    const doc = await Order.findOne({ userId: user.userId }).lean();
+    const orders = doc && Array.isArray(doc.orders) ? doc.orders : [];
+    // Return newest first
+    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json({ orders });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

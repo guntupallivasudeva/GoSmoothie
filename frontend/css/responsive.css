@@ -1,0 +1,231 @@
+/* ==========================================================================
+   GoSmoothie — Responsive Enhancements for Mac & Large Screens
+   Targets: 1440px (MacBook Pro 14"), 1536px (common), 1680px (MacBook Pro 16"),
+            1920px (external displays), 2560px (Studio Display / ultra-wide)
+   ========================================================================== */
+
+/* --- Base responsive container overrides --- */
+.container {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1480px;
+  }
+}
+@media (min-width: 1680px) {
+  .container {
+    max-width: 1600px;
+  }
+}
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1800px;
+  }
+}
+
+/* --- Horizontal padding: 20px across all viewports --- */
+.container {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+/* --- Header responsive scaling --- */
+@media (min-width: 1440px) {
+  header .container {
+    max-width: 1400px;
+  }
+  header nav a {
+    font-size: 0.95rem;
+  }
+}
+@media (min-width: 1680px) {
+  header .container {
+    max-width: 1600px;
+  }
+}
+@media (min-width: 1920px) {
+  header .container {
+    max-width: 1800px;
+  }
+}
+
+/* --- Grid enhancements for larger screens --- */
+@media (min-width: 1440px) {
+  .grid.lg\:grid-cols-3:not(.xl\:grid-cols-4) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1680px) {
+  .grid.xl\:grid-cols-4 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .grid.lg\:grid-cols-3:not(.xl\:grid-cols-4) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1920px) {
+  .grid.xl\:grid-cols-4 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* --- Hero section scales gracefully --- */
+@media (min-width: 1440px) {
+  section.pt-20 .max-w-xl {
+    max-width: 38rem;
+  }
+  section.pt-20 .max-w-xl h1 {
+    font-size: 3.75rem;
+    line-height: 1.1;
+  }
+}
+@media (min-width: 1680px) {
+  section.pt-20 .max-w-xl {
+    max-width: 42rem;
+  }
+  section.pt-20 .max-w-xl h1 {
+    font-size: 4rem;
+  }
+}
+
+/* --- Card sizing on large screens --- */
+@media (min-width: 1440px) {
+  .smoothie-card,
+  .menu-card,
+  .card-hover {
+    min-height: 360px;
+  }
+}
+
+/* --- Section vertical spacing scales up --- */
+@media (min-width: 1440px) {
+  section.py-16 {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+  section.py-20 {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+@media (min-width: 1680px) {
+  section.py-16 {
+    padding-top: 5.5rem;
+    padding-bottom: 5.5rem;
+  }
+  section.py-20 {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+}
+
+/* --- Typography scaling for readability on large displays --- */
+@media (min-width: 1440px) {
+  body {
+    font-size: 16px;
+  }
+  h2 {
+    font-size: 2.25rem;
+  }
+}
+@media (min-width: 1680px) {
+  body {
+    font-size: 17px;
+  }
+  h2 {
+    font-size: 2.5rem;
+  }
+}
+@media (min-width: 1920px) {
+  body {
+    font-size: 18px;
+  }
+}
+
+/* --- Footer grid scaling --- */
+@media (min-width: 1440px) {
+  footer .grid.lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3rem;
+  }
+}
+@media (min-width: 1680px) {
+  footer .grid.lg\:grid-cols-4 {
+    gap: 4rem;
+  }
+}
+
+/* --- Admin dashboard sidebar + content on large screens --- */
+@media (min-width: 1440px) {
+  .console-shell {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+}
+@media (min-width: 1680px) {
+  .console-shell {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+}
+@media (min-width: 1920px) {
+  .console-shell {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+}
+
+/* --- Form/auth pages: make content wider on large screens --- */
+@media (min-width: 1440px) {
+  .max-w-md {
+    max-width: 30rem;
+  }
+  .max-w-6xl {
+    max-width: 80rem;
+  }
+}
+
+/* --- Mobile: tighten header padding --- */
+@media (max-width: 767px) {
+  .text-3xl.font-\[\'Pacifico\'\] {
+    font-size: 1.5rem;
+  }
+}
+
+/* --- Smooth transitions for responsive layout shifts --- */
+.container,
+.grid {
+  transition: max-width 0.2s ease;
+}
+
+/* --- Prevent content from becoming too wide on ultra-wide screens --- */
+@media (min-width: 2560px) {
+  .container {
+    max-width: 1920px;
+  }
+}

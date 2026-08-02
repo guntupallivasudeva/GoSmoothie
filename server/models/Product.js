@@ -25,6 +25,8 @@ const ProductSchema = new mongoose.Schema(
     imageStoragePath: { type: String, default: null },
     imageContentType: { type: String, default: null },
     imageSize: { type: Number, default: null },
+    _createdBy: { type: mongoose.Schema.Types.Mixed, default: null },
+    _lastUpdatedBy: { type: mongoose.Schema.Types.Mixed, default: null },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

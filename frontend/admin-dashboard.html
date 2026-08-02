@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <title>GoSmoothie Admin Console</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4ade80",
+              accent: "#f97316",
+              ink: "#0f172a",
+              muted: "#64748b",
+              panel: "#ffffff",
+              app: "#f6f8fb",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "10px",
+              lg: "12px",
+              xl: "14px",
+              "2xl": "16px",
+              "3xl": "20px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+<link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+      <link rel="stylesheet" href="/css/toast.css" />
+    <link rel="stylesheet" href="/css/admin-dashboard.css" />
+  </head>
+  <body>
+    <div class="console-shell">
+      <aside
+        class="sidebar lg:sticky lg:top-0 lg:h-screen p-5 flex flex-col gap-6"
+      >
+        <div class="brand-row flex items-start justify-between gap-3">
+          <div class="brand-full min-w-0">
+            <a
+              href="/main.html"
+              class="text-3xl font-['Pacifico'] text-primary block truncate"
+              >GoSmoothie</a
+            >
+            <p
+              class="brand-copy mt-2 text-xs uppercase tracking-[0.22em] text-gray-500"
+            >
+              Delivery Admin
+            </p>
+          </div>
+          <a
+            href="/main.html"
+            class="brand-mark w-12 h-12 rounded-2xl bg-gradient-to-br from-green-100 to-orange-50 text-green-600 items-center justify-center shadow-sm border border-green-100"
+           
+          >
+            <i class="bi bi-leaf text-2xl"></i>
+          </a>
+          <button
+            id="sidebarToggle"
+            class="w-10 h-10 rounded-xl border border-green-100 bg-white text-green-700 hover:bg-green-50 transition flex items-center justify-center"
+            aria-label="Toggle sidebar"
+          >
+            <i
+              id="sidebarToggleIcon"
+              class="bi bi-layout-sidebar-inset text-xl"
+            ></i>
+          </button>
+        </div>
+
+        <nav class="space-y-1">
+          <a
+            class="nav-item active"
+            href="#overview"
+            data-view-target="overview"
+
+            ><i class="bi bi-speedometer2 text-lg"></i>
+            <span class="sidebar-label">Overview</span></a
+          >
+          <a
+            class="nav-item"
+            href="#orders"
+            data-view-target="orders"
+
+            ><i class="bi bi-signpost-split text-lg"></i>
+            <span class="sidebar-label">Orders</span></a
+          >
+          <a
+            class="nav-item"
+            href="#payments"
+            data-view-target="payments"
+
+            ><i class="bi bi-credit-card text-lg"></i>
+            <span class="sidebar-label">Payments</span></a
+          >
+          <a
+            class="nav-item"
+            href="#catalog"
+            data-view-target="catalog"
+
+            ><i class="bi bi-fork-knife text-lg"></i>
+            <span class="sidebar-label">Catalog</span></a
+          >
+          <a
+            class="nav-item"
+            href="#editor"
+            data-view-target="editor"
+
+            ><i class="bi bi-pencil-square text-lg"></i>
+            <span class="sidebar-label">Product Editor</span></a
+          >
+          <a
+            class="nav-item"
+            href="#gallery"
+            data-view-target="gallery"
+
+            ><i class="bi bi-image text-lg"></i>
+            <span class="sidebar-label">Image Gallery</span></a
+          >
+        </nav>
+
+        <div
+          class="session-card mt-auto rounded-2xl border border-green-100 bg-green-50/70 p-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-white text-green-600 flex items-center justify-center shadow-sm"
+            >
+              <i class="bi bi-shield-check text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-gray-900">Secure session</p>
+              <p class="sidebar-copy text-xs text-gray-500">
+                Admin access only
+              </p>
+            </div>
+          </div>
+          <button id="logoutBtn" class="mt-4 w-full btn btn-light">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+        </div>
+      </aside>
+
+      <div class="min-w-0">
+        <header
+          class="sticky top-0 z-40 bg-white/88 backdrop-blur-xl border-b border-green-100"
+        >
+          <div
+            class="px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3"
+          >
+            <div>
+              <h1
+                id="workspaceTitle"
+                class="text-xl md:text-2xl font-black text-ink"
+              >
+                Overview
+              </h1>
+              <p id="workspaceSubtitle" class="text-sm text-muted">
+                Monitor revenue, fulfillment, product quality, and database
+                health.
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <a href="/main.html" class="btn btn-light"
+                ><i class="bi bi-shop"></i
+                ><span class="desktop-only">Storefront</span></a
+              >
+              <button id="refreshBtn" class="btn btn-dark">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main class="px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          <section id="overview" class="admin-view section-anchor space-y-6">
+            <div
+              class="workspace-hero p-5 md:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+            >
+              <div>
+                <p
+                  class="text-sm font-bold uppercase tracking-[0.18em] text-green-700"
+                >
+                  Live Business Overview
+                </p>
+                <h2 class="mt-2 text-2xl md:text-3xl font-black text-gray-900">
+                  Fresh operations, clean data, fast decisions.
+                </h2>
+                <p class="mt-2 text-gray-600 max-w-2xl">
+                  Track revenue, payment health, kitchen readiness, best
+                  sellers, and database status in one focused workspace.
+                </p>
+              </div>
+              <div
+                class="hidden md:flex w-24 h-24 rounded-3xl bg-white shadow-sm items-center justify-center text-primary"
+              >
+                <i class="bi bi-activity text-5xl"></i>
+              </div>
+            </div>
+            <div
+              id="statsGrid"
+              class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4"
+            ></div>
+
+            <div class="grid xl:grid-cols-[0.92fr_1.08fr] gap-6">
+              <section class="panel p-5">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h2 class="text-lg font-black">Fulfillment Pulse</h2>
+                    <p class="text-sm text-muted">
+                      Operational signals for the current queue.
+                    </p>
+                  </div>
+                  <div
+                    class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center"
+                  >
+                    <i class="bi bi-bicycle text-xl"></i>
+                  </div>
+                </div>
+                <div
+                  id="opsPulse"
+                  class="grid sm:grid-cols-3 xl:grid-cols-1 gap-3"
+                ></div>
+              </section>
+
+              <section class="panel p-5">
+                <div class="mb-4">
+                  <h2 class="text-lg font-black">Best Sellers</h2>
+                  <p class="text-sm text-muted">
+                    Ranked by recorded order revenue.
+                  </p>
+                </div>
+                <div id="topProducts" class="grid md:grid-cols-2 gap-3"></div>
+              </section>
+            </div>
+
+            <section class="db-status-panel">
+              <div
+                class="px-5 sm:px-6 py-5 border-b border-green-100 flex flex-wrap items-center justify-between gap-4"
+              >
+                <div class="flex items-center gap-4">
+                  <div class="db-health-ring">
+                    <i class="bi bi-database text-3xl"></i>
+                  </div>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-3">
+                      <h2 class="text-xl font-black text-ink">
+                        Database Status
+                      </h2>
+                      <span
+                        id="dbStatusLabel"
+                        class="db-badge bg-slate-100 text-slate-700"
+                        ><i class="bi bi-database"></i> Loading</span
+                      >
+                    </div>
+                    <p class="mt-1 text-sm text-muted">
+                      MongoDB health, storage, collection volumes, and
+                      connection state.
+                    </p>
+                  </div>
+                </div>
+                <div id="dbServerTime" class="text-sm text-muted"></div>
+              </div>
+              <div id="dbStatusBar" class="px-5 sm:px-6 py-5"></div>
+            </section>
+          </section>
+
+          <section class="view-layout">
+            <div
+              id="orders"
+              class="admin-view section-anchor panel p-5 overflow-hidden"
+              hidden
+            >
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 mb-5"
+              >
+                <div>
+                  <p
+                    class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2"
+                  >
+                    Fulfillment Workspace
+                  </p>
+                  <h2 class="text-2xl font-black">Order History</h2>
+                  <p class="text-sm text-muted">
+                    Customer, order, items, payment status, value, and timing.
+                  </p>
+                </div>
+              </div>
+              <div class="overflow-auto max-h-[560px]">
+                <table class="min-w-full text-sm">
+                  <thead
+                    class="sticky top-0 bg-white z-10 text-left text-slate-500 uppercase tracking-[0.14em] text-[11px] border-b border-slate-200"
+                  >
+                    <tr>
+                      <th class="py-3 pr-4">Customer</th>
+                      <th class="py-3 pr-4">Order</th>
+                      <th class="py-3 pr-4">Items</th>
+                      <th class="py-3 pr-4">Total</th>
+                      <th class="py-3 pr-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="ordersTable"
+                    class="divide-y divide-slate-100"
+                  ></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div
+              id="payments"
+              class="admin-view section-anchor panel p-5 overflow-hidden"
+              hidden
+            >
+              <div class="mb-5">
+                <p
+                  class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2"
+                >
+                  Finance Workspace
+                </p>
+                <h2 class="text-2xl font-black">Payment Ledger</h2>
+                <p class="text-sm text-muted">
+                  Recorded payment trail across users.
+                </p>
+              </div>
+              <div class="overflow-auto max-h-[560px]">
+                <table class="min-w-full text-sm">
+                  <thead
+                    class="sticky top-0 bg-white z-10 text-left text-slate-500 uppercase tracking-[0.14em] text-[11px] border-b border-slate-200"
+                  >
+                    <tr>
+                      <th class="py-3 pr-4">Customer</th>
+                      <th class="py-3 pr-4">Payment</th>
+                      <th class="py-3 pr-4">Amount</th>
+                      <th class="py-3 pr-4">Method</th>
+                      <th class="py-3 pr-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="paymentsTable"
+                    class="divide-y divide-slate-100"
+                  ></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section class="view-layout">
+            <div id="editor" class="admin-view section-anchor panel p-5" hidden>
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 mb-5"
+              >
+                <div>
+                  <p
+                    class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2"
+                  >
+                    Menu Workspace
+                  </p>
+                  <h2 class="text-2xl font-black">Product Editor</h2>
+                  <p class="text-sm text-muted">
+                    Create, update, archive, or restore menu items.
+                  </p>
+                </div>
+                <button id="resetFormBtn" class="btn btn-light !py-2">
+                  <i class="bi bi-eraser"></i> Clear
+                </button>
+              </div>
+
+              <form id="productForm" class="grid gap-4">
+                <input type="hidden" name="productId" />
+
+                <div
+                  class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                >
+                  <div
+                    class="w-28 h-28 shrink-0 rounded-xl overflow-hidden image-grid-bg border border-white shadow-sm"
+                  >
+                    <img
+                      id="imagePreview"
+                      src="/assets/images/smoothie-bowl.jpg"
+                      alt="Product preview"
+                      class="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p class="text-sm font-black text-ink">Catalog asset</p>
+                    <p class="text-xs text-muted mt-1 max-w-sm">
+                      Current product image used across menu, homepage, and
+                      checkout surfaces.
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-bold mb-2"
+                    >Product name</label
+                  >
+                  <input
+                    name="name"
+                    required
+                    class="field"
+                    placeholder="Green Goddess"
+                  />
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Price</label>
+                    <input
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="1"
+                      required
+                      class="field"
+                      placeholder="250"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Sugar</label>
+                    <input
+                      name="sugar"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="field"
+                      placeholder="18"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Category</label>
+                    <select
+                      id="categorySelect"
+                      class="field"
+                      onchange="
+                        if (this.value === '__custom__') {
+                          document
+                            .getElementById('customCategoryWrap')
+                            .classList.remove('hidden');
+                          document.getElementById('categoryHidden').value = '';
+                          document
+                            .getElementById('customCategoryInput')
+                            .focus();
+                        } else {
+                          document
+                            .getElementById('customCategoryWrap')
+                            .classList.add('hidden');
+                          document.getElementById('categoryHidden').value =
+                            this.value;
+                        }
+                      "
+                    >
+                      <option value="">Select category...</option>
+                      <option value="Smoothies">Smoothies</option>
+                      <option value="Seasonal Fruit Juices / Smoothies">
+                        Seasonal Fruit Juices / Smoothies
+                      </option>
+                      <option value="Salads">Salads</option>
+                      <option value="Protein Bowls">Protein Bowls</option>
+                      <option value="Healthy Snacks">Healthy Snacks</option>
+                      <option value="Ice Creams & Gelato">
+                        Ice Creams & Gelato
+                      </option>
+                      <option value="Cold-Pressed Juices">
+                        Cold-Pressed Juices
+                      </option>
+                      <option value="__custom__">+ New Category</option>
+                    </select>
+                    <div id="customCategoryWrap" class="hidden mt-2">
+                      <input
+                        id="customCategoryInput"
+                        class="field"
+                        placeholder="Enter new category name"
+                      />
+                    </div>
+                    <input name="category" type="hidden" id="categoryHidden" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2"
+                      >Diet type</label
+                    >
+                    <select name="type" class="field">
+                      <option value="Vegetarian">Vegetarian</option>
+                      <option value="Non-Vegetarian">Non-Vegetarian</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-bold mb-2"
+                    >Description</label
+                  >
+                  <textarea
+                    name="description"
+                    rows="3"
+                    class="field resize-none"
+                    placeholder="Fresh ingredients, flavor profile, and serving notes."
+                  ></textarea>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Calories</label
+                    ><input
+                      name="calories"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="field"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Protein</label
+                    ><input
+                      name="protein"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="field"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Carbs</label
+                    ><input
+                      name="carbs"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="field"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Fat</label
+                    ><input
+                      name="fat"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="field"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2">Fiber</label
+                    ><input
+                      name="fiber"
+                      type="number"
+                      min="0"
+                      step="1"
+                      class="field"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2"
+                      >Ingredients</label
+                    ><input
+                      name="ingredients"
+                      class="field"
+                      placeholder="Spinach, Kale, Banana"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-bold mb-2"
+                    >Product image</label
+                  >
+                  <input
+                    name="imageFile"
+                    type="file"
+                    accept="image/*,video/mp4,video/quicktime,video/webm"
+                    class="field bg-white"
+                  />
+                  <div
+                    id="imageFilePreview"
+                    class="hidden mt-3 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
+                  >
+                    <img
+                      id="imageFileThumb"
+                      src=""
+                      alt="Selected file preview"
+                      class="w-16 h-16 rounded-lg object-cover border border-white shadow-sm"
+                    />
+                    <div class="min-w-0">
+                      <p
+                        id="imageFileName"
+                        class="text-sm font-bold text-ink truncate"
+                      ></p>
+                      <p
+                        id="imageFileSize"
+                        class="text-xs text-muted mt-0.5"
+                      ></p>
+                    </div>
+                  </div>
+                  <input
+                    name="image"
+                    type="text"
+                    placeholder="Optional: paste image URL or local image path"
+                    class="field mt-3"
+                  />
+                </div>
+
+                <div
+                  class="grid sm:grid-cols-2 gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4"
+                >
+                  <label
+                    class="inline-flex items-center gap-3 text-sm font-bold text-emerald-900"
+                  >
+                    <input
+                      name="isFeatured"
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-emerald-300 text-primary focus:ring-primary"
+                    />
+                    Show under Popular Blends
+                  </label>
+                  <div>
+                    <label class="block text-sm font-bold mb-2 text-emerald-900"
+                      >Homepage order</label
+                    >
+                    <input
+                      name="featuredOrder"
+                      type="number"
+                      min="1"
+                      max="6"
+                      step="1"
+                      class="field bg-white"
+                      placeholder="1 to 6"
+                    />
+                  </div>
+                  <p class="sm:col-span-2 text-xs text-emerald-800">
+                    The homepage displays the first six active products marked
+                    as Popular Blends, sorted by this order.
+                  </p>
+                </div>
+
+                <label
+                  id="archiveCheckboxLabel"
+                  class="inline-flex items-center gap-3 text-sm font-bold"
+                >
+                  <input
+                    name="isArchived"
+                    type="checkbox"
+                    class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                  Archive item immediately
+                </label>
+
+                <div class="flex flex-wrap gap-3 pt-1">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy"></i> Save product
+                  </button>
+                  <button
+                    type="button"
+                    id="cancelEditBtn"
+                    class="btn btn-light"
+                  >
+                    <i class="bi bi-x-lg"></i> Close
+                  </button>
+                  <button
+                    type="button"
+                    id="archiveBtn"
+                    class="btn bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 hidden"
+                  >
+                    <i class="bi bi-archive"></i> Archive
+                  </button>
+                  <button
+                    type="button"
+                    id="deleteProductBtn"
+                    class="btn bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 hidden"
+                  >
+                    <i class="bi bi-trash3"></i> Delete
+                  </button>
+                </div>
+
+                <div
+                  id="formErrorNotice"
+                  class="hidden rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700"
+                ></div>
+                <div
+                  id="formFallbackNotice"
+                  class="hidden rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-700"
+                >
+                  <i class="bi bi-exclamation-triangle"></i> Image stored on
+                  server file system
+                </div>
+              </form>
+            </div>
+
+            <div
+              id="catalog"
+              class="admin-view section-anchor panel p-5 overflow-hidden"
+              hidden
+            >
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 mb-5"
+              >
+                <div>
+                  <p
+                    class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2"
+                  >
+                    Catalog Workspace
+                  </p>
+                  <h2 class="text-2xl font-black">Catalog Control</h2>
+                  <p class="text-sm text-muted">
+                    Active items, archived history, images, codes, and nutrition
+                    tags.
+                  </p>
+                </div>
+                <div class="relative w-[36rem]">
+                  <input
+                    id="catalogSearch"
+                    type="text"
+                    placeholder="Search products..."
+                    class="field w-full pl-10 pr-10"
+                  />
+                  <i
+                    class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  ></i>
+                  <button
+                    id="catalogSearchClear"
+                    type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition hidden"
+                   
+                  >
+                    <i class="bi bi-x-lg text-lg"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="overflow-auto max-h-[920px]">
+                <table class="min-w-full text-sm table-fixed">
+                  <thead
+                    class="sticky top-0 bg-white z-10 text-left text-slate-500 uppercase tracking-[0.14em] text-[11px] border-b border-slate-200"
+                  >
+                    <tr>
+                      <th class="py-3 pr-4 w-[140px]">Image</th>
+                      <th class="py-3 pr-4 w-[220px]">Product</th>
+                      <th class="py-3 pr-4 w-[160px]">Nutrition</th>
+                      <th class="py-3 pr-4 w-[80px]">Price</th>
+                      <th class="py-3 pr-4 w-[100px]">State</th>
+                      <th class="py-3 pr-4 w-[60px]">Featured</th>
+                      <th class="py-3 pr-4 w-[130px]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="productsTable"
+                    class="divide-y divide-slate-100"
+                  ></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div
+              id="gallery"
+              class="admin-view section-anchor panel p-5 overflow-hidden"
+              hidden
+            >
+              <div
+                class="flex flex-wrap items-center justify-between gap-3 mb-5"
+              >
+                <div>
+                  <p
+                    class="text-sm font-bold uppercase tracking-[0.18em] text-green-700 mb-2"
+                  >
+                    Asset Workspace
+                  </p>
+                  <h2 class="text-2xl font-black">Image Gallery</h2>
+                  <p class="text-sm text-muted">
+                    Manage product images stored in the database.
+                  </p>
+                </div>
+                <button
+                  id="addImageBtn"
+                  class="btn bg-green-50 text-green-600 hover:bg-green-100 border border-green-100"
+                >
+                  <i data-lucide="plus" class="w-5 h-5"></i> Add Image
+                </button>
+              </div>
+
+              <!-- Add Image Form (hidden by default) -->
+              <div
+                id="addImageForm"
+                class="hidden mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-bold mb-2"
+                      >Select Product</label
+                    >
+                    <select id="galleryProductSelect" class="field"></select>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-bold mb-2"
+                      >Image File</label
+                    >
+                    <input
+                      id="galleryFileInput"
+                      type="file"
+                      accept="image/*,video/mp4,video/quicktime,video/webm"
+                      class="field bg-white"
+                    />
+                  </div>
+                </div>
+                <div class="flex gap-3 mt-4">
+                  <button id="uploadImageBtn" class="btn btn-primary">
+                    <i data-lucide="upload" class="w-5 h-5"></i> Upload
+                  </button>
+                  <button id="cancelImageBtn" class="btn btn-light">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+
+              <!-- Gallery Grid -->
+              <div id="galleryGrid" class="space-y-8"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+
+    <!-- Discard Confirmation Modal -->
+    <div id="discardModal" class="fixed inset-0 z-50 hidden">
+      <div
+        class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        id="discardModalBackdrop"
+      ></div>
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-2xl shadow-2xl border border-green-100 max-w-sm w-full p-6 animate-[fadeIn_0.15s_ease-out]"
+        >
+          <div class="flex items-start gap-4">
+            <div
+              class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0"
+            >
+              <i class="bi bi-exclamation-triangle text-xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-black text-ink">Close editor?</h3>
+              <p class="mt-2 text-sm text-muted">
+                Any unsaved changes will be lost. This action cannot be undone.
+              </p>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button id="discardModalCancel" class="btn btn-light">
+              Keep editing
+            </button>
+            <button id="discardModalConfirm" class="btn btn-danger">
+              Discard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden">
+      <div
+        class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        id="deleteModalBackdrop"
+      ></div>
+      <div class="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          class="relative bg-white rounded-2xl shadow-2xl border border-red-100 max-w-sm w-full p-6 animate-[fadeIn_0.15s_ease-out]"
+        >
+          <div class="flex items-start gap-4">
+            <div
+              class="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0"
+            >
+              <i class="bi bi-trash3 text-xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-black text-ink">Delete permanently?</h3>
+              <p class="mt-2 text-sm text-muted">
+                This product will be permanently removed. This action cannot be
+                undone.
+              </p>
+            </div>
+          </div>
+          <div class="flex justify-end gap-3 mt-6">
+            <button id="deleteModalCancel" class="btn btn-light">Cancel</button>
+            <button id="deleteModalConfirm" class="btn btn-danger">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+      <script src="/js/toast.js"></script>
+    <script src="/js/admin-dashboard.js"></script>
+  </body>
+</html>

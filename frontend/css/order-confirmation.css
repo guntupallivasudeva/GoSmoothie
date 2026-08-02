@@ -1,0 +1,158 @@
+body {
+        font-family: "Poppins", sans-serif;
+        overflow-x: hidden;
+      }
+      .page-glow {
+        position: fixed;
+        border-radius: 9999px;
+        filter: blur(12px);
+        pointer-events: none;
+        z-index: -1;
+      }
+      .confirmation-card {
+        position: relative;
+        isolation: isolate;
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.98),
+          rgba(247, 255, 250, 0.96)
+        );
+        box-shadow:
+          0 30px 80px rgba(15, 23, 42, 0.13),
+          0 8px 24px rgba(74, 222, 128, 0.12);
+      }
+      .confirmation-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(
+          135deg,
+          rgba(74, 222, 128, 0.75),
+          rgba(255, 255, 255, 0.3),
+          rgba(249, 115, 22, 0.38)
+        );
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+      }
+      .success-title {
+        background: linear-gradient(90deg, #0f172a 10%, #15803d 55%, #16a34a);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .order-id-panel {
+        background:
+          radial-gradient(
+            circle at top right,
+            rgba(74, 222, 128, 0.22),
+            transparent 42%
+          ),
+          linear-gradient(135deg, #0f172a, #172554);
+      }
+      .timeline {
+        position: relative;
+      }
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 39px;
+        top: 46px;
+        bottom: 46px;
+        width: 2px;
+        background: linear-gradient(#4ade80, #bbf7d0, #e2e8f0);
+      }
+      .confetti {
+        position: fixed;
+        top: -16px;
+        width: 9px;
+        height: 18px;
+        opacity: 0;
+        z-index: 60;
+        pointer-events: none;
+        animation: confetti-fall 3.4s ease-in var(--delay) forwards;
+        transform: rotate(var(--rotate));
+      }
+      @keyframes confetti-fall {
+        0% {
+          opacity: 1;
+          transform: translate3d(0, -5vh, 0) rotate(0deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translate3d(var(--drift), 105vh, 0) rotate(760deg);
+        }
+      }
+      @keyframes success-pop {
+        0% {
+          opacity: 0;
+          transform: scale(0.45);
+        }
+        65% {
+          opacity: 1;
+          transform: scale(1.12);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .success-icon {
+        position: relative;
+        animation: success-pop 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      .success-icon::after {
+        content: "";
+        position: absolute;
+        inset: -8px;
+        border: 2px solid rgba(74, 222, 128, 0.35);
+        border-radius: 9999px;
+        animation: success-ring 1.2s ease-out 0.3s both;
+      }
+      @keyframes success-ring {
+        0% {
+          opacity: 0.9;
+          transform: scale(0.72);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.28);
+        }
+      }
+      .success-circle {
+        stroke-dasharray: 138;
+        stroke-dashoffset: -138;
+        animation: draw-circle 0.7s ease-out 0.15s forwards;
+      }
+      .success-check {
+        stroke-dasharray: 58;
+        stroke-dashoffset: 58;
+        animation: draw-check 0.4s ease-out 0.75s forwards;
+      }
+      @keyframes draw-circle {
+        to {
+          stroke-dashoffset: -24;
+        }
+      }
+      @keyframes draw-check {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .check-breathe-svg {
+        animation: svg-breathe 1.8s ease-in-out 1.2s infinite;
+      }
+      @keyframes svg-breathe {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }

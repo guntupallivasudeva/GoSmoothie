@@ -264,6 +264,286 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 
+// Detailed database information for admin modal views
+router.get("/database/details", async (req, res) => {
+  try {
+    const db = mongoose.connection.db;
+    const collectionsInfo = await db.listCollections().toArray();
+
+    // Parallelize all collection stats
+    const [collectionDetails, users, admins, dbStats] = await Promise.all([
+      Promise.all(
+        collectionsInfo.map(async (col) => {
+          const stats = await db.collection(col.name).stats();
+          return {
+            name: col.name,
+            type: col.type,
+            documents: stats.count || 0,
+            storageSize: stats.storageSize || 0,
+            avgDocSize: stats.avgObjSize || 0,
+            indexes: stats.nindexes || 0,
+            totalIndexSize: stats.totalIndexSize || 0,
+          };
+        }),
+      ),
+      User.find({})
+        .select("userId name email phone phoneNumber isActive createdAt")
+        .sort({ createdAt: -1 })
+        .lean(),
+      Admin.find({}).select("-passwordHash").sort({ createdAt: -1 }).lean(),
+      db.stats(),
+    ]);
+
+    // Parallelize document fetching (limit 30 per collection for speed)
+    const docResults = await Promise.all(
+      collectionsInfo.map(async (col) => {
+        const docs = await db
+          .collection(col.name)
+          .find({})
+          .sort({ _id: -1 })
+          .toArray();
+        return [
+          col.name,
+          docs.map((doc) => ({
+            _id: String(doc._id),
+            ...Object.fromEntries(
+              Object.entries(doc)
+                .filter(
+                  ([key]) =>
+                    key !== "_id" && key !== "passwordHash" && key !== "data",
+                )
+                .map(([key, val]) => {
+                  if (typeof val === "string" && val.length > 300)
+                    return [key, val.slice(0, 300) + "..."];
+                  if (Buffer.isBuffer(val))
+                    return [key, `[Binary: ${val.length} bytes]`];
+                  return [key, val];
+                }),
+            ),
+          })),
+        ];
+      }),
+    );
+    const documentsByCollection = Object.fromEntries(docResults);
+
+    const storageBreakdown = collectionDetails.map((c) => ({
+      name: c.name,
+      storageSize: c.storageSize,
+      documents: c.documents,
+      indexSize: c.totalIndexSize,
+    }));
+
+    res.json({
+      collections: collectionDetails,
+      users,
+      admins,
+      documentsByCollection,
+      storageBreakdown,
+      totals: {
+        collections: collectionsInfo.length,
+        documents: dbStats.objects || 0,
+        storageSize: dbStats.storageSize || 0,
+        dataSize: dbStats.dataSize || 0,
+        indexSize: dbStats.indexSize || 0,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to load database details" });
+  }
+});
+
+// Generate real unique IDs for a collection (preview before save)
+const {
+  generateUniqueNumericId: genId,
+  peekNextProductCode,
+  resetProductCodeState,
+} = require("../utils/idGenerator");
+
+router.get("/database/generate-id/:collection", async (req, res) => {
+  try {
+    const col = req.params.collection.toLowerCase();
+    const result = {};
+
+    if (col === "products") {
+      result.productId = await genId(Product, "productId", 12);
+      result.productCode = await peekNextProductCode(Product);
+    } else if (col === "admins") {
+      result.adminId = await genId(Admin, "adminId", 12);
+    } else if (col === "users") {
+      const { randomNumeric } = require("../utils/idGenerator");
+      for (let i = 0; i < 1000; i++) {
+        const candidate = randomNumeric(8);
+        const exists = await User.findOne({ userId: candidate }).lean();
+        if (!exists) {
+          result.userId = candidate;
+          break;
+        }
+      }
+      if (!result.userId) {
+        const { randomNumeric: rn } = require("../utils/idGenerator");
+        result.userId = rn(8);
+      }
+    } else if (col === "addresses") {
+      result.addressId = `addr_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    } else if (col === "orders") {
+      result.orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    } else if (col === "payments") {
+      result.paymentId = `PAY-${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    } else if (col === "carts") {
+      result.cartId = `cart_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ID generation failed" });
+  }
+});
+
+// Return model schemas for form generation
+router.get("/database/schemas", (req, res) => {
+  const schemas = {};
+  const models = mongoose.modelNames();
+  const EXCLUDE = [
+    "__v",
+    "_id",
+    "_createdBy",
+    "_lastUpdatedBy",
+    "passwordHash",
+    "data",
+    "checksum",
+  ];
+  models.forEach((name) => {
+    const model = mongoose.model(name);
+    const paths = model.schema.paths;
+    const fields = {};
+    Object.entries(paths).forEach(([key, schema]) => {
+      if (EXCLUDE.includes(key)) return;
+      fields[key] = {
+        type: schema.instance || "String",
+        required: !!schema.isRequired,
+        default: schema.defaultValue !== undefined ? schema.defaultValue : null,
+      };
+    });
+    schemas[model.collection.collectionName] = { modelName: name, fields };
+  });
+  res.json(schemas);
+});
+
+// CRUD: Update a document in any collection
+router.put("/database/document/:collection/:docId", async (req, res) => {
+  try {
+    const { collection, docId } = req.params;
+    const db = mongoose.connection.db;
+    const { ObjectId } = require("mongoose").Types;
+    const update = req.body;
+    delete update._id; // never overwrite _id
+    // Track who performed this update
+    update._lastUpdatedBy = {
+      adminId: req.user.adminId || req.user.id,
+      name: req.user.name || "",
+      at: new Date().toISOString(),
+    };
+    const result = await db
+      .collection(collection)
+      .updateOne({ _id: new ObjectId(docId) }, { $set: update });
+    if (result.matchedCount === 0)
+      return res.status(404).json({ error: "Document not found" });
+    res.json({
+      message: "Document updated",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Update failed" });
+  }
+});
+
+// CRUD: Delete a document from any collection
+router.delete("/database/document/:collection/:docId", async (req, res) => {
+  try {
+    const { collection, docId } = req.params;
+    const db = mongoose.connection.db;
+    const { ObjectId } = require("mongoose").Types;
+    const result = await db
+      .collection(collection)
+      .deleteOne({ _id: new ObjectId(docId) });
+    if (result.deletedCount === 0)
+      return res.status(404).json({ error: "Document not found" });
+    res.json({ message: "Document deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Delete failed" });
+  }
+});
+
+// CRUD: Create a document in any collection
+router.post("/database/document/:collection", async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const db = mongoose.connection.db;
+    const doc = req.body;
+    delete doc._id; // let MongoDB generate _id
+    // Track who created this document
+    doc._createdBy = {
+      adminId: req.user.adminId || req.user.id,
+      name: req.user.name || "",
+      at: new Date().toISOString(),
+    };
+    const result = await db.collection(collection).insertOne(doc);
+    res
+      .status(201)
+      .json({ message: "Document created", insertedId: result.insertedId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Create failed" });
+  }
+});
+
+// CRUD: Drop a collection
+router.delete("/database/collection/:collection", async (req, res) => {
+  try {
+    const { collection } = req.params;
+    const db = mongoose.connection.db;
+    await db.collection(collection).drop();
+    res.json({ message: `Collection '${collection}' dropped` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Drop failed" });
+  }
+});
+
+// CRUD: Delete user by userId
+router.delete("/database/user/:userId", async (req, res) => {
+  try {
+    const user = await User.findOneAndDelete({ userId: req.params.userId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ message: "User deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Delete failed" });
+  }
+});
+
+// CRUD: Update user by userId
+router.put("/database/user/:userId", async (req, res) => {
+  try {
+    const user = await User.findOne({ userId: req.params.userId });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const { name, email, phone, isActive } = req.body;
+    if (name !== undefined) user.name = name;
+    if (email !== undefined) user.email = email;
+    if (phone !== undefined) user.phone = phone;
+    if (isActive !== undefined) user.isActive = !!isActive;
+    await user.save();
+    res.json({ message: "User updated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Update failed" });
+  }
+});
+
 router.get("/", async (req, res) => {
   try {
     const { search = "", role, isActive, page = "1", limit = "20" } = req.query;
@@ -320,6 +600,13 @@ router.post("/", async (req, res) => {
       passwordHash,
       phoneNumber,
       role,
+      _createdBy: req.user
+        ? {
+            adminId: req.user.adminId || req.user.id,
+            name: req.user.name || "",
+            at: new Date().toISOString(),
+          }
+        : null,
     });
     res.status(201).json(admin.toJSON());
   } catch (err) {
@@ -339,6 +626,14 @@ router.put("/:adminId", async (req, res) => {
     if (role !== undefined) admin.role = role;
     if (isActive !== undefined) admin.isActive = !!isActive;
     if (password) admin.passwordHash = await bcrypt.hash(password, 10);
+    admin._lastUpdatedBy = req.user
+      ? {
+          adminId: req.user.adminId || req.user.id,
+          name: req.user.name || "",
+          at: new Date().toISOString(),
+        }
+      : null;
+    admin.updatedAt = new Date();
     await admin.save();
     res.json(admin.toJSON());
   } catch (err) {

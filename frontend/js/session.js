@@ -267,6 +267,14 @@
 
   restore();
 
+  // Proactively validate the session on every page load.
+  // If the user has been deactivated, this triggers handleInvalidSession.
+  if (getToken() && !/\/(login|register)\.html$/.test(global.location.pathname)) {
+    setTimeout(function () {
+      fetch("/api/users/me", { headers: authHeaders() }).catch(function () {});
+    }, 300);
+  }
+
   global.GoSmoothieSession = {
     TOKEN_KEY,
     USER_KEY,

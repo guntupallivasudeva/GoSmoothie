@@ -119,12 +119,24 @@ router.get("/images/gallery", requireAdmin, async (req, res) => {
     }).lean();
     const productMap = {};
     products.forEach((p) => {
-      productMap[p.productId] = p.name;
+      productMap[p.productId] = {
+        name: p.name,
+        category: p.category || "",
+        type: p.type || "Vegetarian",
+      };
     });
 
     const gallery = images.map((img) => ({
       productId: img.productId,
-      productName: img.productName || productMap[img.productId] || "Unknown",
+      productName:
+        img.productName ||
+        (productMap[img.productId] && productMap[img.productId].name) ||
+        "Unknown",
+      category:
+        (productMap[img.productId] && productMap[img.productId].category) || "",
+      type:
+        (productMap[img.productId] && productMap[img.productId].type) ||
+        "Vegetarian",
       contentType: img.contentType,
       size: img.size,
       checksum: img.checksum,
@@ -183,6 +195,13 @@ router.post(
         archivedAt: null,
         ...payload,
         createdAt: new Date(),
+        _createdBy: req.user
+          ? {
+              adminId: req.user.adminId || req.user.id,
+              name: req.user.name || "",
+              at: new Date().toISOString(),
+            }
+          : undefined,
       });
 
       // If file was uploaded, save image using the generated productId then update the record

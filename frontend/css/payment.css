@@ -1,0 +1,240 @@
+body {
+        font-family: "Poppins", sans-serif;
+      }
+
+      /* ---------- Payment options modal ---------- */
+      /* Animations mirror the cart and profile cards (same easing and travel)
+         so the modal feels part of the same app. */
+      #payModal.is-open {
+        display: flex;
+      }
+      #payModal .pay-backdrop {
+        animation: pay-fade 0.24s ease-out both;
+      }
+      #payModal .pay-shell {
+        animation: pay-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+        box-shadow:
+          0 30px 70px rgba(15, 23, 42, 0.28),
+          0 8px 24px rgba(74, 222, 128, 0.14);
+      }
+      @keyframes pay-fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes pay-rise {
+        from {
+          opacity: 0;
+          transform: translateY(22px) scale(0.975);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      /* Brand rail: the app's green gradient instead of a third-party blue. */
+      .pay-brand {
+        background:
+          radial-gradient(
+            120% 90% at 100% 0%,
+            rgba(255, 255, 255, 0.22),
+            transparent 60%
+          ),
+          linear-gradient(160deg, #15803d 0%, #16a34a 42%, #4ade80 100%);
+      }
+      .pay-brand-wave {
+        position: absolute;
+        inset: auto -20% -18% -20%;
+        height: 62%;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.16),
+          rgba(255, 255, 255, 0.04)
+        );
+        transform: skewY(-9deg);
+        pointer-events: none;
+      }
+      .pay-brand-blob {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(26px);
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .pay-summary-card {
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 14px 30px rgba(6, 78, 59, 0.18);
+      }
+      .pay-side-row {
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .pay-side-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(6, 78, 59, 0.18);
+      }
+      /* Method rail */
+      .pay-method {
+        transition:
+          background 0.22s ease,
+          box-shadow 0.22s ease,
+          color 0.22s ease;
+      }
+      .pay-method:hover {
+        background: rgba(74, 222, 128, 0.08);
+      }
+      .pay-method[aria-selected="true"] {
+        background: linear-gradient(
+          90deg,
+          rgba(74, 222, 128, 0.18),
+          rgba(255, 255, 255, 0)
+        );
+        box-shadow: inset 3px 0 0 #16a34a;
+      }
+      /* An ineligible method stays visible and focusable (so its reason can be
+         read) but loses the hover affordance. */
+      .pay-method[aria-disabled="true"]:hover {
+        background: transparent;
+      }
+      /* Content panes */
+      .pay-pane {
+        animation: pay-pane-in 0.3s ease-out both;
+      }
+      @keyframes pay-pane-in {
+        from {
+          opacity: 0;
+          transform: translateX(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      .pay-row {
+        transition:
+          transform 0.18s ease,
+          border-color 0.18s ease,
+          background 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      .pay-row:hover {
+        transform: translateY(-2px);
+        border-color: rgba(74, 222, 128, 0.6);
+        background: rgba(240, 253, 244, 0.75);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+      }
+      .pay-row[aria-pressed="true"] {
+        border-color: #22c55e;
+        background: rgba(240, 253, 244, 0.9);
+        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+      }
+      /* Lettered placeholder: still the fallback for a brand with no artwork
+         and for a logo that fails to load. */
+      .pay-chip {
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 0.35rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: 0.02em;
+      }
+      /* Brand marks. The box has fixed dimensions and the image is contained
+         inside it, so logos of any aspect ratio share one footprint and nothing
+         shifts while they load. */
+      .pay-logo-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+        overflow: hidden;
+      }
+      .pay-logo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+      }
+      /* method rail */
+      .pay-logo-box--sm {
+        width: 1.5rem;
+        height: 1.25rem;
+      }
+      /* bank and wallet rows */
+      .pay-logo-box--md {
+        width: 2rem;
+        height: 1.5rem;
+      }
+      /* "Scan the QR using any UPI App" strip */
+      .pay-logo-box--lg {
+        width: 2.25rem;
+        height: 1.5rem;
+      }
+      /* QR is hidden until requested, exactly like a real checkout sheet. */
+      .pay-qr {
+        transition:
+          filter 0.35s ease,
+          opacity 0.35s ease;
+      }
+      .pay-qr.is-hidden {
+        filter: blur(6px);
+        opacity: 0.55;
+      }
+      .pay-field {
+        transition:
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+      .pay-field:focus {
+        outline: none;
+        border-color: #22c55e;
+        box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.22);
+      }
+      .pay-cta {
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
+      }
+      .pay-cta:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 26px rgba(15, 23, 42, 0.18);
+      }
+      .pay-cta:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      /* Bottom sheets (contact details, offers) */
+      .pay-sheet {
+        animation: pay-sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      @keyframes pay-sheet-up {
+        from {
+          opacity: 0;
+          transform: translateY(26px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .pay-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(34, 197, 94, 0.45) transparent;
+      }
+      .pay-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .pay-scroll::-webkit-scrollbar-thumb {
+        background: rgba(34, 197, 94, 0.4);
+        border-radius: 9999px;
+      }

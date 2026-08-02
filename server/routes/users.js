@@ -22,6 +22,14 @@ router.get("/me", async (req, res) => {
     const user = await resolveAuthUser(req.user.id, req.user.email);
     // A verified token with no matching account means the session is dead.
     if (!user) return sendSessionInvalid(res);
+    // Deactivated accounts are forced to log out
+    if (user.isActive === false)
+      return res
+        .status(401)
+        .json({
+          code: "SESSION_INVALID",
+          error: "Your account has been deactivated. Please contact the admin.",
+        });
     const safeUser = user.toObject ? user.toObject() : user;
     delete safeUser.passwordHash;
     res.json(safeUser);
@@ -37,13 +45,6 @@ router.put("/me", async (req, res) => {
     return res.status(401).json({ error: "Authentication required" });
   const { name, email, phone, addresses } = req.body;
   try {
-    console.log("[PUT /api/users/me] incoming", {
-      userId: req.user.id,
-      hasName: typeof name === "string" && name.trim().length > 0,
-      hasEmail: typeof email === "string" && email.trim().length > 0,
-      hasPhone: typeof phone === "string" && phone.trim().length > 0,
-      addressCount: Array.isArray(addresses) ? addresses.length : 0,
-    });
     const user = await resolveAuthUser(req.user.id, req.user.email);
     // A verified token with no matching account means the session is dead.
     if (!user) return sendSessionInvalid(res);
@@ -75,14 +76,6 @@ router.put("/me", async (req, res) => {
       // Do not auto-assign a default address here; honor explicit isDefault only.
     }
     await user.save();
-    console.log("[PUT /api/users/me] saved", {
-      userId: user._id.toString(),
-      phone: user.phone || "",
-      addressCount: Array.isArray(user.addresses) ? user.addresses.length : 0,
-      defaultAddressId: Array.isArray(user.addresses)
-        ? user.addresses.find((a) => a.isDefault)?._id || null
-        : null,
-    });
     res.json({
       id: user.userId,
       userId: user.userId,
@@ -111,9 +104,9 @@ router.post("/change-password", async (req, res) => {
     const user = await resolveAuthUser(req.user.id, req.user.email);
     // A verified token with no matching account means the session is dead.
     if (!user) return sendSessionInvalid(res);
-    const ok = await user.verifyPassword(passwordToCheck);
+    const ok = await user.verifyPassword(String(passwordToCheck));
     if (!ok) return res.status(400).json({ error: "Old password incorrect" });
-    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    user.passwordHash = await bcrypt.hash(String(newPassword), 10);
     await user.save();
     res.json({ message: "Password changed" });
   } catch (err) {

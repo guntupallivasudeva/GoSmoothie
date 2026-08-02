@@ -14,10 +14,11 @@ function escapeRegex(value) {
 // typed at registration, so an exact match is tried first and a
 // case-insensitive match is used only as a fallback for sign-in convenience.
 async function findUserByEmail(email) {
-  const exact = await User.findOne({ email });
+  const exact = await User.findOne({ email, isAnonymous: { $ne: true } });
   if (exact) return exact;
   return User.findOne({
     email: { $regex: `^${escapeRegex(email)}$`, $options: "i" },
+    isAnonymous: { $ne: true },
   });
 }
 
@@ -36,7 +37,7 @@ router.post("/register", async (req, res) => {
     const existing = await findUserByEmail(exactEmail);
     if (existing)
       return res.status(400).json({ error: "Email already registered" });
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(String(password), 10);
     const user = await User.create({
       name: exactName,
       email: exactEmail,
@@ -77,7 +78,13 @@ router.post("/login", async (req, res) => {
     // Accounts are read from the database only; there are no built-in users.
     const user = await findUserByEmail(String(email).trim());
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
-    const ok = await user.verifyPassword(password);
+    if (user.isActive === false)
+      return res
+        .status(403)
+        .json({
+          error: "Your account has been deactivated. Please contact the admin.",
+        });
+    const ok = await user.verifyPassword(String(password));
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
     const token = jwt.sign(
       {

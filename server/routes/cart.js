@@ -25,15 +25,10 @@ async function resolveUserForClient(req, providedClientId) {
     return await User.findOne({ userId: providedClientId.slice(2) });
   }
   if (providedClientId) {
-    let anon = await User.findOne({ clientToken: providedClientId });
-    if (anon) return anon;
-    return await User.create({
-      name: "Anonymous",
-      email: `anon+${Date.now()}@local`,
-      passwordHash: "ANON",
-      isAnonymous: true,
-      clientToken: providedClientId,
-    });
+    // Use clientId directly as a virtual user identifier for anonymous carts.
+    // No anonymous User document is created — the Cart collection stores
+    // carts keyed by the clientId string for unauthenticated visitors.
+    return { userId: providedClientId, isAnonymous: true };
   }
   return null;
 }
@@ -270,43 +265,38 @@ router.post("/merge", async (req, res) => {
   try {
     const user = await resolveTokenUser(req);
     if (!user) return sendSessionInvalid(res);
-    // Resolve the anonymous cart owner without the token taking precedence.
-    const anon = await resolveUserForClient({ body: {}, query: {} }, clientId);
-    if (!anon) return res.status(404).json({ error: "User not found" });
-    if (anon.userId === user.userId)
-      return res.json(await serializeUserCart(user.userId));
-    const anonDoc = await Cart.findOne({ userId: anon.userId });
-    if (anonDoc) {
-      const userDoc = await Cart.findOne({ userId: user.userId });
-      if (!userDoc) {
-        anonDoc.userId = user.userId;
-        await Cart.create({ userId: user.userId, carts: anonDoc.carts });
-      } else {
-        for (const item of anonDoc.carts) {
-          const idx = findCartLineIndex(userDoc.carts, {
-            productId: item.productId,
-            productName: item.productName,
-          });
-          if (idx >= 0) {
-            userDoc.carts[idx].quantity =
-              (userDoc.carts[idx].quantity || 0) + (item.quantity || 1);
-            userDoc.carts[idx].subtotal =
-              (userDoc.carts[idx].unitPrice || 0) * userDoc.carts[idx].quantity;
-            userDoc.carts[idx].updatedAt = Date.now();
-          } else {
-            userDoc.carts.push(item);
-          }
+    // Look for an anonymous cart stored directly under the clientId.
+    const anonDoc = await Cart.findOne({ userId: clientId });
+    if (!anonDoc) return res.json(await serializeUserCart(user.userId));
+    // Merge anonymous cart items into the user's cart.
+    const userDoc = await Cart.findOne({ userId: user.userId });
+    if (!userDoc) {
+      // No existing user cart — just reassign the anonymous one.
+      anonDoc.userId = user.userId;
+      anonDoc.updatedAt = Date.now();
+      await anonDoc.save();
+    } else {
+      for (const item of anonDoc.carts) {
+        const idx = findCartLineIndex(userDoc.carts, {
+          productId: item.productId,
+          productName: item.productName,
+        });
+        if (idx >= 0) {
+          userDoc.carts[idx].quantity =
+            (userDoc.carts[idx].quantity || 0) + (item.quantity || 1);
+          userDoc.carts[idx].subtotal =
+            (userDoc.carts[idx].unitPrice || 0) * userDoc.carts[idx].quantity;
+          userDoc.carts[idx].updatedAt = Date.now();
+        } else {
+          userDoc.carts.push(item);
         }
-        userDoc.updatedAt = Date.now();
-        await userDoc.save();
       }
-      await Cart.deleteOne({ userId: anon.userId });
+      userDoc.updatedAt = Date.now();
+      await userDoc.save();
+      await Cart.deleteOne({ userId: clientId });
     }
-    // Only the throwaway guest record is removed. A clientId of the form
-    // "u_<userId>" can resolve to a real account, which must never be deleted.
-    if (anon.isAnonymous) {
-      await User.findOneAndDelete({ userId: anon.userId, isAnonymous: true });
-    }
+    // Clean up any legacy anonymous User documents for this clientId.
+    await User.deleteMany({ clientToken: clientId, isAnonymous: true });
     res.json(await serializeUserCart(user.userId));
   } catch (err) {
     console.error(err);

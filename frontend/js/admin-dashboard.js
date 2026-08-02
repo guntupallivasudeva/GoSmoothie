@@ -286,6 +286,42 @@ function renderDb(database) {
       `;
 }
 
+// Silently refresh only the DB chip count values (Users, Admins, etc.) without re-rendering the full section
+async function refreshDbChipCounts() {
+  try {
+    const response = await fetch(apiUrl("/api/admins/dashboard"), {
+      headers: authHeaders(),
+    });
+    if (!response.ok) return;
+    const data = await readApiJson(response);
+    state.dashboard = data;
+    const counts = (data.database || {}).collectionCounts || {};
+    const chipMap = {
+      Users: counts.users,
+      Admins: counts.admins,
+      Products: counts.products,
+      Orders: counts.orders,
+      Payments: counts.payments,
+      Carts: counts.carts,
+      Addresses: counts.addresses,
+    };
+    document.querySelectorAll(".db-chip").forEach((chip) => {
+      const labelEl = chip.querySelector(".truncate");
+      const valueEl = chip.querySelector(".font-black");
+      if (
+        labelEl &&
+        valueEl &&
+        chipMap[labelEl.textContent.trim()] !== undefined
+      ) {
+        const newVal = String(chipMap[labelEl.textContent.trim()] ?? 0);
+        if (valueEl.textContent !== newVal) valueEl.textContent = newVal;
+      }
+    });
+  } catch (e) {
+    /* silent */
+  }
+}
+
 function renderPulse(data) {
   const totals = data.totals || {};
   const orders = data.orders || data.recentOrders || [];
@@ -455,10 +491,10 @@ function renderProducts(products) {
             </td>
             <td class="py-4 pr-4">
               <div class="flex gap-2">
-                <button data-action="edit" data-id="${product.productId}" class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center transition active:scale-95"><i class="bi bi-pencil-square text-lg"></i></button>
-                <button data-action="stock" data-id="${product.productId}" class="w-9 h-9 rounded-lg ${product.isOutOfStock ? "bg-green-50 text-green-600 hover:bg-green-100" : "bg-amber-50 text-amber-600 hover:bg-amber-100"} flex items-center justify-center transition active:scale-95"><i class="bi ${product.isOutOfStock ? "bi-box-seam" : "bi-x-octagon"} text-lg"></i></button>
-                <button data-action="toggle" data-id="${product.productId}" class="w-9 h-9 rounded-lg ${product.isArchived ? "bg-green-50 text-green-600 hover:bg-green-100" : "bg-blue-50 text-blue-600 hover:bg-blue-100"} flex items-center justify-center transition active:scale-95"><i class="bi ${product.isArchived ? "bi-arrow-counterclockwise" : "bi-archive"} text-lg"></i></button>
-                <button data-action="delete" data-id="${product.productId}" class="w-9 h-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition active:scale-95"><i class="bi bi-trash3 text-lg"></i></button>
+                <button data-action="edit" data-id="${product.productId}" data-tip="Edit product" class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center transition active:scale-95"><i class="bi bi-pencil-square text-lg"></i></button>
+                <button data-action="stock" data-id="${product.productId}" data-tip="${product.isOutOfStock ? "Mark in stock" : "Mark out of stock"}" class="w-9 h-9 rounded-lg ${product.isOutOfStock ? "bg-green-50 text-green-600 hover:bg-green-100" : "bg-amber-50 text-amber-600 hover:bg-amber-100"} flex items-center justify-center transition active:scale-95"><i class="bi ${product.isOutOfStock ? "bi-box-seam" : "bi-x-octagon"} text-lg"></i></button>
+                <button data-action="toggle" data-id="${product.productId}" data-tip="${product.isArchived ? "Restore product" : "Archive product"}" class="w-9 h-9 rounded-lg ${product.isArchived ? "bg-green-50 text-green-600 hover:bg-green-100" : "bg-blue-50 text-blue-600 hover:bg-blue-100"} flex items-center justify-center transition active:scale-95"><i class="bi ${product.isArchived ? "bi-arrow-counterclockwise" : "bi-archive"} text-lg"></i></button>
+                <button data-action="delete" data-id="${product.productId}" data-tip="Delete product" class="w-9 h-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition active:scale-95"><i class="bi bi-trash3 text-lg"></i></button>
               </div>
             </td>
           </tr>
@@ -1203,9 +1239,9 @@ function renderGallery(images) {
                       <p class="text-xs text-muted mt-1">${formatBytes(img.size)} &middot; ${fileTypeLabel(img.contentType)}</p>
                       <p class="text-xs text-muted mt-0.5">${dateTime(img.updatedAt || img.createdAt)}</p>
                       <div class="flex gap-3 mt-3">
-                        <a href="${escapeHtml(img.imageUrl)}" download="${escapeHtml(img.productName)}.jpg" class="w-9 h-9 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition"><i data-lucide="download" class="w-5 h-5"></i></a>
-                        <button data-gallery-action="replace" data-product-id="${escapeHtml(img.productId)}" class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center transition"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
-                        <button data-gallery-action="delete" data-product-id="${escapeHtml(img.productId)}" class="w-9 h-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        <a href="${escapeHtml(img.imageUrl)}" download="${escapeHtml(img.productName)}.jpg" data-tip="Download image" class="w-9 h-9 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 flex items-center justify-center transition"><i data-lucide="download" class="w-5 h-5"></i></a>
+                        <button data-gallery-action="replace" data-product-id="${escapeHtml(img.productId)}" data-tip="Replace image" class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center transition"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                        <button data-gallery-action="delete" data-product-id="${escapeHtml(img.productId)}" data-tip="Delete image" class="w-9 h-9 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                       </div>
                     </div>
                   </div>
@@ -1336,7 +1372,7 @@ document.addEventListener("DOMContentLoaded", () => {
   modalOverlay.innerHTML = `<div class="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
       <h2 id="dbModalTitle" class="text-xl font-bold text-slate-900"></h2>
-      <button id="dbModalClose" class="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition"><i class="bi bi-x-lg text-lg text-slate-600"></i></button>
+      <button id="dbModalClose" data-tip="Close" class="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition"><i class="bi bi-x-lg text-lg text-slate-600"></i></button>
     </div>
     <div id="dbModalBody" class="flex-1 overflow-y-auto p-6"></div>
   </div>`;
@@ -1857,7 +1893,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="w-10 h-10 rounded-xl ${color.badge} flex items-center justify-center"><i class="bi ${colIcon(c.name)} text-lg"></i></div>
             <div><h4 class="font-bold text-slate-900 text-sm">${escapeHtml(c.name)}</h4><p class="text-[11px] text-slate-500">${pct}% of total docs</p></div>
           </div>
-          <button class="text-xs px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition" data-crud-drop="${escapeHtml(c.name)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition" data-tip="Drop collection" data-crud-drop="${escapeHtml(c.name)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </div>
         <div class="h-3 rounded-full bg-white/80 mb-3 overflow-hidden shadow-inner"><div class="h-full rounded-full ${color.bar}" style="width:${Math.max(4, pct)}%"></div></div>
         <div class="grid grid-cols-3 gap-2 text-center">
@@ -1891,9 +1927,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="py-3 pr-3">${active ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>' : '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactive</span>'}</td>
         <td class="py-3 pr-3 text-slate-600 text-xs">${fmtDate(u.createdAt)}</td>
         <td class="py-3 text-right whitespace-nowrap">
-          <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-crud-edit-user="${escapeHtml(u.userId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
-          <button class="text-xs px-2 py-1 rounded ${active ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"} mr-1" data-crud-toggle-user="${escapeHtml(u.userId)}" data-active="${active}"><i data-lucide="${active ? "user-x" : "user-check"}" class="w-3.5 h-3.5"></i></button>
-          <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-crud-delete-user="${escapeHtml(u.userId)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-tip="Edit user" data-crud-edit-user="${escapeHtml(u.userId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded ${active ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"} mr-1" data-tip="${active ? "Deactivate user" : "Activate user"}" data-crud-toggle-user="${escapeHtml(u.userId)}" data-active="${active}"><i data-lucide="${active ? "user-x" : "user-check"}" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-tip="Delete user" data-crud-delete-user="${escapeHtml(u.userId)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </td></tr>`;
     });
     html += `</tbody></table></div>`;
@@ -1924,8 +1960,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="py-3 pr-3 text-slate-600 text-xs">${fmtDate(a.createdAt)}</td>
         <td class="py-3 pr-3 text-slate-600 text-xs">${escapeHtml(createdBy)}</td>
         <td class="py-3 text-right whitespace-nowrap">
-          <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-crud-edit-admin="${escapeHtml(a.adminId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
-          <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-crud-delete-admin="${escapeHtml(a.adminId)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-tip="Edit admin" data-crud-edit-admin="${escapeHtml(a.adminId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-tip="Delete admin" data-crud-delete-admin="${escapeHtml(a.adminId)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </td></tr>`;
     });
     html += `</tbody></table></div>`;
@@ -1980,8 +2016,8 @@ document.addEventListener("DOMContentLoaded", () => {
               </span>
               <div class="flex items-center gap-2">
                 <span class="font-mono text-[13px] text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg cursor-help select-all">${escapeHtml(doc._id)}</span>
-                <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200" data-crud-edit-doc="${escapeHtml(colName)}|${escapeHtml(doc._id)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
-                <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-crud-delete-doc="${escapeHtml(colName)}|${escapeHtml(doc._id)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200" data-tip="Edit document" data-crud-edit-doc="${escapeHtml(colName)}|${escapeHtml(doc._id)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
+                <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-tip="Delete document" data-crud-delete-doc="${escapeHtml(colName)}|${escapeHtml(doc._id)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
               </div>
             </div>
             <div class="p-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-sm">`;
@@ -2046,17 +2082,50 @@ document.addEventListener("DOMContentLoaded", () => {
     const breakdown = data.storageBreakdown || [];
     const totals = data.totals || {};
     let html = `<div class="mb-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="rounded-xl bg-orange-50 border border-orange-100 p-4 text-center"><p class="text-xs text-slate-500 mb-1">Total Storage</p><p class="font-black text-lg text-slate-900">${formatBytes(totals.storageSize)}</p></div>
-      <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 text-center"><p class="text-xs text-slate-500 mb-1">Data Size</p><p class="font-black text-lg text-slate-900">${formatBytes(totals.dataSize)}</p></div>
-      <div class="rounded-xl bg-purple-50 border border-purple-100 p-4 text-center"><p class="text-xs text-slate-500 mb-1">Index Size</p><p class="font-black text-lg text-slate-900">${formatBytes(totals.indexSize)}</p></div>
-      <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-center"><p class="text-xs text-slate-500 mb-1">Collections</p><p class="font-black text-lg text-slate-900">${totals.collections}</p></div>
-    </div><h3 class="font-semibold text-slate-800 mb-3">Storage by Collection</h3><div class="space-y-2">`;
+      <div class="rounded-xl bg-gradient-to-br from-orange-50 to-orange-100/50 border border-orange-200 p-5 text-center">
+        <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-orange-200/60 flex items-center justify-center"><i class="bi bi-device-hdd-fill text-xl text-orange-700"></i></div>
+        <p class="text-[11px] font-semibold uppercase tracking-wider text-orange-600 mb-1">Total Storage</p>
+        <p class="text-2xl font-black text-slate-900">${formatBytes(totals.storageSize)}</p>
+      </div>
+      <div class="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 p-5 text-center">
+        <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-blue-200/60 flex items-center justify-center"><i class="bi bi-database-fill text-xl text-blue-700"></i></div>
+        <p class="text-[11px] font-semibold uppercase tracking-wider text-blue-600 mb-1">Data Size</p>
+        <p class="text-2xl font-black text-slate-900">${formatBytes(totals.dataSize)}</p>
+      </div>
+      <div class="rounded-xl bg-gradient-to-br from-violet-50 to-violet-100/50 border border-violet-200 p-5 text-center">
+        <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-violet-200/60 flex items-center justify-center"><i class="bi bi-list-columns-reverse text-xl text-violet-700"></i></div>
+        <p class="text-[11px] font-semibold uppercase tracking-wider text-violet-600 mb-1">Index Size</p>
+        <p class="text-2xl font-black text-slate-900">${formatBytes(totals.indexSize)}</p>
+      </div>
+      <div class="rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 p-5 text-center">
+        <div class="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-200/60 flex items-center justify-center"><i class="bi bi-layers-fill text-xl text-emerald-700"></i></div>
+        <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 mb-1">Collections</p>
+        <p class="text-2xl font-black text-slate-900">${totals.collections}</p>
+      </div>
+    </div>
+    <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-2"><i class="bi bi-bar-chart-fill text-slate-400"></i>Storage by Collection</h3>
+    <div class="space-y-3">`;
     const sorted = [...breakdown].sort((a, b) => b.storageSize - a.storageSize);
     const max = sorted.length ? sorted[0].storageSize : 1;
-    sorted.forEach((item) => {
+    sorted.forEach((item, idx) => {
+      const c = palette[idx % palette.length];
       const pct =
-        max > 0 ? Math.max(3, Math.round((item.storageSize / max) * 100)) : 0;
-      html += `<div class="flex items-center gap-3"><span class="w-32 text-sm font-medium text-slate-700 truncate shrink-0"><i class="bi ${colIcon(item.name)} mr-1 text-slate-400"></i>${escapeHtml(item.name)}</span><div class="flex-1 h-6 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full flex items-center justify-end pr-2" style="width:${pct}%"><span class="text-[10px] font-bold text-white">${formatBytes(item.storageSize)}</span></div></div><span class="text-xs text-slate-500 w-16 text-right shrink-0">${item.documents} docs</span></div>`;
+        max > 0 ? Math.max(4, Math.round((item.storageSize / max) * 100)) : 0;
+      html += `<div class="group rounded-xl border ${c.border} ${c.bg} p-3 hover:shadow-md transition-all duration-200">
+        <div class="flex items-center justify-between mb-2">
+          <span class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg ${c.badge} flex items-center justify-center"><i class="bi ${colIcon(item.name)} text-sm"></i></span>
+            <span class="text-sm font-bold ${c.text}">${escapeHtml(item.name)}</span>
+          </span>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-semibold text-slate-600">${formatBytes(item.storageSize)}</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full ${c.badge} border ${c.border} font-semibold">${item.documents} docs</span>
+          </div>
+        </div>
+        <div class="h-2.5 rounded-full bg-white/80 overflow-hidden shadow-inner">
+          <div class="h-full rounded-full ${c.bar} transition-all duration-500 ease-out" style="width:${pct}%"></div>
+        </div>
+      </div>`;
     });
     html += `</div>`;
     openModal("Storage Breakdown", html);
@@ -2080,6 +2149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Document deleted");
     invalidateCache();
     renderDocumentsModal(await fetchDbDetails(true), col);
+    refreshDbChipCounts();
   }
   async function crudEditDoc(col, id) {
     const schemas = await fetchSchemas();
@@ -2115,17 +2185,40 @@ document.addEventListener("DOMContentLoaded", () => {
       // Products: use the products API with multipart
       if (colLower === "products" && doc.productId) {
         const formData = new FormData();
-        const metaFields = ["calories", "protein", "carbs", "fat", "fiber", "sugar", "ingredients"];
+        const metaFields = [
+          "calories",
+          "protein",
+          "carbs",
+          "fat",
+          "fiber",
+          "sugar",
+          "ingredients",
+        ];
         const meta = {};
         Object.entries(result).forEach(([k, v]) => {
-          if (k === "_hasFile" || k === "imageUrl" || k === "productId" || k === "productCode") return;
+          if (
+            k === "_hasFile" ||
+            k === "imageUrl" ||
+            k === "productId" ||
+            k === "productCode"
+          )
+            return;
           if (v instanceof File) formData.append("image", v);
-          else if (metaFields.includes(k)) { if (v !== "" && v !== undefined && v !== 0) meta[k] = isNaN(Number(v)) ? v : Number(v); }
-          else if (k === "isFeatured" || k === "isArchived" || k === "isOutOfStock") formData.append(k, v ? "on" : "");
+          else if (metaFields.includes(k)) {
+            if (v !== "" && v !== undefined && v !== 0)
+              meta[k] = isNaN(Number(v)) ? v : Number(v);
+          } else if (
+            k === "isFeatured" ||
+            k === "isArchived" ||
+            k === "isOutOfStock"
+          )
+            formData.append(k, v ? "on" : "");
           else formData.append(k, String(v ?? ""));
         });
-        if (Object.keys(meta).length) formData.append("meta", JSON.stringify(meta));
-        if (!result.image && result.imageUrl) formData.append("image", result.imageUrl);
+        if (Object.keys(meta).length)
+          formData.append("meta", JSON.stringify(meta));
+        if (!result.image && result.imageUrl)
+          formData.append("image", result.imageUrl);
         r = await fetch(apiUrl(`/api/products/${doc.productId}`), {
           method: "PUT",
           headers: { Authorization: "Bearer " + token() },
@@ -2133,14 +2226,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       } else {
         delete result._hasFile;
-        r = await fetch(
-          apiUrl(`/api/admins/database/document/${col}/${id}`),
-          {
-            method: "PUT",
-            headers: authHeaders({ "Content-Type": "application/json" }),
-            body: JSON.stringify(result),
-          },
-        );
+        r = await fetch(apiUrl(`/api/admins/database/document/${col}/${id}`), {
+          method: "PUT",
+          headers: authHeaders({ "Content-Type": "application/json" }),
+          body: JSON.stringify(result),
+        });
       }
       const d = await r.json();
       if (!r.ok) {
@@ -2252,6 +2342,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("Document created");
         invalidateCache();
         renderDocumentsModal(await fetchDbDetails(true), col);
+        refreshDbChipCounts();
       },
       generatedIds,
     );
@@ -2275,6 +2366,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast(`Collection '${col}' dropped`);
     invalidateCache();
     renderCollectionsModal(await fetchDbDetails(true));
+    refreshDbChipCounts();
   }
   async function crudDeleteUser(uid) {
     if (
@@ -2295,6 +2387,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("User deleted");
     invalidateCache();
     renderUsersModal(await fetchDbDetails(true));
+    refreshDbChipCounts();
   }
   async function crudToggleUser(uid, active) {
     const opts = active
@@ -2407,6 +2500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("User created");
       invalidateCache();
       renderUsersModal(await fetchDbDetails(true));
+      refreshDbChipCounts();
     });
   }
 
@@ -2429,6 +2523,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Admin deleted");
     invalidateCache();
     renderAdminsModal(await fetchDbDetails(true));
+    refreshDbChipCounts();
   }
   async function crudEditAdmin(aid) {
     const data = await fetchDbDetails();
@@ -2502,6 +2597,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("Admin created");
       invalidateCache();
       renderAdminsModal(await fetchDbDetails(true));
+      refreshDbChipCounts();
     });
   }
 

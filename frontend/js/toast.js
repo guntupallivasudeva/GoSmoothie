@@ -226,10 +226,11 @@
     function (e) {
       var el = e.target;
 
-      // Explicit data-tip attribute (for programmatically truncated text with "...")
-      var tipText = el.getAttribute && el.getAttribute("data-tip");
-      if (tipText) {
-        showTip(el, tipText);
+      // Walk up to find closest element with data-tip (handles icons inside buttons)
+      var tipEl = el.closest ? el.closest("[data-tip]") : null;
+      if (!tipEl && el.getAttribute && el.getAttribute("data-tip")) tipEl = el;
+      if (tipEl) {
+        showTip(tipEl, tipEl.getAttribute("data-tip"));
         return;
       }
 
@@ -256,6 +257,7 @@
     function (e) {
       var el = e.target;
       if (
+        (el.closest && el.closest("[data-tip]")) ||
         (el.getAttribute && el.getAttribute("data-tip")) ||
         (el.classList && el.classList.contains("truncate"))
       ) {

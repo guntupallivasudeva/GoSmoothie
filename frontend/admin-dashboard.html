@@ -44,12 +44,12 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-<link
+    <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
     />
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-      <link rel="stylesheet" href="/css/toast.css" />
+    <link rel="stylesheet" href="/css/toast.css" />
     <link rel="stylesheet" href="/css/admin-dashboard.css" />
   </head>
   <body>
@@ -73,7 +73,6 @@
           <a
             href="/main.html"
             class="brand-mark w-12 h-12 rounded-2xl bg-gradient-to-br from-green-100 to-orange-50 text-green-600 items-center justify-center shadow-sm border border-green-100"
-           
           >
             <i class="bi bi-leaf text-2xl"></i>
           </a>
@@ -94,47 +93,26 @@
             class="nav-item active"
             href="#overview"
             data-view-target="overview"
-
             ><i class="bi bi-speedometer2 text-lg"></i>
             <span class="sidebar-label">Overview</span></a
           >
-          <a
-            class="nav-item"
-            href="#orders"
-            data-view-target="orders"
-
+          <a class="nav-item" href="#orders" data-view-target="orders"
             ><i class="bi bi-signpost-split text-lg"></i>
             <span class="sidebar-label">Orders</span></a
           >
-          <a
-            class="nav-item"
-            href="#payments"
-            data-view-target="payments"
-
+          <a class="nav-item" href="#payments" data-view-target="payments"
             ><i class="bi bi-credit-card text-lg"></i>
             <span class="sidebar-label">Payments</span></a
           >
-          <a
-            class="nav-item"
-            href="#catalog"
-            data-view-target="catalog"
-
+          <a class="nav-item" href="#catalog" data-view-target="catalog"
             ><i class="bi bi-fork-knife text-lg"></i>
             <span class="sidebar-label">Catalog</span></a
           >
-          <a
-            class="nav-item"
-            href="#editor"
-            data-view-target="editor"
-
+          <a class="nav-item" href="#editor" data-view-target="editor"
             ><i class="bi bi-pencil-square text-lg"></i>
             <span class="sidebar-label">Product Editor</span></a
           >
-          <a
-            class="nav-item"
-            href="#gallery"
-            data-view-target="gallery"
-
+          <a class="nav-item" href="#gallery" data-view-target="gallery"
             ><i class="bi bi-image text-lg"></i>
             <span class="sidebar-label">Image Gallery</span></a
           >
@@ -186,7 +164,10 @@
                 ><i class="bi bi-shop"></i
                 ><span class="desktop-only">Storefront</span></a
               >
-              <button id="refreshBtn" class="btn btn-dark">
+              <button
+                id="refreshBtn"
+                class="btn btn-dark"
+              >
                 <i class="bi bi-arrow-clockwise"></i> Refresh
               </button>
             </div>
@@ -382,7 +363,10 @@
                     Create, update, archive, or restore menu items.
                   </p>
                 </div>
-                <button id="resetFormBtn" class="btn btn-light !py-2">
+                <button
+                  id="resetFormBtn"
+                  class="btn btn-light !py-2"
+                >
                   <i class="bi bi-eraser"></i> Clear
                 </button>
               </div>
@@ -666,7 +650,10 @@
                 </label>
 
                 <div class="flex flex-wrap gap-3 pt-1">
-                  <button type="submit" class="btn btn-primary">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                  >
                     <i class="bi bi-floppy"></i> Save product
                   </button>
                   <button
@@ -740,7 +727,7 @@
                     id="catalogSearchClear"
                     type="button"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition hidden"
-                   
+                    data-tip="Clear search"
                   >
                     <i class="bi bi-x-lg text-lg"></i>
                   </button>
@@ -838,7 +825,6 @@
       </div>
     </div>
 
-
     <!-- Discard Confirmation Modal -->
     <div id="discardModal" class="fixed inset-0 z-50 hidden">
       <div
@@ -907,7 +893,7 @@
         </div>
       </div>
     </div>
-      <script src="/js/toast.js"></script>
+    <script src="/js/toast.js"></script>
     <script src="/js/admin-dashboard.js"></script>
   </body>
 </html>

@@ -59,6 +59,27 @@ async function generateNextProductCode(ProductModel) {
   return `PROD${productCodeState}`;
 }
 
+// Preview the next product code without incrementing permanently
+async function peekNextProductCode(ProductModel) {
+  if (productCodeState === null) {
+    const existing = await ProductModel.find({ productCode: /^PROD\d+$/ })
+      .select("productCode")
+      .lean();
+    let max = 0;
+    for (const item of existing) {
+      const match = String(item.productCode || "").match(/^PROD(\d+)$/);
+      if (match) max = Math.max(max, parseInt(match[1], 10) || 0);
+    }
+    productCodeState = max;
+  }
+  return `PROD${productCodeState + 1}`;
+}
+
+// Reset state so it re-scans from DB (call after product save or abandon)
+function resetProductCodeState() {
+  productCodeState = null;
+}
+
 function generate8DigitId() {
   return randomNumeric(8);
 }
@@ -75,4 +96,6 @@ module.exports = {
   generateUniqueNumericId,
   generateOrderId,
   generateNextProductCode,
+  peekNextProductCode,
+  resetProductCodeState,
 };

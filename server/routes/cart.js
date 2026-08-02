@@ -6,24 +6,29 @@ const {
   generateUniqueNumericId,
   isExactNumericId,
 } = require("../utils/idGenerator");
+const {
+  resolveTokenUser,
+  hasStaleSession,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
 
 async function resolveUserForClient(req, providedClientId) {
   if (req.user && req.user.id) {
-    return await User.findOne({ userId: String(req.user.id) });
+    const tokenUser = await resolveTokenUser(req);
+    if (tokenUser) return tokenUser;
+    // The token's account is gone. Fall back to an anonymous cart when the
+    // client supplied one, so the visitor can keep shopping; callers use
+    // hasStaleSession() to report the dead session when there is no fallback.
+    if (!providedClientId) return null;
   }
   if (providedClientId && providedClientId.startsWith("u_")) {
     return await User.findOne({ userId: providedClientId.slice(2) });
   }
   if (providedClientId) {
-    let anon = await User.findOne({ clientToken: providedClientId });
-    if (anon) return anon;
-    return await User.create({
-      name: "Anonymous",
-      email: `anon+${Date.now()}@local`,
-      passwordHash: "ANON",
-      isAnonymous: true,
-      clientToken: providedClientId,
-    });
+    // Use clientId directly as a virtual user identifier for anonymous carts.
+    // No anonymous User document is created — the Cart collection stores
+    // carts keyed by the clientId string for unauthenticated visitors.
+    return { userId: providedClientId, isAnonymous: true };
   }
   return null;
 }
@@ -72,13 +77,21 @@ function serializeCartItem(item) {
   };
 }
 
+async function serializeUserCart(userId) {
+  const doc = await Cart.findOne({ userId }).lean();
+  const items = doc && Array.isArray(doc.carts) ? doc.carts : [];
+  return { carts: items, items: items.map(serializeCartItem) };
+}
+
 router.get("/", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
-    if (!user)
-      return res
-        .status(400)
-        .json({ error: "clientId or authentication required" });
+    // A dead session is reported so the browser can drop the stored token
+    // rather than silently showing an empty cart forever.
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
+    // An unidentified anonymous read is simply an empty cart; writes still
+    // require an authenticated user or an explicit clientId.
+    if (!user) return res.json({ carts: [], items: [] });
     const doc = await Cart.findOne({ userId: user.userId }).lean();
     const items = doc && Array.isArray(doc.carts) ? doc.carts : [];
     res.json({ carts: items, items: items.map(serializeCartItem) });
@@ -94,6 +107,7 @@ router.post("/", async (req, res) => {
       req,
       req.body.clientId || req.query.clientId,
     );
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -170,6 +184,7 @@ router.post("/", async (req, res) => {
 router.put("/:cartId", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -197,6 +212,7 @@ router.put("/:cartId", async (req, res) => {
 router.delete("/:cartId", async (req, res) => {
   try {
     const user = await resolveUserForClient(req, req.query.clientId);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -224,7 +240,11 @@ router.delete("/:cartId", async (req, res) => {
 
 router.delete("/", async (req, res) => {
   try {
-    const user = await resolveUserForClient(req, req.query.clientId);
+    const user = await resolveUserForClient(
+      req,
+      req.body?.clientId || req.query.clientId,
+    );
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -243,42 +263,41 @@ router.post("/merge", async (req, res) => {
   const { clientId } = req.body;
   if (!clientId) return res.status(400).json({ error: "clientId required" });
   try {
-    const anon = await resolveUserForClient(req, clientId);
-    const user = await User.findOne({ userId: String(req.user.id) });
-    if (!anon || !user)
-      return res.status(404).json({ error: "User not found" });
-    const anonDoc = await Cart.findOne({ userId: anon.userId });
-    if (anonDoc) {
-      const userDoc = await Cart.findOne({ userId: user.userId });
-      if (!userDoc) {
-        anonDoc.userId = user.userId;
-        await Cart.create({ userId: user.userId, carts: anonDoc.carts });
-      } else {
-        for (const item of anonDoc.carts) {
-          const idx = findCartLineIndex(userDoc.carts, {
-            productId: item.productId,
-            productName: item.productName,
-          });
-          if (idx >= 0) {
-            userDoc.carts[idx].quantity =
-              (userDoc.carts[idx].quantity || 0) + (item.quantity || 1);
-            userDoc.carts[idx].subtotal =
-              (userDoc.carts[idx].unitPrice || 0) * userDoc.carts[idx].quantity;
-            userDoc.carts[idx].updatedAt = Date.now();
-          } else {
-            userDoc.carts.push(item);
-          }
+    const user = await resolveTokenUser(req);
+    if (!user) return sendSessionInvalid(res);
+    // Look for an anonymous cart stored directly under the clientId.
+    const anonDoc = await Cart.findOne({ userId: clientId });
+    if (!anonDoc) return res.json(await serializeUserCart(user.userId));
+    // Merge anonymous cart items into the user's cart.
+    const userDoc = await Cart.findOne({ userId: user.userId });
+    if (!userDoc) {
+      // No existing user cart — just reassign the anonymous one.
+      anonDoc.userId = user.userId;
+      anonDoc.updatedAt = Date.now();
+      await anonDoc.save();
+    } else {
+      for (const item of anonDoc.carts) {
+        const idx = findCartLineIndex(userDoc.carts, {
+          productId: item.productId,
+          productName: item.productName,
+        });
+        if (idx >= 0) {
+          userDoc.carts[idx].quantity =
+            (userDoc.carts[idx].quantity || 0) + (item.quantity || 1);
+          userDoc.carts[idx].subtotal =
+            (userDoc.carts[idx].unitPrice || 0) * userDoc.carts[idx].quantity;
+          userDoc.carts[idx].updatedAt = Date.now();
+        } else {
+          userDoc.carts.push(item);
         }
-        userDoc.updatedAt = Date.now();
-        await userDoc.save();
       }
-      await Cart.deleteOne({ userId: anon.userId });
+      userDoc.updatedAt = Date.now();
+      await userDoc.save();
+      await Cart.deleteOne({ userId: clientId });
     }
-    await User.findOneAndDelete({ userId: anon.userId });
-    const mergedDoc = await Cart.findOne({ userId: user.userId }).lean();
-    const items =
-      mergedDoc && Array.isArray(mergedDoc.carts) ? mergedDoc.carts : [];
-    res.json({ carts: items, items: items.map(serializeCartItem) });
+    // Clean up any legacy anonymous User documents for this clientId.
+    await User.deleteMany({ clientToken: clientId, isAnonymous: true });
+    res.json(await serializeUserCart(user.userId));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

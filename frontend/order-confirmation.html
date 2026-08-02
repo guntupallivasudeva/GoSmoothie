@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <title>Order Confirmed - GoSmoothie</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4ade80", secondary: "#f97316" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+<link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+    <script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.js"></script>
+      <link rel="stylesheet" href="/css/toast.css" />
+    <link rel="stylesheet" href="/css/order-confirmation.css" />
+  </head>
+  <body
+    class="bg-gradient-to-br from-[#e8f8ee] via-[#fbfdfb] to-[#fff3e8] min-h-screen"
+  >
+    <div class="page-glow w-72 h-72 bg-green-200/60 -top-24 -left-24"></div>
+    <div
+      class="page-glow w-96 h-96 bg-orange-100/70 -bottom-40 -right-36"
+    ></div>
+    <div aria-hidden="true">
+      <span
+        class="confetti left-[8%] bg-primary"
+        style="--delay: 0.05s; --drift: 45px; --rotate: 16deg"
+      ></span>
+      <span
+        class="confetti left-[17%] bg-orange-400"
+        style="--delay: 0.3s; --drift: -35px; --rotate: 48deg"
+      ></span>
+      <span
+        class="confetti left-[29%] bg-yellow-400"
+        style="--delay: 0.12s; --drift: 55px; --rotate: 72deg"
+      ></span>
+      <span
+        class="confetti left-[42%] bg-green-500"
+        style="--delay: 0.5s; --drift: -42px; --rotate: 24deg"
+      ></span>
+      <span
+        class="confetti left-[55%] bg-blue-400"
+        style="--delay: 0.18s; --drift: 38px; --rotate: 64deg"
+      ></span>
+      <span
+        class="confetti left-[67%] bg-primary"
+        style="--delay: 0.42s; --drift: -52px; --rotate: 32deg"
+      ></span>
+      <span
+        class="confetti left-[79%] bg-orange-400"
+        style="--delay: 0.08s; --drift: 46px; --rotate: 84deg"
+      ></span>
+      <span
+        class="confetti left-[91%] bg-yellow-400"
+        style="--delay: 0.34s; --drift: -38px; --rotate: 12deg"
+      ></span>
+    </div>
+    <!-- Header -->
+    <header
+      class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-white/70 shadow-sm"
+    >
+      <div
+        class="container mx-auto px-4 py-4 flex items-center justify-between"
+      >
+        <a href="/main.html" class="text-2xl font-['Pacifico'] text-primary"
+          >GoSmoothie</a
+        >
+        <nav class="flex items-center space-x-6">
+          <a
+            href="/main.html"
+            class="text-gray-700 hover:text-primary transition"
+            >Home</a
+          >
+          <a
+            href="/cart.html"
+            class="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-full"
+            >Cart</a
+          >
+          <a
+            href="/profile.html"
+            class="text-gray-700 hover:text-primary transition"
+            >Profile</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <section class="relative py-10 md:py-16">
+      <div
+        class="absolute inset-x-0 top-0 -z-10 h-[30rem] bg-gradient-to-b from-green-100/80 via-green-50/40 to-transparent"
+      ></div>
+      <div class="container mx-auto px-4 max-w-6xl">
+        <a
+          href="/main.html"
+          aria-label="Back to home"
+          title="Back to home"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 hover:border-primary hover:text-primary transition rounded-lg font-medium shadow-sm mb-7"
+        >
+          <i class="bi bi-arrow-left text-lg"></i>
+        </a>
+        <div
+          class="mb-5 inline-flex items-center gap-2 rounded-full bg-white/80 ring-1 ring-green-200 px-4 py-2 text-sm font-semibold text-green-700 shadow-sm backdrop-blur"
+        >
+          <i data-lucide="circle-check" class="w-5 h-5"></i>
+          Order confirmed
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div class="lg:col-span-7">
+            <div
+              class="confirmation-card rounded-[2rem] p-8 md:p-12 text-center overflow-hidden"
+            >
+              <div
+                class="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-green-100/70 blur-2xl -z-10"
+              ></div>
+              <div
+                class="absolute -bottom-28 -left-24 w-64 h-64 rounded-full bg-orange-100/70 blur-2xl -z-10"
+              ></div>
+              <div class="mb-6 flex justify-center">
+                <div
+                  class="success-icon w-28 h-28 bg-gradient-to-br from-green-50 to-green-200 rounded-full flex items-center justify-center shadow-[inset_0_2px_12px_rgba(34,197,94,.16),0_16px_35px_rgba(34,197,94,.24)] ring-8 ring-white"
+                >
+                  <svg
+                    viewBox="0 0 64 64"
+                    class="w-[4.5rem] h-[4.5rem] text-green-500 check-breathe-svg"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      class="success-circle"
+                      cx="32"
+                      cy="32"
+                      r="22"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      transform="rotate(-74 32 32)"
+                    ></circle>
+                    <path
+                      class="success-check"
+                      d="M20 34 29 43 53 15"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+
+              <p
+                class="text-xs font-bold uppercase tracking-[0.25em] text-green-600 mb-3"
+              >
+                Order successfully placed
+              </p>
+              <h1
+                class="success-title text-4xl md:text-6xl leading-tight font-extrabold mb-4"
+              >
+                Order Confirmed!
+              </h1>
+              <p
+                class="text-lg md:text-xl max-w-2xl mx-auto text-slate-600 mb-8"
+              >
+                Thank you for your order. Your delicious smoothies are being
+                prepared and will be delivered soon.
+              </p>
+
+              <div
+                class="order-id-panel rounded-2xl p-6 mb-8 text-white shadow-xl text-left sm:flex sm:items-center sm:justify-between gap-5"
+              >
+                <div>
+                  <p
+                    class="text-xs font-semibold uppercase tracking-[0.18em] text-green-300 mb-2"
+                  >
+                    Order reference
+                  </p>
+                  <p
+                    id="orderId"
+                    class="font-mono text-xl md:text-2xl font-bold break-all"
+                  >
+                    Loading...
+                  </p>
+                </div>
+                <span
+                  class="mt-4 sm:mt-0 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 text-sm font-semibold ring-1 ring-white/15"
+                >
+                  <i data-lucide="shield-check" class="w-4 h-4"></i> Confirmed
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-left">
+                <div
+                  class="rounded-2xl bg-white/80 p-5 ring-1 ring-green-100 shadow-sm"
+                >
+                  <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Status
+                  </p>
+                  <p class="font-semibold text-gray-900">Being prepared</p>
+                </div>
+                <div
+                  class="rounded-2xl bg-white/80 p-5 ring-1 ring-green-100 shadow-sm"
+                >
+                  <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Prep time
+                  </p>
+                  <p class="font-semibold text-gray-900">30 mins</p>
+                </div>
+                <div
+                  class="rounded-2xl bg-white/80 p-5 ring-1 ring-green-100 shadow-sm"
+                >
+                  <p class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+                    Delivery
+                  </p>
+                  <p class="font-semibold text-gray-900">45-60 mins</p>
+                </div>
+              </div>
+
+              <div
+                class="space-y-3 sm:space-y-0 sm:flex sm:gap-3 sm:justify-center"
+              >
+                <a
+                  href="/main.html"
+                  class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-lg hover:from-green-600 hover:to-green-700 transition shadow-lg shadow-green-200"
+                  ><i data-lucide="house" class="w-5 h-5"></i>Back to Home</a
+                >
+                <a
+                  href="/menu.html"
+                  class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3.5 bg-white text-gray-900 border border-gray-200 rounded-xl font-semibold text-lg hover:border-green-300 hover:bg-green-50 transition shadow-sm"
+                  ><i data-lucide="glass-water" class="w-5 h-5"></i>Order
+                  More</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5">
+            <div
+              class="bg-white/90 backdrop-blur rounded-[2rem] shadow-xl ring-1 ring-green-100 p-6 md:p-8 sticky top-24"
+            >
+              <p
+                class="text-xs font-bold uppercase tracking-[0.18em] text-primary mb-2"
+              >
+                Order journey
+              </p>
+              <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                What happens next
+              </h2>
+              <div class="timeline space-y-4">
+                <div
+                  class="relative flex gap-4 p-4 rounded-2xl bg-green-50/80 ring-1 ring-green-100"
+                >
+                  <span
+                    class="relative z-10 w-12 h-12 shrink-0 rounded-xl bg-green-500 text-white flex items-center justify-center shadow-md"
+                    ><i data-lucide="mail-check" class="w-6 h-6"></i
+                  ></span>
+                  <div>
+                    <p class="font-semibold text-gray-900">Confirmation sent</p>
+                    <p class="text-sm text-gray-600">
+                      An order confirmation email has been sent to your
+                      registered email.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="relative flex gap-4 p-4 rounded-2xl bg-gray-50 ring-1 ring-gray-100"
+                >
+                  <span
+                    class="relative z-10 w-12 h-12 shrink-0 rounded-xl bg-white text-orange-500 flex items-center justify-center shadow-sm ring-1 ring-orange-100"
+                    ><i data-lucide="timer" class="w-6 h-6"></i
+                  ></span>
+                  <div>
+                    <p class="font-semibold text-gray-900">
+                      Preparation started
+                    </p>
+                    <p class="text-sm text-gray-600">
+                      Your order will be prepared in the next 30 minutes.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="relative flex gap-4 p-4 rounded-2xl bg-gray-50 ring-1 ring-gray-100"
+                >
+                  <span
+                    class="relative z-10 w-12 h-12 shrink-0 rounded-xl bg-white text-blue-500 flex items-center justify-center shadow-sm ring-1 ring-blue-100"
+                    ><i data-lucide="bike" class="w-6 h-6"></i
+                  ></span>
+                  <div>
+                    <p class="font-semibold text-gray-900">On the way soon</p>
+                    <p class="text-sm text-gray-600">
+                      Delivery is scheduled within 45-60 minutes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 pt-6 border-t border-gray-200">
+                <p class="text-sm text-gray-600 mb-2">Need help?</p>
+                <p class="text-sm text-gray-700">
+                  <i data-lucide="phone" class="inline-block w-5 h-5 mr-1"></i>
+                  <span class="font-semibold">Call us:</span> +91-XXXX-XXXX-XXXX
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+      <script src="/js/toast.js"></script>
+    <script src="/js/order-confirmation.js"></script>
+  </body>
+</html>

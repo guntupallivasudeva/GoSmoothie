@@ -23,12 +23,20 @@ if (isLikelyValidStripeKey(stripeKey)) {
 }
 const Cart = require("../models/Cart");
 const User = require("../models/User");
+const {
+  resolveTokenUser,
+  hasStaleSession,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
+const { codConfig } = require("../config/payments");
 
 async function resolveUser(req) {
-  if (req.user && req.user.id) {
-    return User.findOne({ userId: String(req.user.id) });
-  }
   const clientId = req.body.clientId;
+  if (req.user && req.user.id) {
+    const tokenUser = await resolveTokenUser(req);
+    if (tokenUser) return tokenUser;
+    if (!clientId) return null;
+  }
   if (!clientId) return null;
   if (clientId.startsWith("u_")) {
     return User.findOne({ userId: clientId.slice(2) });
@@ -36,10 +44,16 @@ async function resolveUser(req) {
   return User.findOne({ clientToken: clientId });
 }
 
+// GET /api/payments/options -> checkout configuration for the payment modal
+router.get("/options", (req, res) => {
+  res.json({ cod: codConfig() });
+});
+
 // POST /api/payments/create-session { returnUrlSuccess, returnUrlCancel }
 router.post("/create-session", async (req, res) => {
   try {
     const user = await resolveUser(req);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)

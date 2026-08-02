@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function useCanonicalLocalApp() {
+        const isLocal = ["localhost", "127.0.0.1"].includes(
+          window.location.hostname,
+        );
+        if (
+          isLocal &&
+          (window.location.hostname !== "localhost" ||
+            window.location.port !== "3000")
+        ) {
+          window.location.replace(
+            `http://localhost:3000${window.location.pathname}${window.location.search}${window.location.hash}`,
+          );
+        }
+      })();
+    </script>
+    <script src="/js/api-client.js"></script>
+    <!-- Shared session: restores the login handed over by login.html and keeps
+       the token, user and guest cart id consistent across every page. -->
+    <script src="/js/session.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <title>Fresh Blend | Premium Smoothies & Juices</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4ade80", secondary: "#f97316" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+<link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    />
+      <link rel="stylesheet" href="/css/toast.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+      <div
+        class="container mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <div class="flex items-center">
+          <a href="#" class="text-3xl font-['Pacifico'] text-primary mr-8"
+            >GoSmoothie</a
+          >
+          <nav class="hidden md:flex space-x-6">
+            <a
+              href="#home"
+              class="text-gray-900 font-medium hover:text-primary transition"
+              >Home</a
+            >
+            <a
+              href="/menu.html"
+              class="text-gray-900 font-medium hover:text-primary transition"
+              >Menu</a
+            >
+            <a
+              href="#builder"
+              class="text-gray-900 font-medium hover:text-primary transition"
+              >Build Your Own</a
+            >
+            <a
+              href="/about-us.html"
+              class="text-gray-900 font-medium hover:text-primary transition"
+              >About Us</a
+            >
+          </nav>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button
+              id="cartBtn"
+              class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-primary transition"
+            >
+              <i class="bi bi-cart text-xl"></i>
+              <span
+                class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                >0</span
+              >
+            </button>
+          </div>
+          <div id="authLinks" class="flex items-center space-x-2">
+            <a
+              id="loginLink"
+              href="/login.html"
+              class="text-gray-700 hover:text-primary"
+              >Login</a
+            >
+            <a
+              id="registerLink"
+              href="/register.html"
+              class="text-gray-700 hover:text-primary"
+              >Register</a
+            >
+          </div>
+          <div id="userMenu" class="hidden relative">
+            <button
+              id="userMenuBtn"
+              type="button"
+              class="flex items-center gap-2 text-gray-700 hover:text-primary transition cursor-pointer"
+            >
+              <span id="userName" class="text-sm font-medium"></span>
+            </button>
+            <div
+              id="userMenuDropdown"
+              class="absolute right-0 top-full pt-2 w-48 opacity-0 invisible pointer-events-none translate-y-1 transition-all duration-150 z-50"
+            >
+              <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <a
+                  href="/profile.html"
+                  class="block px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-primary transition flex items-center gap-2"
+                >
+                  <i class="bi bi-person"></i> My Profile
+                </a>
+                <button
+                  id="logoutBtn"
+                  class="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition flex items-center gap-2 border-t"
+                >
+                  <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+              </div>
+            </div>
+          </div>
+          <button
+            class="md:hidden w-10 h-10 flex items-center justify-center text-gray-700"
+          >
+            <i class="bi bi-list text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    <!-- Hero Section -->
+    <section class="pt-20 relative overflow-hidden">
+      <div
+        class="absolute inset-0 z-0"
+        style="
+          background-image: url(&quot;https://readdy.ai/api/search-image?query=A%20vibrant%2C%20fresh%20scene%20with%20colorful%20fruits%20and%20smoothies.%20Left%20side%20has%20a%20clean%20gradient%20from%20light%20green%20to%20white%2C%20providing%20space%20for%20text.%20Right%20side%20features%20an%20arrangement%20of%20fresh%20fruits%2C%20berries%2C%20and%20smoothie%20glasses%20with%20ingredients%20spilling%20artistically.%20Modern%2C%20bright%2C%20and%20appetizing%20composition%20with%20natural%20lighting%20and%20professional%20food%20styling.&width=1920&height=800&seq=1&orientation=landscape&quot;);
+          background-size: cover;
+          background-position: center;
+        "
+      ></div>
+      <div
+        class="relative z-10 container mx-auto px-4 py-20 md:py-28 flex flex-col items-start"
+      >
+        <div class="max-w-xl">
+          <h1
+            class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6"
+          >
+            Refresh Your Day with Nature's Best
+          </h1>
+          <p class="text-lg md:text-xl text-gray-700 mb-8">
+            Handcrafted smoothies and juices made with 100% fresh ingredients.
+            Fuel your body with the perfect blend of nutrition and delicious
+            taste.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a
+              href="/menu.html"
+              class="bg-primary text-white px-6 py-3 !rounded-button font-medium text-center whitespace-nowrap"
+              >Explore Menu</a
+            >
+            <a
+              href="#builder"
+              class="bg-white text-gray-900 border border-gray-300 px-6 py-3 !rounded-button font-medium text-center whitespace-nowrap"
+              >Build Your Own</a
+            >
+          </div>
+        </div>
+      </div>
+      <div
+        class="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce"
+      >
+        <i class="bi bi-arrow-down text-2xl text-gray-700"></i>
+      </div>
+    </section>
+    <!-- Featured Products Grid -->
+    <section id="menu" class="py-16 bg-gradient-to-r from-white to-green-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Our Popular Blends
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            Discover our most loved creations, crafted with premium ingredients
+            to deliver exceptional taste and nutrition.
+          </p>
+        </div>
+        <div
+          id="productsGrid"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <!-- products will be rendered here -->
+          <div
+            class="col-span-full text-center text-gray-500"
+            id="productsLoading"
+          >
+            Loading products...
+          </div>
+        </div>
+        <div class="text-center mt-12">
+          <a
+            href="/menu.html"
+            class="inline-flex items-center text-primary font-medium hover:underline"
+          >
+            View Full Menu
+            <i class="bi bi-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </section>
+    <!-- Smoothie Builder Section -->
+    <section id="builder" class="py-20 bg-gradient-to-b from-green-50 to-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            Build Your Perfect Blend
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            Create your own custom smoothie with our interactive builder. Mix
+            and match ingredients to craft your ideal blend.
+          </p>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-3">
+            <!-- Builder Controls -->
+            <div
+              class="lg:col-span-2 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-gray-200"
+            >
+              <div class="mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                  1. Choose Your Base
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option"
+                  >
+                    <input
+                      type="radio"
+                      name="base"
+                      value="almond"
+                      class="custom-radio mr-3"
+                    />
+                    <span>Almond Milk</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option"
+                  >
+                    <input
+                      type="radio"
+                      name="base"
+                      value="coconut"
+                      class="custom-radio mr-3"
+                    />
+                    <span>Coconut Water</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option"
+                  >
+                    <input
+                      type="radio"
+                      name="base"
+                      value="yogurt"
+                      class="custom-radio mr-3"
+                    />
+                    <span>Greek Yogurt</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option"
+                  >
+                    <input
+                      type="radio"
+                      name="base"
+                      value="oat"
+                      class="custom-radio mr-3"
+                    />
+                    <span>Oat Milk</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option"
+                  >
+                    <input
+                      type="radio"
+                      name="base"
+                      value="juice"
+                      class="custom-radio mr-3"
+                    />
+                    <span>Apple Juice</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition base-option"
+                  >
+                    <input
+                      type="radio"
+                      name="base"
+                      value="water"
+                      class="custom-radio mr-3"
+                    />
+                    <span>Filtered Water</span>
+                  </label>
+                </div>
+              </div>
+              <div class="mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                  2. Select Your Fruits (Choose up to 3)
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="strawberry"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Strawberry</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="banana"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Banana</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="blueberry"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Blueberry</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="mango"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Mango</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="pineapple"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Pineapple</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="kiwi"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Kiwi</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="peach"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Peach</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition fruit-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="fruits"
+                      value="raspberry"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Raspberry</span>
+                  </label>
+                </div>
+              </div>
+              <div class="mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                  3. Add Boosters (Optional)
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="boosters"
+                      value="protein"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Protein Powder (+50 Rs/-)</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="boosters"
+                      value="chia"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Chia Seeds (+80 Rs/-)</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="boosters"
+                      value="flax"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Flax Seeds (+75 Rs/-)</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="boosters"
+                      value="spinach"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Spinach (+100 Rs/-)</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="boosters"
+                      value="collagen"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Collagen (+180 Rs/-)</span>
+                  </label>
+                  <label
+                    class="flex items-center p-3 border border-gray-200 rounded cursor-pointer hover:border-primary transition booster-option"
+                  >
+                    <input
+                      type="checkbox"
+                      name="boosters"
+                      value="acai"
+                      class="custom-checkbox mr-3"
+                    />
+                    <span>Acai Powder (+130 Rs/-)</span>
+                  </label>
+                </div>
+              </div>
+              <div
+                class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)] gap-2 items-start"
+              >
+                <div>
+                  <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    4. Choose Your Size
+                  </h3>
+                  <div class="flex flex-wrap gap-4">
+                    <label
+                      class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option"
+                    >
+                      <input
+                        type="radio"
+                        name="size"
+                        value="small"
+                        class="custom-radio mb-2"
+                      />
+                      <div class="w-12 h-12 flex items-center justify-center">
+                        <i
+                          class="ri-cup-line ri-2x text-gray-600"
+                          aria-hidden="true"
+                        ></i>
+                      </div>
+                      <span class="mt-2 text-center">Small<br />(12 oz)</span>
+                      <span class="text-primary font-semibold mt-1"
+                        >80 rs/-</span
+                      >
+                    </label>
+                    <label
+                      class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option"
+                    >
+                      <input
+                        type="radio"
+                        name="size"
+                        value="medium"
+                        class="custom-radio mb-2"
+                      />
+                      <div class="w-12 h-12 flex items-center justify-center">
+                        <i
+                          class="ri-cup-line ri-3x text-gray-600"
+                          aria-hidden="true"
+                        ></i>
+                      </div>
+                      <span class="mt-2 text-center">Medium<br />(16 oz)</span>
+                      <span class="text-primary font-semibold mt-1"
+                        >130 rs/-</span
+                      >
+                    </label>
+                    <label
+                      class="flex flex-col items-center p-4 border border-gray-200 rounded cursor-pointer hover:border-primary transition w-36 size-option"
+                    >
+                      <input
+                        type="radio"
+                        name="size"
+                        value="large"
+                        class="custom-radio mb-2"
+                      />
+                      <div class="w-12 h-12 flex items-center justify-center">
+                        <i
+                          class="ri-cup-line ri-4x text-gray-600"
+                          aria-hidden="true"
+                        ></i>
+                      </div>
+                      <span class="mt-2 text-center">Large<br />(24 oz)</span>
+                      <span class="text-primary font-semibold mt-1"
+                        >180 rs/-</span
+                      >
+                    </label>
+                  </div>
+                </div>
+                <div class="lg:flex-1">
+                  <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    5. Special requests / Instructions
+                  </h3>
+                  <label
+                    for="builderInstructions"
+                    class="block text-sm font-medium text-gray-700 mb-2"
+                    >Tell us how you'd like it made</label
+                  >
+                  <textarea
+                    id="builderInstructions"
+                    rows="7"
+                    placeholder="Any preferences or requests (e.g., less sugar, extra ice, allergy notes)..."
+                    class="w-full p-3 border border-gray-200 rounded resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+            <!-- Preview and Summary -->
+            <div class="p-6 md:p-8 bg-gray-50">
+              <h3 class="text-xl font-bold text-gray-800 mb-4">
+                Your Custom Smoothie
+              </h3>
+              <div class="mb-6 bg-white p-4 rounded shadow-sm">
+                <div class="h-48 mb-4 flex items-center justify-center">
+                  <img
+                    src="https://readdy.ai/api/search-image?query=A%20custom%20smoothie%20in%20a%20clear%20glass%20with%20visible%20layers%20of%20pink%20strawberry%20and%20yellow%20banana.%20The%20smoothie%20has%20a%20creamy%20texture%20with%20a%20strawberry%20garnish%20on%20top.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=400&height=300&seq=8&orientation=portrait"
+                    alt="Custom Smoothie Preview"
+                    class="h-full object-contain"
+                  />
+                </div>
+                <h4 class="font-semibold text-center text-gray-800">
+                  Your Smoothie
+                </h4>
+              </div>
+              <div class="mb-6">
+                <h4 class="font-semibold text-gray-800 mb-2">
+                  Nutrition Information
+                </h4>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <div class="flex justify-between p-2 bg-white rounded">
+                    <span>Calories:</span>
+                    <span class="font-medium"
+                      ><span data-nutrition="calories">0</span> kcal</span
+                    >
+                  </div>
+                  <div class="flex justify-between p-2 bg-white rounded">
+                    <span>Protein:</span>
+                    <span class="font-medium"
+                      ><span data-nutrition="protein">0</span>g</span
+                    >
+                  </div>
+                  <div class="flex justify-between p-2 bg-white rounded">
+                    <span>Carbs:</span>
+                    <span class="font-medium"
+                      ><span data-nutrition="carbs">0</span>g</span
+                    >
+                  </div>
+                  <div class="flex justify-between p-2 bg-white rounded">
+                    <span>Fat:</span>
+                    <span class="font-medium"
+                      ><span data-nutrition="fat">0</span>g</span
+                    >
+                  </div>
+                  <div class="flex justify-between p-2 bg-white rounded">
+                    <span>Fiber:</span>
+                    <span class="font-medium"
+                      ><span data-nutrition="fiber">0</span>g</span
+                    >
+                  </div>
+                  <div class="flex justify-between p-2 bg-white rounded">
+                    <span>Sugar:</span>
+                    <span class="font-medium"
+                      ><span data-nutrition="sugar">0</span>g</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="mb-6">
+                <h4 class="font-semibold text-gray-800 mb-2">Order Summary</h4>
+                <div class="bg-white p-4 rounded shadow-sm">
+                  <div
+                    class="flex justify-between mb-2 pb-2 border-b border-gray-100"
+                  >
+                    <span>Base:</span>
+                    <span class="builder-summary" data-type="base">-</span>
+                  </div>
+                  <div
+                    class="flex justify-between mb-2 pb-2 border-b border-gray-100"
+                  >
+                    <span>Fruits:</span>
+                    <span class="builder-summary" data-type="fruits">None</span>
+                  </div>
+                  <div
+                    class="flex justify-between mb-2 pb-2 border-b border-gray-100"
+                  >
+                    <span>Boosters:</span>
+                    <span class="builder-summary" data-type="boosters"
+                      >None</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between mb-2 pb-2 border-b border-gray-100"
+                  >
+                    <span>Size:</span>
+                    <span class="builder-summary" data-type="size">-</span>
+                  </div>
+                  <div class="flex justify-between font-bold text-lg mt-4">
+                    <span>Total Price:</span>
+                    <span class="text-primary"
+                      ><span data-price>0</span> Rs/-</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="mb-6">
+    <h4 class="font-semibold text-gray-800 mb-3">Quantity</h4>
+    <div class="flex items-center gap-2">
+      <div class="flex items-center border rounded overflow-hidden w-32">
+        <button id="builderQtyDec" class="qty-dec px-3 py-2 bg-gray-100 hover:bg-gray-200">-</button>
+        <input id="builderQtyInput" type="number" min="1" value="1" class="qty-input flex-1 text-center px-2 py-2 border-l border-r focus:outline-none" />
+        <button id="builderQtyInc" class="qty-inc px-3 py-2 bg-gray-100 hover:bg-gray-200">+</button>
+      </div>
+    </div>
+    </div> -->
+              <button
+                id="builderAddToCart"
+                class="w-full py-3 bg-primary text-white font-semibold rounded-button shadow hover:bg-primary/90 transition whitespace-nowrap"
+              >
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Health Benefits Bar -->
+    <section class="py-16 bg-gradient-to-r from-white via-green-50 to-white">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Health Benefits
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            Our smoothies and juices are packed with nutrients that support your
+            health and wellbeing.
+          </p>
+        </div>
+        <div class="flex overflow-x-auto pb-6 scrollbar-hide">
+          <div class="flex space-x-6 min-w-max">
+            <!-- Benefit 1 -->
+            <div
+              class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4"
+              >
+                <i class="bi bi-heart-pulse text-2xl text-primary"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">Heart Health</h3>
+              <p class="text-gray-600 text-sm">
+                Antioxidant-rich berries and leafy greens support cardiovascular
+                health.
+              </p>
+            </div>
+            <!-- Benefit 2 -->
+            <div
+              class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4"
+              >
+                <i class="bi bi-lightbulb text-2xl text-primary"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">
+                Immune Support
+              </h3>
+              <p class="text-gray-600 text-sm">
+                Vitamin C from citrus fruits and ginger help strengthen your
+                immune system.
+              </p>
+            </div>
+            <!-- Benefit 3 -->
+            <div
+              class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4"
+              >
+                <i class="bi bi-person-standing text-2xl text-primary"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">Energy Boost</h3>
+              <p class="text-gray-600 text-sm">
+                Natural sugars and B vitamins provide sustained energy
+                throughout the day.
+              </p>
+            </div>
+            <!-- Benefit 4 -->
+            <div
+              class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4"
+              >
+                <i class="bi bi-flower1 text-2xl text-primary"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">
+                Digestive Health
+              </h3>
+              <p class="text-gray-600 text-sm">
+                Fiber-rich ingredients support gut health and improve digestion.
+              </p>
+            </div>
+            <!-- Benefit 5 -->
+            <div
+              class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4"
+              >
+                <i class="bi bi-eye text-2xl text-primary"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">Eye Health</h3>
+              <p class="text-gray-600 text-sm">
+                Carotenoids in carrots and leafy greens support vision and eye
+                health.
+              </p>
+            </div>
+            <!-- Benefit 6 -->
+            <div
+              class="bg-gray-50 rounded-xl p-6 w-64 flex flex-col items-center text-center"
+            >
+              <div
+                class="w-16 h-16 flex items-center justify-center bg-primary bg-opacity-10 rounded-full mb-4"
+              >
+                <i class="bi bi-lightbulb text-2xl text-primary"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">
+                Brain Function
+              </h3>
+              <p class="text-gray-600 text-sm">
+                Omega-3 fatty acids and antioxidants support cognitive function.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Seasonal Specials -->
+    <section class="py-16 bg-gradient-to-r from-green-50 to-orange-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Seasonal Specials
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            Limited-time offerings featuring the freshest seasonal ingredients.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div
+            class="bg-white rounded-lg shadow-md overflow-hidden group relative"
+            data-product-name="Watermelon Mint Refresher"
+            data-product-price="300"
+          >
+            <div
+              class="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full"
+            >
+              LIMITED TIME
+            </div>
+            <div class="h-48 overflow-hidden">
+              <img
+                src="https://readdy.ai/api/search-image?query=A%20vibrant%20watermelon%20mint%20smoothie%20in%20a%20clear%20glass%20with%20visible%20watermelon%20chunks%20and%20mint%20leaves.%20The%20smoothie%20has%20a%20bright%20pink%20color%20with%20a%20watermelon%20slice%20and%20mint%20garnish.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=600&height=400&seq=10&orientation=landscape"
+                alt="Watermelon Mint Refresher"
+                class="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div class="p-5">
+              <h3 class="text-lg font-bold text-gray-800 mb-2">
+                Watermelon Mint Refresher
+              </h3>
+              <p class="text-gray-600 text-sm mb-3">
+                Sweet watermelon blended with fresh mint, lime, and coconut
+                water for the ultimate summer hydration.
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-primary font-semibold">300 Rs/-</span>
+                <button
+                  class="add-to-cart px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow-md overflow-hidden group relative"
+            data-product-name="Peach Ginger Bliss"
+            data-product-price="340"
+          >
+            <div
+              class="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full"
+            >
+              LIMITED TIME
+            </div>
+            <div class="h-48 overflow-hidden">
+              <img
+                src="https://readdy.ai/api/search-image?query=A%20golden%20peach%20and%20ginger%20smoothie%20in%20a%20clear%20glass%20with%20visible%20peach%20slices%20and%20a%20hint%20of%20ginger.%20The%20smoothie%20has%20a%20warm%20golden%20color%20with%20a%20peach%20slice%20garnish.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=600&height=400&seq=11&orientation=landscape"
+                alt="Peach Ginger Bliss"
+                class="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div class="p-5">
+              <h3 class="text-lg font-bold text-gray-800 mb-2">
+                Peach Ginger Bliss
+              </h3>
+              <p class="text-gray-600 text-sm mb-3">
+                Ripe summer peaches with a hint of ginger, honey, and almond
+                milk for a smooth, refreshing treat.
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-primary font-semibold">340 Rs/-</span>
+                <button
+                  class="add-to-cart px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow-md overflow-hidden group relative"
+            data-product-name="Blackberry Lavender Dream"
+            data-product-price="360"
+          >
+            <div
+              class="absolute top-3 right-3 z-10 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full"
+            >
+              LIMITED TIME
+            </div>
+            <div class="h-48 overflow-hidden">
+              <img
+                src="https://readdy.ai/api/search-image?query=A%20rich%20purple%20blackberry%20lavender%20smoothie%20in%20a%20clear%20glass%20with%20visible%20blackberries%20and%20a%20sprig%20of%20lavender%20as%20garnish.%20The%20smoothie%20has%20a%20deep%20purple%20color%20with%20a%20smooth%20texture.%20The%20background%20is%20clean%20white%20with%20minimal%20styling%2C%20focusing%20on%20the%20smoothie.%20Professional%20food%20photography%20with%20soft%20natural%20lighting%20highlighting%20the%20freshness%20of%20the%20ingredients.&width=600&height=400&seq=12&orientation=landscape"
+                alt="Blackberry Lavender Dream"
+                class="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
+              />
+            </div>
+            <div class="p-5">
+              <h3 class="text-lg font-bold text-gray-800 mb-2">
+                Blackberry Lavender Dream
+              </h3>
+              <p class="text-gray-600 text-sm mb-3">
+                Fresh blackberries with a hint of lavender, vanilla, and oat
+                milk for a calming, antioxidant-rich blend.
+              </p>
+              <div class="flex justify-between items-center">
+                <span class="text-primary font-semibold">360 Rs/-</span>
+                <button
+                  class="add-to-cart px-4 py-2 bg-primary text-white rounded-button text-sm font-medium hover:bg-primary/90 transition whitespace-nowrap"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Reviews Section -->
+    <section class="py-16 bg-gradient-to-r from-white to-green-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            What Our Customers Say
+          </h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">
+            Don't just take our word for it. Here's what our happy customers
+            have to say about our fresh blends.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Review 1 -->
+          <div class="bg-gray-50 rounded-xl p-6 flex flex-col h-full">
+            <div class="flex items-center mb-4">
+              <div class="text-yellow-400 flex">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <span class="ml-2 text-gray-600 text-sm">5.0</span>
+            </div>
+            <p class="text-gray-700 mb-6 flex-1">
+              "I've tried many smoothie places, but this one stands out for the
+              freshness and quality of ingredients. The Green Goddess is my
+              go-to for a post-workout boost!"
+            </p>
+            <div class="flex items-center" data-reviewer-name="Anu">
+              <div
+                class="reviewer-initials w-10 h-10 flex items-center justify-center bg-primary text-white rounded-full mr-3 font-medium"
+              ></div>
+              <div>
+                <h4 class="font-medium text-gray-900">Anu</h4>
+                <p class="text-sm text-gray-500">Fitness Instructor</p>
+              </div>
+            </div>
+          </div>
+          <!-- Review 2 -->
+          <div class="bg-gray-50 rounded-xl p-6 flex flex-col h-full">
+            <div class="flex items-center mb-4">
+              <div class="text-yellow-400 flex">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <span class="ml-2 text-gray-600 text-sm">5.0</span>
+            </div>
+            <p class="text-gray-700 mb-6 flex-1">
+              "The custom smoothie builder is a game-changer! I can create
+              exactly what I want, and the nutritional information helps me stay
+              on track with my health goals."
+            </p>
+            <div class="flex items-center" data-reviewer-name="Ananya">
+              <div
+                class="reviewer-initials w-10 h-10 flex items-center justify-center bg-secondary text-white rounded-full mr-3 font-medium"
+              ></div>
+              <div>
+                <h4 class="font-medium text-gray-900">Ananya</h4>
+                <p class="text-sm text-gray-500">CTO Apple</p>
+              </div>
+            </div>
+          </div>
+          <!-- Review 3 -->
+          <div class="bg-gray-50 rounded-xl p-6 flex flex-col h-full">
+            <div class="flex items-center mb-4">
+              <div class="text-yellow-400 flex">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <span class="ml-2 text-gray-600 text-sm">4.5</span>
+            </div>
+            <p class="text-gray-700 mb-6 flex-1">
+              "I order delivery at least twice a week. Always on time, always
+              fresh, and the online ordering system is so easy to use. My kids
+              love the Tropical Paradise!"
+            </p>
+            <div class="flex items-center" data-reviewer-name="Sneha">
+              <div
+                class="reviewer-initials w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full mr-3 font-medium"
+              ></div>
+              <div>
+                <h4 class="font-medium text-gray-900">Sneha</h4>
+                <p class="text-sm text-gray-500">Senior Manager</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Newsletter Section -->
+    <section class="py-16 bg-primary bg-opacity-10">
+      <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto text-center">
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            Join Our Healthy Community
+          </h2>
+          <p class="text-gray-600 mb-8">
+            Subscribe to our newsletter for exclusive offers, new flavor alerts,
+            and healthy living tips.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              class="flex-1 px-4 py-3 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button
+              class="bg-primary text-white px-6 py-3 !rounded-button font-medium whitespace-nowrap"
+            >
+              Subscribe
+            </button>
+          </div>
+          <p class="text-sm text-gray-500 mt-4">
+            By subscribing, you agree to receive marketing emails from us. No
+            worries, we hate spam too!
+          </p>
+        </div>
+      </div>
+    </section>
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div>
+            <a
+              href="#"
+              class="text-3xl font-['Pacifico'] text-primary mb-6 inline-block"
+              >GoSmoothie</a
+            >
+            <p class="text-gray-400 mb-6">
+              Refreshing, nutritious smoothies and juices made with the freshest
+              ingredients for a healthier you.
+            </p>
+            <div class="flex space-x-4">
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors"
+              >
+                <i class="bi bi-globe2"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors"
+              >
+                <i class="bi bi-camera"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors"
+              >
+                <i class="bi bi-chat-dots"></i>
+              </a>
+              <a
+                href="#"
+                class="w-10 h-10 flex items-center justify-center bg-gray-800 hover:bg-primary rounded-full transition-colors"
+              >
+                <i class="bi bi-music-note"></i>
+              </a>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold mb-6">Quick Links</h3>
+            <ul class="space-y-3">
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#menu"
+                  class="text-gray-400 hover:text-white transition"
+                  >Menu</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#build"
+                  class="text-gray-400 hover:text-white transition"
+                  >Build Your Own</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition"
+                  >Locations</a
+                >
+              </li>
+              <li>
+                <a href="#" class="text-gray-400 hover:text-white transition"
+                  >Careers</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold mb-6">Contact Us</h3>
+            <ul class="space-y-3">
+              <li class="flex items-start">
+                <i class="bi bi-geo-alt mt-1 mr-3 text-primary"></i>
+                <span class="text-gray-400"
+                  >sree Main Street<br />banjara Hills Road no 5,5-2-12</span
+                >
+              </li>
+              <li class="flex items-center">
+                <i class="bi bi-telephone mr-3 text-primary"></i>
+                <span class="text-gray-400">+91 9848938852</span>
+              </li>
+              <li class="flex items-center">
+                <i class="bi bi-envelope mr-3 text-primary"></i>
+                <span class="text-gray-400">contact@freshblend.com</span>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold mb-6">Opening Hours</h3>
+            <ul class="space-y-3">
+              <li class="flex justify-between">
+                <span class="text-gray-400">Monday - Friday</span>
+                <span class="text-gray-400">7:00 AM - 8:00 PM</span>
+              </li>
+              <li class="flex justify-between">
+                <span class="text-gray-400">Saturday</span>
+                <span class="text-gray-400">8:00 AM - 8:00 PM</span>
+              </li>
+              <li class="flex justify-between">
+                <span class="text-gray-400">Sunday</span>
+                <span class="text-gray-400">9:00 AM - 6:00 PM</span>
+              </li>
+            </ul>
+            <div class="mt-6">
+              <h4 class="text-sm font-bold uppercase text-gray-500 mb-3">
+                We Accept
+              </h4>
+              <div class="flex flex-wrap items-center gap-3">
+                <!-- Visa -->
+                <span
+                  class="inline-flex items-center justify-center w-12 h-8 rounded bg-white border border-gray-200 px-1"
+                >
+                  <svg viewBox="0 0 48 16" class="h-4" fill="none">
+                    <path
+                      d="M19.5 1.5l-3.2 13h-2.6l3.2-13h2.6zm12.9 8.4l1.4-3.8.8 3.8h-2.2zm2.9 4.6h2.4l-2.1-13h-2.2c-.5 0-.9.3-1.1.7l-3.8 12.3h2.7l.5-1.5h3.3l.3 1.5zm-6.7-4.2c0-3.4-4.7-3.6-4.7-5.1 0-.5.5-.9 1.4-.9.9 0 1.6.2 2.1.4l.4-1.8c-.5-.2-1.3-.4-2.2-.4-2.4 0-4 1.3-4 3.1 0 1.3 1.2 2.1 2.1 2.5.9.5 1.2.8 1.2 1.2 0 .7-.7 1-1.4 1-.9 0-1.7-.2-2.3-.5l-.4 1.9c.6.2 1.5.4 2.5.4 2.5 0 4.2-1.2 4.3-3.2h0zM13.5 1.5L9.8 14.5H7.1L5.2 4.2c-.1-.5-.2-.6-.6-.8C4 3.1 3 2.8 2 2.6l.1-.3h4.3c.5 0 1 .4 1.1 1l1.1 5.7 2.6-6.5h2.3z"
+                      fill="#1a1f71"
+                    />
+                  </svg>
+                </span>
+                <!-- Mastercard -->
+                <span
+                  class="inline-flex items-center justify-center w-12 h-8 rounded bg-white border border-gray-200"
+                >
+                  <svg viewBox="0 0 32 20" class="h-5">
+                    <circle cx="12" cy="10" r="7" fill="#eb001b" />
+                    <circle cx="20" cy="10" r="7" fill="#f79e1b" />
+                    <path
+                      d="M16 4.6a7 7 0 010 10.8 7 7 0 000-10.8z"
+                      fill="#ff5f00"
+                    />
+                  </svg>
+                </span>
+                <!-- RuPay -->
+                <span
+                  class="inline-flex items-center justify-center w-12 h-8 rounded bg-white border border-gray-200 px-1"
+                >
+                  <svg viewBox="0 0 40 14" class="h-3">
+                    <text
+                      x="0"
+                      y="11"
+                      font-size="10"
+                      font-family="Arial"
+                      font-weight="bold"
+                      fill="#0f766e"
+                    >
+                      RuPay
+                    </text>
+                  </svg>
+                </span>
+                <!-- UPI -->
+                <span
+                  class="inline-flex items-center justify-center w-12 h-8 rounded bg-white border border-gray-200 px-1"
+                >
+                  <svg viewBox="0 0 30 14" class="h-3">
+                    <text
+                      x="0"
+                      y="11"
+                      font-size="10"
+                      font-family="Arial"
+                      font-weight="bold"
+                      fill="#4b5563"
+                    >
+                      UPI
+                    </text>
+                  </svg>
+                </span>
+                <!-- Google Pay -->
+                <span
+                  class="inline-flex items-center justify-center w-12 h-8 rounded bg-white border border-gray-200 px-1"
+                >
+                  <svg viewBox="0 0 24 24" class="h-5">
+                    <path
+                      d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"
+                      fill="#4285f4"
+                    />
+                  </svg>
+                </span>
+                <!-- PhonePe -->
+                <span
+                  class="inline-flex items-center justify-center w-12 h-8 rounded bg-white border border-gray-200 px-1"
+                >
+                  <svg viewBox="0 0 30 14" class="h-3">
+                    <text
+                      x="0"
+                      y="11"
+                      font-size="8"
+                      font-family="Arial"
+                      font-weight="bold"
+                      fill="#5f259f"
+                    >
+                      PhonePe
+                    </text>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="pt-8 border-t border-gray-800 text-center text-gray-400 text-sm"
+        >
+          <p class="mb-4">&copy; 2025 Fresh Blend. All rights reserved.</p>
+          <div class="flex justify-center space-x-6">
+            <a href="#" class="hover:text-white transition">Privacy Policy</a>
+            <a href="#" class="hover:text-white transition">Terms of Service</a>
+            <a href="#" class="hover:text-white transition">Accessibility</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Back to top button -->
+    <button
+      id="toTopBtn"
+      aria-label="Scroll to top"
+      class="hidden fixed bottom-6 right-6 z-50 bg-primary text-white p-3 rounded-full shadow-lg hover:scale-105 transition-transform"
+    >
+      <i class="bi bi-arrow-up text-xl"></i>
+    </button>
+
+    <!-- Kept at the document root so it always overlays the complete page. -->
+    <div
+      id="logoutModal"
+      class="hidden fixed inset-0 items-center justify-center bg-slate-950/55 backdrop-blur-sm px-4"
+      style="z-index: 9999"
+      aria-hidden="true"
+    >
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logoutModalTitle"
+        class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+      >
+        <div class="flex items-start gap-4">
+          <span
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600"
+            ><i class="bi bi-exclamation-triangle text-2xl"></i
+          ></span>
+          <div>
+            <h2 id="logoutModalTitle" class="text-xl font-bold text-slate-900">
+              Log out?
+            </h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">
+              You will need to sign in again to access your account and profile.
+            </p>
+          </div>
+        </div>
+        <div class="mt-7 flex justify-end gap-3">
+          <button
+            id="logoutCancelBtn"
+            type="button"
+            class="rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-200"
+          >
+            Cancel
+          </button>
+          <button
+            id="logoutConfirmBtn"
+            type="button"
+            class="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700"
+          >
+            Log out
+          </button>
+        </div>
+      </section>
+    </div>
+
+      <script src="/js/toast.js"></script>
+    <script src="/js/main.js"></script>
+  </body>
+</html>

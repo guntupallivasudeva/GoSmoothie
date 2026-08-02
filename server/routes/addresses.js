@@ -6,10 +6,18 @@ const {
   generateUniqueNumericId,
   isExactNumericId,
 } = require("../utils/idGenerator");
+const {
+  resolveTokenUser,
+  hasStaleSession,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
 
 async function resolveUser(req, clientId) {
-  if (req.user && req.user.id)
-    return await User.findOne({ userId: String(req.user.id) });
+  if (req.user && req.user.id) {
+    const tokenUser = await resolveTokenUser(req);
+    if (tokenUser) return tokenUser;
+    if (!clientId) return null;
+  }
   if (clientId && clientId.startsWith("u_"))
     return await User.findOne({ userId: clientId.slice(2) });
   if (clientId) return await User.findOne({ clientToken: clientId });
@@ -95,6 +103,7 @@ router.post("/", async (req, res) => {
       req,
       req.body.clientId || req.query.clientId,
     );
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)

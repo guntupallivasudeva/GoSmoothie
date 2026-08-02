@@ -4,11 +4,23 @@ const User = require("../models/User");
 const Cart = require("../models/Cart");
 const Order = require("../models/Order");
 const Address = require("../models/Address");
+const Payment = require("../models/Payment");
 const { generateOrderId } = require("../utils/idGenerator");
+const { codConfig } = require("../config/payments");
+const {
+  resolveTokenUser,
+  hasStaleSession,
+  sendSessionInvalid,
+} = require("../utils/requestUser");
 
 async function resolveUser(req, clientId) {
-  if (req.user && req.user.id)
-    return await User.findOne({ userId: String(req.user.id) });
+  if (req.user && req.user.id) {
+    const tokenUser = await resolveTokenUser(req);
+    if (tokenUser) return tokenUser;
+    // The token's account no longer exists; only an explicit clientId can
+    // identify the shopper now.
+    if (!clientId) return null;
+  }
   if (clientId && clientId.startsWith("u_"))
     return await User.findOne({ userId: clientId.slice(2) });
   if (clientId) return await User.findOne({ clientToken: clientId });
@@ -29,7 +41,6 @@ router.get("/", async (req, res) => {
     }
     const pageNumber = Math.max(1, parseInt(page, 10) || 1);
     const pageSize = Math.max(1, Math.min(100, parseInt(limit, 10) || 20));
-    // when querying across all users, return per-user order documents (admin view)
     const [items, total] = await Promise.all([
       Order.find(query)
         .sort({ createdAt: -1 })
@@ -39,6 +50,22 @@ router.get("/", async (req, res) => {
       Order.countDocuments(query),
     ]);
     res.json({ items, total, page: pageNumber, limit: pageSize });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// GET /api/orders/my — fetch logged-in user's orders
+router.get("/my", async (req, res) => {
+  try {
+    const user = await resolveTokenUser(req);
+    if (!user) return res.status(401).json({ error: "Authentication required" });
+    const doc = await Order.findOne({ userId: user.userId }).lean();
+    const orders = doc && Array.isArray(doc.orders) ? doc.orders : [];
+    // Return newest first
+    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json({ orders });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -64,6 +91,7 @@ router.post("/", async (req, res) => {
   const { clientId, addressId } = req.body;
   try {
     const user = await resolveUser(req, clientId);
+    if (hasStaleSession(req, user)) return sendSessionInvalid(res);
     if (!user)
       return res
         .status(400)
@@ -79,9 +107,25 @@ router.post("/", async (req, res) => {
       subtotal: i.subtotal,
     }));
     const subtotal = items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-    const tax = 0;
-    const deliveryFee = 0;
+    const tax = Math.round(subtotal * 0.1);
+    const deliveryOption = req.body?.fulfillment?.deliveryOption || "standard";
+    const deliveryFee =
+      req.body?.mode === "delivery" && deliveryOption === "express" ? 20 : 0;
     const totalAmount = subtotal + tax + deliveryFee;
+    // The browser proposes a mode; the server decides what is allowed and what
+    // payment status follows from it.
+    const paymentMode = req.body?.paymentMode === "cod" ? "cod" : "online";
+    if (paymentMode === "cod") {
+      const cod = codConfig();
+      if (!cod.enabled)
+        return res
+          .status(400)
+          .json({ error: "Cash on Delivery is currently unavailable" });
+      if (totalAmount > cod.maxOrderTotal)
+        return res.status(400).json({
+          error: `Cash on Delivery is available on orders up to ₹${cod.maxOrderTotal}. Please choose an online payment method.`,
+        });
+    }
     const existingDoc = await Order.findOne({ userId: user.userId }).lean();
     const existingOrderIds =
       existingDoc && Array.isArray(existingDoc.orders)
@@ -96,6 +140,9 @@ router.post("/", async (req, res) => {
     const address = addressId
       ? addressList.find((a) => a.addressId === String(addressId))
       : addressList.find((a) => a.isDefault) || {};
+    // Only the label of the selected method is kept; the checkout modal never
+    // sends card numbers, CVVs or UPI credentials.
+    const paymentMethod = String(req.body?.paymentMethod || "").slice(0, 60);
     const orderObj = {
       orderId,
       paymentId: "",
@@ -106,7 +153,9 @@ router.post("/", async (req, res) => {
       deliveryFee,
       totalAmount,
       orderStatus: "confirmed",
-      paymentStatus: "unpaid",
+      paymentStatus: paymentMode === "cod" ? "cash due" : "paid",
+      paymentMethod,
+      paymentMode,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -116,7 +165,42 @@ router.post("/", async (req, res) => {
       { upsert: true },
     );
     await Cart.deleteOne({ userId: user.userId });
-    res.json({ orderId, total: totalAmount, order: orderObj });
+
+    // Record payment in the Payment collection for the ledger
+    const paymentId = "PAY-" + orderId;
+    const paymentRecord = {
+      paymentId,
+      userName: user.name || "",
+      userEmail: user.email || "",
+      userPhone: user.phoneNumber || "",
+      paymentMethod: paymentMethod || "Unknown",
+      amountPaid: totalAmount,
+      transactionId: "",
+      paymentStatus: paymentMode === "cod" ? "cash due" : "paid",
+      orderId,
+      createdAt: new Date(),
+    };
+
+    await Payment.findOneAndUpdate(
+      { userId: user.userId },
+      {
+        $push: { payments: paymentRecord },
+        $set: { updatedAt: new Date() },
+      },
+      { upsert: true },
+    );
+
+    // Also update the order's paymentId
+    await Order.updateOne(
+      { "orders.orderId": orderId },
+      { $set: { "orders.$.paymentId": paymentId } },
+    );
+
+    res.json({
+      orderId,
+      total: totalAmount,
+      order: { ...orderObj, paymentId },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

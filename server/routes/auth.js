@@ -5,17 +5,44 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { secret } = require("../middleware/auth");
 
+// Escape a value so it can be used inside a RegExp literal safely.
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Look up a user by email. The stored email keeps the exact casing the user
+// typed at registration, so an exact match is tried first and a
+// case-insensitive match is used only as a fallback for sign-in convenience.
+async function findUserByEmail(email) {
+  const exact = await User.findOne({ email, isAnonymous: { $ne: true } });
+  if (exact) return exact;
+  return User.findOne({
+    email: { $regex: `^${escapeRegex(email)}$`, $options: "i" },
+    isAnonymous: { $ne: true },
+  });
+}
+
 // POST /api/auth/register { name, email, password }
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password)
     return res.status(400).json({ error: "name,email,password required" });
+  // Store the name and email exactly as provided (only surrounding whitespace
+  // is dropped) so the database mirrors what the user typed.
+  const exactName = String(name).trim();
+  const exactEmail = String(email).trim();
+  if (!exactName || !exactEmail)
+    return res.status(400).json({ error: "name,email,password required" });
   try {
-    const existing = await User.findOne({ email });
+    const existing = await findUserByEmail(exactEmail);
     if (existing)
       return res.status(400).json({ error: "Email already registered" });
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, passwordHash: hash });
+    const hash = await bcrypt.hash(String(password), 10);
+    const user = await User.create({
+      name: exactName,
+      email: exactEmail,
+      passwordHash: hash,
+    });
     const token = jwt.sign(
       {
         id: user.userId,
@@ -48,9 +75,16 @@ router.post("/login", async (req, res) => {
   if (!email || !password)
     return res.status(400).json({ error: "email,password required" });
   try {
-    const user = await User.findOne({ email });
+    // Accounts are read from the database only; there are no built-in users.
+    const user = await findUserByEmail(String(email).trim());
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
-    const ok = await user.verifyPassword(password);
+    if (user.isActive === false)
+      return res
+        .status(403)
+        .json({
+          error: "Your account has been deactivated. Please contact the admin.",
+        });
+    const ok = await user.verifyPassword(String(password));
     if (!ok) return res.status(400).json({ error: "Invalid credentials" });
     const token = jwt.sign(
       {

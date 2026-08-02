@@ -1,0 +1,21 @@
+body {
+  font-family: "Poppins", sans-serif;
+}
+.menu-card:hover .nutrition-panel {
+  opacity: 1;
+  visibility: visible;
+}
+.nutrition-panel {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+/* Hide number input spinners */
+.qty-input::-webkit-inner-spin-button,
+.qty-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.qty-input[type="number"] {
+  -moz-appearance: textfield;
+}

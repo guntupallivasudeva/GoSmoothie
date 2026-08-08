@@ -225,8 +225,15 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "email,password required" });
     // Admin accounts come from the database only; nothing is hardcoded here.
     const admin = await findAdminByEmail(String(email).trim());
-    if (!admin || !admin.isActive)
+    if (!admin)
       return res.status(400).json({ error: "Invalid admin credentials" });
+    if (!admin.isActive)
+      return res
+        .status(403)
+        .json({
+          error:
+            "Your admin account has been deactivated. Please contact a super admin.",
+        });
     const ok = await admin.verifyPassword(password);
     if (!ok)
       return res.status(400).json({ error: "Invalid admin credentials" });

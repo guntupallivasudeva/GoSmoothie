@@ -1961,6 +1961,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="py-3 pr-3 text-slate-600 text-xs">${escapeHtml(createdBy)}</td>
         <td class="py-3 text-right whitespace-nowrap">
           <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-tip="Edit admin" data-crud-edit-admin="${escapeHtml(a.adminId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
+          <button class="text-xs px-2 py-1 rounded ${active ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"} mr-1" data-tip="${active ? "Deactivate admin" : "Activate admin"}" data-crud-toggle-admin="${escapeHtml(a.adminId)}" data-active="${active}"><i data-lucide="${active ? "user-x" : "user-check"}" class="w-3.5 h-3.5"></i></button>
           <button class="text-xs px-2 py-1 rounded bg-red-100 text-red-700 hover:bg-red-200" data-tip="Delete admin" data-crud-delete-admin="${escapeHtml(a.adminId)}"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
         </td></tr>`;
     });
@@ -2525,6 +2526,45 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAdminsModal(await fetchDbDetails(true));
     refreshDbChipCounts();
   }
+  async function crudToggleAdmin(aid, active) {
+    const opts = active
+      ? {
+          icon: "user-x",
+          iconBg: "bg-red-100",
+          iconColor: "text-red-600",
+          btnBg: "bg-red-600 hover:bg-red-700",
+          btnText: "Deactivate",
+          btnIcon: "user-x",
+        }
+      : {
+          icon: "user-check",
+          iconBg: "bg-emerald-100",
+          iconColor: "text-emerald-600",
+          btnBg: "bg-emerald-600 hover:bg-emerald-700",
+          btnText: "Activate",
+          btnIcon: "user-check",
+        };
+    if (
+      !(await confirmAction(
+        `${active ? "Deactivate" : "Activate"} admin <b>${aid}</b>?${active ? " They will be logged out immediately." : ""}`,
+        opts,
+      ))
+    )
+      return;
+    const r = await fetch(apiUrl(`/api/admins/${aid}`), {
+      method: "PUT",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({ isActive: !active }),
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      showToast(d.error, "error");
+      return;
+    }
+    showToast(`Admin ${active ? "deactivated" : "activated"}`);
+    invalidateCache();
+    renderAdminsModal(await fetchDbDetails(true));
+  }
   async function crudEditAdmin(aid) {
     const data = await fetchDbDetails();
     const admin = (data.admins || []).find((a) => a.adminId === aid);
@@ -2683,6 +2723,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const dA = e.target.closest("[data-crud-delete-admin]");
     if (dA) {
       crudDeleteAdmin(dA.dataset.crudDeleteAdmin);
+      return;
+    }
+    const tA = e.target.closest("[data-crud-toggle-admin]");
+    if (tA) {
+      crudToggleAdmin(tA.dataset.crudToggleAdmin, tA.dataset.active === "true");
       return;
     }
     const eA = e.target.closest("[data-crud-edit-admin]");

@@ -1930,7 +1930,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="py-3 pr-3 text-slate-700">${escapeHtml(u.email || "-")}</td>
         <td class="py-3 pr-3 text-slate-700">${escapeHtml(u.phone || u.phoneNumber || "-")}</td>
         <td class="py-3 pr-3">${active ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>' : '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactive</span>'}</td>
-        <td class="py-3 pr-3 text-slate-600 text-xs">${fmtDate(u.createdAt)}</td>
+        <td class="py-3 pr-3 text-slate-600 text-xs">${fmtDateTime(u.createdAt)}</td>
         <td class="py-3 text-right whitespace-nowrap">
           <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-tip="Edit user" data-crud-edit-user="${escapeHtml(u.userId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
           <button class="text-xs px-2 py-1 rounded ${active ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"} mr-1" data-tip="${active ? "Deactivate user" : "Activate user"}" data-crud-toggle-user="${escapeHtml(u.userId)}" data-active="${active}"><i data-lucide="${active ? "user-x" : "user-check"}" class="w-3.5 h-3.5"></i></button>
@@ -1962,7 +1962,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td class="py-3 pr-3 text-slate-700">${escapeHtml(a.email || "-")}</td>
         <td class="py-3 pr-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">${escapeHtml(a.role || "admin")}</span></td>
         <td class="py-3 pr-3">${active ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>' : '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactive</span>'}</td>
-        <td class="py-3 pr-3 text-slate-600 text-xs">${fmtDate(a.createdAt)}</td>
+        <td class="py-3 pr-3 text-slate-600 text-xs">${fmtDateTime(a.createdAt)}</td>
         <td class="py-3 pr-3 text-slate-600 text-xs">${escapeHtml(createdBy)}</td>
         <td class="py-3 text-right whitespace-nowrap">
           <button class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1" data-tip="Edit admin" data-crud-edit-admin="${escapeHtml(a.adminId)}"><i data-lucide="square-pen" class="w-3.5 h-3.5"></i></button>
@@ -2420,6 +2420,28 @@ document.addEventListener("DOMContentLoaded", () => {
       ))
     )
       return;
+    // Optimistic UI update — toggle button and status immediately
+    const toggleBtn = document.querySelector(
+      `[data-crud-toggle-user="${uid}"]`,
+    );
+    if (toggleBtn) {
+      const newActive = !active;
+      toggleBtn.dataset.active = String(newActive);
+      toggleBtn.className = `text-xs px-2 py-1 rounded ${newActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"} mr-1`;
+      toggleBtn.dataset.tip = newActive ? "Deactivate user" : "Activate user";
+      toggleBtn.innerHTML = `<i data-lucide="${newActive ? "user-x" : "user-check"}" class="w-3.5 h-3.5"></i>`;
+      // Update status badge in the same row
+      const row = toggleBtn.closest("tr");
+      if (row) {
+        const statusCell = row.querySelector("td:nth-child(4)");
+        if (statusCell) {
+          statusCell.innerHTML = newActive
+            ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>'
+            : '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactive</span>';
+        }
+      }
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    }
     const r = await fetch(apiUrl(`/api/admins/database/user/${uid}`), {
       method: "PUT",
       headers: authHeaders({ "Content-Type": "application/json" }),
@@ -2428,11 +2450,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const d = await r.json();
     if (!r.ok) {
       showToast(d.error, "error");
+      // Revert on failure — re-render from server
+      invalidateCache();
+      renderUsersModal(await fetchDbDetails(true));
       return;
     }
     showToast(`User ${active ? "deactivated" : "activated"}`);
     invalidateCache();
-    renderUsersModal(await fetchDbDetails(true));
   }
   async function crudEditUser(uid) {
     const data = await fetchDbDetails();
@@ -2556,6 +2580,28 @@ document.addEventListener("DOMContentLoaded", () => {
       ))
     )
       return;
+    // Optimistic UI update — toggle button and status immediately
+    const toggleBtn = document.querySelector(
+      `[data-crud-toggle-admin="${aid}"]`,
+    );
+    if (toggleBtn) {
+      const newActive = !active;
+      toggleBtn.dataset.active = String(newActive);
+      toggleBtn.className = `text-xs px-2 py-1 rounded ${newActive ? "bg-red-50 text-red-600 hover:bg-red-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"} mr-1`;
+      toggleBtn.dataset.tip = newActive ? "Deactivate admin" : "Activate admin";
+      toggleBtn.innerHTML = `<i data-lucide="${newActive ? "user-x" : "user-check"}" class="w-3.5 h-3.5"></i>`;
+      // Update status badge in the same row
+      const row = toggleBtn.closest("tr");
+      if (row) {
+        const statusCell = row.querySelector("td:nth-child(4)");
+        if (statusCell) {
+          statusCell.innerHTML = newActive
+            ? '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Active</span>'
+            : '<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactive</span>';
+        }
+      }
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    }
     const r = await fetch(apiUrl(`/api/admins/${aid}`), {
       method: "PUT",
       headers: authHeaders({ "Content-Type": "application/json" }),
@@ -2564,11 +2610,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const d = await r.json();
     if (!r.ok) {
       showToast(d.error, "error");
+      // Revert on failure — re-render from server
+      invalidateCache();
+      renderAdminsModal(await fetchDbDetails(true));
       return;
     }
     showToast(`Admin ${active ? "deactivated" : "activated"}`);
     invalidateCache();
-    renderAdminsModal(await fetchDbDetails(true));
   }
   async function crudEditAdmin(aid) {
     const data = await fetchDbDetails();

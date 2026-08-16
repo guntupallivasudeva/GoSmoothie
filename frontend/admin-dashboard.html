@@ -160,15 +160,23 @@
               </p>
             </div>
             <div class="flex items-center gap-2">
+              <div id="adminGreeting" class="hidden items-center gap-2 mr-2">
+                <div
+                  class="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center"
+                >
+                  <i class="bi bi-person-circle text-lg"></i>
+                </div>
+                <span
+                  id="adminNameLabel"
+                  class="text-sm font-semibold text-ink"
+                ></span>
+              </div>
               <a href="/main.html" class="btn btn-light"
                 ><i class="bi bi-shop"></i
                 ><span class="desktop-only">Storefront</span></a
               >
-              <button
-                id="refreshBtn"
-                class="btn btn-dark"
-              >
-                <i class="bi bi-arrow-clockwise"></i> Refresh
+              <button id="refreshBtn" class="btn btn-dark">
+                <i class="bi bi-arrow-clockwise"></i>
               </button>
             </div>
           </div>
@@ -363,10 +371,7 @@
                     Create, update, archive, or restore menu items.
                   </p>
                 </div>
-                <button
-                  id="resetFormBtn"
-                  class="btn btn-light !py-2"
-                >
+                <button id="resetFormBtn" class="btn btn-light !py-2">
                   <i class="bi bi-eraser"></i> Clear
                 </button>
               </div>
@@ -650,10 +655,7 @@
                 </label>
 
                 <div class="flex flex-wrap gap-3 pt-1">
-                  <button
-                    type="submit"
-                    class="btn btn-primary"
-                  >
+                  <button type="submit" class="btn btn-primary">
                     <i class="bi bi-floppy"></i> Save product
                   </button>
                   <button

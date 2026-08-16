@@ -721,6 +721,20 @@ async function loadDashboard() {
     window.location.href = "/admin-login.html";
     return;
   }
+  // Display logged-in admin name
+  try {
+    const adminData = JSON.parse(localStorage.getItem(userKey) || "{}");
+    const adminName = adminData.name || adminData.email || "";
+    if (adminName) {
+      const greetingEl = document.getElementById("adminGreeting");
+      const nameEl = document.getElementById("adminNameLabel");
+      if (greetingEl && nameEl) {
+        nameEl.textContent = adminName;
+        greetingEl.classList.remove("hidden");
+        greetingEl.classList.add("flex");
+      }
+    }
+  } catch (_) {}
   const response = await fetch(apiUrl("/api/admins/dashboard"), {
     headers: authHeaders(),
   });
@@ -766,10 +780,20 @@ async function refreshAll() {
 }
 
 document.getElementById("refreshBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("refreshBtn");
+  const icon = btn.querySelector("i");
+  btn.disabled = true;
+  btn.classList.add("opacity-70", "pointer-events-none");
+  if (icon) icon.classList.add("animate-spin");
   try {
     await refreshAll();
+    showToast("Dashboard refreshed");
   } catch (err) {
     showToast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("opacity-70", "pointer-events-none");
+    if (icon) icon.classList.remove("animate-spin");
   }
 });
 

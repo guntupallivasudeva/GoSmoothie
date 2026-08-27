@@ -4,9 +4,10 @@ A complete full-stack smoothie e-commerce application with Node.js backend, Mong
 
 ## 📚 Documentation
 
-All documentation has been organized in the **`docs/`** folder. 
+All documentation has been organized in the **`docs/`** folder.
 
 **Quick Links:**
+
 - 📖 [Getting Started](docs/QUICKSTART.md) - 5-minute setup guide
 - 📘 [Full Documentation](docs/README.md) - Complete reference
 - 🚀 [Deployment Guide](docs/DEPLOYMENT.md) - Production deployment
@@ -77,11 +78,12 @@ GoSmoothie/
 - **Provider**: MongoDB Atlas
 - **Database**: GoSmoothie
 - **Accounts**: users are created through registration and read from MongoDB (no built-in demo users)
-- **Admin**: run `npm run create-admin` to create the dashboard admin (`admin@local` / `Admin@123`, name `Admin`)
+- **Admin**: run `npm run create-admin` to create the dashboard admin (configure credentials via `ADMIN_EMAIL` and `ADMIN_PASSWORD` env vars)
 
 ## 📖 See Also
 
 For detailed information, visit the [docs folder](docs/) where you'll find:
+
 - Complete feature documentation
 - API endpoint reference
 - Deployment instructions

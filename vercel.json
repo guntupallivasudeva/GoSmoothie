@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "gosmoothie-backend",
+  "name": "gosmoothie",
   "builds": [
     {
       "src": "server.js",
@@ -8,6 +8,14 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api/products/\\d{12}/image",
+      "dest": "server.js",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "CDN-Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
     {
       "src": "/api/(.*)",
       "dest": "server.js"

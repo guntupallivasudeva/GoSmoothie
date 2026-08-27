@@ -93,6 +93,52 @@ function renderProducts(products) {
   attachCardHandlers();
   applyMenuFilter();
   syncMenuCards();
+
+  // Preload all product images in background for instant display
+  preloadProductImages(products);
+}
+
+/**
+ * Preloads product images in batches using the browser cache.
+ * After the first load, images are served from cache (immutable, 1-year expiry).
+ */
+function preloadProductImages(products) {
+  const imageUrls = products
+    .filter(function (p) {
+      return p.image && p.image.startsWith("/api/");
+    })
+    .map(function (p) {
+      return p.image;
+    });
+
+  // Load in batches of 6 to avoid overwhelming the connection
+  var batchSize = 6;
+  var index = 0;
+
+  function loadBatch() {
+    var batch = imageUrls.slice(index, index + batchSize);
+    if (batch.length === 0) return;
+    index += batchSize;
+
+    var loaded = 0;
+    batch.forEach(function (url) {
+      var link = document.createElement("link");
+      link.rel = "prefetch";
+      link.as = "image";
+      link.href = url;
+      link.onload = link.onerror = function () {
+        loaded++;
+        if (loaded >= batch.length) {
+          // Small delay between batches to keep UI responsive
+          setTimeout(loadBatch, 50);
+        }
+      };
+      document.head.appendChild(link);
+    });
+  }
+
+  // Start preloading after a short delay to not compete with initial render
+  setTimeout(loadBatch, 100);
 }
 
 function renderCard(item, categoryTitle) {
@@ -122,7 +168,7 @@ function renderCard(item, categoryTitle) {
     escapeHtml(imgSrc) +
     '" alt="' +
     escapeHtml(item.name) +
-    '" class="absolute inset-0 w-full h-full object-cover" onerror="handleImgError(this)">' +
+    '" class="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" fetchpriority="low" onerror="handleImgError(this)">' +
     (item.isOutOfStock
       ? '<div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="text-white font-bold text-lg">Out of Stock</span></div>'
       : "") +

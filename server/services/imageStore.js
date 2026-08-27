@@ -67,7 +67,7 @@ async function save(productId, buffer, contentType) {
 
   try {
     // Get product name for the image record
-    const product = await Product.findOne({ productId }).select('name').lean();
+    const product = await Product.findOne({ productId }).select("name").lean();
     const productName = product ? product.name : null;
 
     // Upsert to ProductImage collection (unique by productId replaces existing)
@@ -263,9 +263,50 @@ async function getMetadata(productId) {
   };
 }
 
+/**
+ * Get image data for a product WITHOUT checksum verification.
+ * Much faster than get() since it skips SHA-256 recomputation.
+ * Use when serving images to end users (ETag handles cache invalidation).
+ *
+ * @param {string} productId
+ * @returns {{ buffer: Buffer, contentType: string, size: number } | null}
+ */
+async function getFast(productId) {
+  // Try ProductImage collection first
+  const imageDoc = await ProductImage.findOne({ productId });
+  if (imageDoc) {
+    return {
+      buffer: imageDoc.data,
+      contentType: imageDoc.contentType,
+      size: imageDoc.size,
+    };
+  }
+
+  // Fall back to disk file via Product record
+  const product = await Product.findOne({ productId }).lean();
+  if (!product || !product.imageStoragePath) {
+    return null;
+  }
+
+  const diskPath = path.join(__dirname, "..", "..", product.imageStoragePath);
+  if (!fs.existsSync(diskPath)) {
+    return null;
+  }
+
+  const buffer = fs.readFileSync(diskPath);
+  const contentType = product.imageContentType || "application/octet-stream";
+
+  return {
+    buffer,
+    contentType,
+    size: buffer.length,
+  };
+}
+
 module.exports = {
   save,
   remove,
   get,
+  getFast,
   getMetadata,
 };

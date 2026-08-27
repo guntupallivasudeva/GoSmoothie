@@ -394,11 +394,12 @@ router.get("/:productId/image", async (req, res) => {
     const etag = `"${metadata.etag}"`;
 
     if (ifNoneMatch && ifNoneMatch === etag) {
+      res.set("Cache-Control", "public, max-age=31536000, immutable");
       return res.status(304).end();
     }
 
-    // Fetch full image data
-    const imageData = await imageStore.get(productId);
+    // Fetch full image data (skip checksum verification for performance)
+    const imageData = await imageStore.getFast(productId);
     if (!imageData) {
       return res.status(404).json({ error: "Image not found" });
     }
@@ -406,7 +407,8 @@ router.get("/:productId/image", async (req, res) => {
     res.set("Content-Type", imageData.contentType);
     res.set("Content-Length", String(imageData.size));
     res.set("ETag", etag);
-    res.set("Cache-Control", "max-age=86400");
+    // Cache for 1 year — images are immutable once uploaded (new upload = new checksum/etag)
+    res.set("Cache-Control", "public, max-age=31536000, immutable");
     res.status(200).send(imageData.buffer);
   } catch (err) {
     console.error("GET /api/products/:productId/image error:", err.message);

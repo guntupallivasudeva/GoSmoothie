@@ -216,17 +216,17 @@ Create a `.env` file from the template:
 cp .env.example .env
 ```
 
-| Variable         | Required | Default                                | Description                                        |
-| ---------------- | -------- | -------------------------------------- | -------------------------------------------------- |
-| `MONGODB_URI`    | Yes      | `mongodb://127.0.0.1:27017/gosmoothie` | MongoDB connection string                          |
-| `PORT`           | No       | `3000`                                 | Server port                                        |
-| `JWT_SECRET`     | Yes      | _(none — must be set)_                 | JWT signing secret (use a strong random string)    |
-| `STRIPE_SECRET`  | No       | _(disabled)_                           | Stripe secret key (from Stripe dashboard)          |
-| `COD_ENABLED`    | No       | `true`                                 | Enable Cash on Delivery                            |
-| `COD_MAX_TOTAL`  | No       | `2000`                                 | Max order total (INR) for COD                      |
-| `NODE_ENV`       | No       | `development`                          | Environment mode                                   |
-| `ADMIN_NAME`     | No       | `Admin`                                | Default admin name (for create-admin script)       |
-| `ADMIN_EMAIL`    | No       | _(set your own)_                       | Admin email for create-admin script                |
+| Variable         | Required | Default                                | Description                                                    |
+| ---------------- | -------- | -------------------------------------- | -------------------------------------------------------------- |
+| `MONGODB_URI`    | Yes      | `mongodb://127.0.0.1:27017/gosmoothie` | MongoDB connection string                                      |
+| `PORT`           | No       | `3000`                                 | Server port                                                    |
+| `JWT_SECRET`     | Yes      | _(none — must be set)_                 | JWT signing secret (use a strong random string)                |
+| `STRIPE_SECRET`  | No       | _(disabled)_                           | Stripe secret key (from Stripe dashboard)                      |
+| `COD_ENABLED`    | No       | `true`                                 | Enable Cash on Delivery                                        |
+| `COD_MAX_TOTAL`  | No       | `2000`                                 | Max order total (INR) for COD                                  |
+| `NODE_ENV`       | No       | `development`                          | Environment mode                                               |
+| `ADMIN_NAME`     | No       | `Admin`                                | Default admin name (for create-admin script)                   |
+| `ADMIN_EMAIL`    | No       | _(set your own)_                       | Admin email for create-admin script                            |
 | `ADMIN_PASSWORD` | No       | _(set your own)_                       | Admin password for create-admin script (use a strong password) |
 
 ---
@@ -484,18 +484,18 @@ Separate collection tracking user payment history with structure identical to Pa
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                         Authentication Flow                           │
+│                         Authentication Flow                         │
 ├─────────────────────────────────────────────────────────────────────┤
-│                                                                       │
-│  1. User registers/logs in → receives JWT                            │
-│  2. JWT payload: { id, userId, name, email, [role] }                 │
-│  3. Token expires in 7 days                                          │
-│  4. Token stored in: localStorage + cookie (cross-port bridging)     │
-│  5. Every request: auth middleware decodes token (non-blocking)       │
-│  6. Protected routes check req.user manually                         │
-│  7. Admin routes use requireAdmin middleware                         │
-│  8. SESSION_INVALID → browser auto-clears token + reloads            │
-│                                                                       │
+│                                                                     │
+│  1. User registers/logs in → receives JWT                           │
+│  2. JWT payload: { id, userId, name, email, [role] }                │
+│  3. Token expires in 7 days                                         │
+│  4. Token stored in: localStorage + cookie (cross-port bridging)    │
+│  5. Every request: auth middleware decodes token (non-blocking)     │
+│  6. Protected routes check req.user manually                        │
+│  7. Admin routes use requireAdmin middleware                        │
+│  8. SESSION_INVALID → browser auto-clears token + reloads           │
+│                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 

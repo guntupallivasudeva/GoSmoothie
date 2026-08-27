@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for security vulnerabilities
+        run: npm audit --audit-level=high || true
+
+      - name: Verify server starts (syntax check)
+        run: node -c server.js
+
+      - name: Verify all route files are valid
+        run: |
+          for file in server/routes/*.js server/middleware/*.js server/models/*.js; do
+            if [ -f "$file" ]; then
+              node -c "$file" || exit 1
+            fi
+          done
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel (Production)
+        run: echo "✅ Vercel auto-deploys from GitHub on push to main. No manual deploy step needed."
